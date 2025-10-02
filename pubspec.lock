@@ -153,6 +153,62 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  firebase_app_distribution:
+    dependency: "direct main"
+    description:
+      name: firebase_app_distribution
+      sha256: "4e07c9facf39e15fa9fb22b5250e2bc5a954d413d469681a5f19b5dd30a3b721"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
+  firebase_app_distribution_android:
+    dependency: transitive
+    description:
+      name: firebase_app_distribution_android
+      sha256: "8dc36654cae4dd001c0719cd16489239aa8c77f7d32792b3a28d7cd065a1dff8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
+  firebase_app_distribution_ios:
+    dependency: transitive
+    description:
+      name: firebase_app_distribution_ios
+      sha256: "004c67812132de3e97047b13a390d708226539e35dc80e52c635ee8e30d4e411"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
+  firebase_app_distribution_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_app_distribution_platform_interface
+      sha256: "7aa2bf8a7a6d839cc9e0f1657e21694d9ed1243c7c951b4d294efe9e603dfa7f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
+  firebase_core:
+    dependency: "direct main"
+    description:
+      name: firebase_core
+      sha256: "4dd96f05015c0dcceaa47711394c32971aee70169625d5e2477e7676c01ce0ee"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.1"
+  firebase_core_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_core_platform_interface
+      sha256: "5873a370f0d232918e23a5a6137dbe4c2c47cf017301f4ea02d9d636e52f60f0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.1"
+  firebase_core_web:
+    dependency: transitive
+    description:
+      name: firebase_core_web
+      sha256: "61a51037312dac781f713308903bb7a1762a7f92f7bc286a3a0947fb2a713b82"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.1"
   fixnum:
     dependency: transitive
     description:
