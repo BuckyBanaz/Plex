@@ -1,0 +1,56 @@
+{
+  "app_name": "PLEX Prime Loops Logistics",
+  "welcome_title": "مرحباً بك في PLEX",
+  "welcome_subtitle": "شبكة الحلقات الأولى اللوجستية",
+  "login_title": "مرحباً بعودتك",
+  "login_subtitle": "سجل دخولك إلى حسابك",
+  "login_btn": "تسجيل الدخول",
+  "no_account": "ليس لديك حساب؟ سجل الآن",
+  "footer_note": "تطبيق تجريبي - قم بإنشاء أي حساب للبدء",
+  "signup_title": "إنشاء حساب فردي",
+  "signup_subtitle": "لبدء الشحن PLEX انضم إلى",
+  "name_label": "الاسم الكامل",
+  "name_hint": "أدخل اسمك الكامل",
+  "email_label": "البريد الإلكتروني",
+  "email_hint": "أدخل بريدك الإلكتروني",
+  "password_label": "كلمة المرور",
+  "password_hint": "أدخل كلمة المرور",
+  "signup_btn": "إنشاء حساب فردي",
+  "have_account": "لديك حساب بالفعل؟ سجل دخولك",
+
+
+  "registration_title": "تسجيل شركة جديدة",
+  "registration_subtitle": "انضم إلى شبكة PLEX اللوجستية",
+  "step_progress": "الخطوة {step} من {total}",
+  "company_info_title": "معلومات الشركة",
+  "company_info_subtitle": "تفاصيل الشركة الأساسية",
+  "company_name_label": "اسم الشركة",
+  "company_name_hint": "مثال: شركة المسار المتقدم للتجارة",
+  "company_name_en_label": "اسم الشركة بالإنجليزية",
+  "business_type_label": "نوع النشاط التجاري",
+  "business_sector_label": "القطاع",
+  "commercial_register_label": "رقم السجل التجاري",
+  "tax_register_label": "الرقم الضريبي",
+  "next": "التالي",
+  "limited_liability": "شركة ذات مسؤولية محدودة",
+  "joint_stock": "شركة مساهمة",
+  "partnership": "شراكة",
+  "sole_proprietorship": "مؤسسة فردية",
+  "government_entity": "جهة حكومية",
+  "non_profit": "منظمة غير ربحية",
+  "select_business_type": "اختر نوع النشاط",
+  "select_sector": "اختر القطاع",
+
+  "app_tagline": "Prime Loops Logistics",
+
+  "choose_account_title": "اختر نوع الحساب",
+  "choose_account_subtitle": "حدد نوع الحساب المناسب لك",
+
+  "account_individual": "فردي",
+  "account_shipping": "شركة شحن",
+  "account_vendor": "تاجر / بائع",
+
+  "back_to_login": "العودة لتسجيل الدخول",
+  "footer_text": "تطبيق تجريبي - قم بإنشاء أي حساب للبدء"
+
+}

@@ -1,0 +1,28 @@
+
+
+import 'package:get/get_navigation/src/routes/get_route.dart';
+import 'package:plex_user/screens/auth/company_registration_view.dart';
+import 'package:plex_user/screens/auth/signup_screen.dart';
+import 'package:plex_user/screens/splash/splash_screen.dart';
+
+import '../screens/auth/choose_account_screen.dart';
+import '../screens/auth/login_screen.dart';
+
+class AppRoutes {
+  static const splash = '/splash';
+  static const welcome = '/welcome';
+  static const login = '/login';
+  static const signup = '/signup';
+  static const choose = '/choose';
+  static const view = '/view';
+
+
+  static get routes => [
+    GetPage(name: splash, page: () =>  SplashScreen()),
+    GetPage(name: login, page: () =>  LoginScreen()),
+    GetPage(name: signup, page: () =>  SignupPage()),
+    GetPage(name: choose, page: () =>  ChooseAccountScreen()),
+    GetPage(name: view, page: () =>  CompanyRegistrationView()),
+
+  ];
+}
