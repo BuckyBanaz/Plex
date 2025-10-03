@@ -25,15 +25,22 @@ class AppTheme {
       displayColor: AppColors.textPrimary,
     );
 
-    // Common InputDecoration for TextFields / TextFormFields
+
     final inputDecoration = InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16,),
-      border: OutlineInputBorder( borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none, ), enabledBorder: OutlineInputBorder( borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none, ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: AppColors.primary, width: 3.5), // focused border thicker
+        borderSide: BorderSide(color: AppColors.primary, width: 3.5),
       ),
       hintStyle: const TextStyle(color: Colors.grey),
     );
@@ -47,7 +54,11 @@ class AppTheme {
 
       // Input fields
       inputDecorationTheme: inputDecoration,
-
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColors.primary,
+        selectionColor: AppColors.primary.withOpacity(0.3),
+        selectionHandleColor: AppColors.primary,
+      ),
       // Elevated Button
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -88,7 +99,8 @@ class AppTheme {
         textStyle: const TextStyle(color: Colors.white),
         inputDecorationTheme: inputDecoration.copyWith(
           fillColor: AppColors.primary,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
         menuStyle: MenuStyle(
           backgroundColor: MaterialStateProperty.all(AppColors.primary),

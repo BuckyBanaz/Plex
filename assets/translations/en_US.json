@@ -19,6 +19,61 @@
   "have_account": "Already have an account? Login",
 
 
+  "contact_info_title": "Contact Information",
+  "contact_info_subtitle": "Account and Contact Details",
+
+  "enter_strong_password": "Enter a strong password",
+  "confirm_password_label": "Confirm Password",
+  "re_enter_password": "Re-enter password",
+  "phone_label": "Phone Number",
+  "website_label": "Website",
+
+  "address_title": "Address",
+  "address_subtitle": "Main Company Address",
+  "country_label": "Country",
+  "select_country": "Select Country",
+  "city_label": "City",
+  "district_label": "District",
+  "street_label": "Street",
+  "building_no_label": "Building No.",
+  "postal_code_label": "Postal Code",
+
+  "Saudi Arabia": "Saudi Arabia",
+  "United Arab Emirates": "United Arab Emirates",
+  "Kuwait": "Kuwait",
+  "Qatar": "Qatar",
+  "Bahrain": "Bahrain",
+  "Oman": "Oman",
+
+  "auth_person_title": "Authorized Person",
+  "auth_person_subtitle": "Details of the person responsible for the account",
+  "full_name_label": "Full Name",
+  "position_label": "Position",
+
+  "activity_details_title": "Activity Details",
+  "activity_details_subtitle": "Additional Company Information",
+  "employee_count_label": "Number of Employees",
+  "select_employee_count": "Select Employee Count",
+  "shipment_volume_label": "Expected Shipment Volume",
+  "select_shipment_volume": "Select Shipment Volume",
+  "1-10_employees": "1-10 Employees",
+  "11-50_employees": "11-50 Employees",
+  "51-100_employees": "51-100 Employees",
+  "101-500_employees": "101-500 Employees",
+  "500+_employees": "More than 500 Employees",
+  "1-10_shipments_monthly": "1-10 Shipments Monthly",
+  "11-50_shipments_monthly": "11-50 Shipments Monthly",
+  "51-100_shipments_monthly": "51-100 Shipments Monthly",
+  "101-500_shipments_monthly": "101-500 Shipments Monthly",
+  "500+_shipments_monthly": "More than 500 Shipments Monthly",
+  "review_data_title": "Data Review",
+  "create_account": "Create Account",
+  "Required field": "Required field",
+  "Enter a valid email address": "Enter a valid email address",
+  "Password must be at least 6 characters": "Password must be at least 6 characters",
+  "Passwords do not match": "Passwords do not match",
+
+
   "registration_title": "New Company Registration",
   "registration_subtitle": "Join PLEX Logistics Network",
   "step_progress": "Step {step} of {total}",
@@ -50,4 +105,23 @@
   "account_vendor": "Vendor / Seller",
 
   "back_to_login": "Back to Login",
-  "footer_text": "Demo Application - Create any account to start"}
+  "footer_text": "Demo Application - Create any account to start",
+
+
+
+
+
+
+
+
+
+  "otp_title": "Enter OTP",
+  "otp_subtitle": "We have sent a 6-digit OTP to your email: @email",
+  "otp_required": "OTP is required",
+  "otp_verified": "OTP verified successfully",
+  "invalid_otp": "Invalid OTP",
+  "verify_btn": "Verify",
+  "otp_resent": "OTP resent successfully",
+  "resend_in": "Resend in",
+  "resend_otp": "Resend OTP"
+}

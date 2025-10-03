@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 import 'package:plex_user/services/translations/app_translations.dart';
 import 'package:plex_user/services/translations/locale_controller.dart';
 import 'package:sizer/sizer.dart';
@@ -13,22 +16,31 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // 1) Load translation JSONs
-  await TranslationService.init();
 
-  // 2) Put locale controller and apply saved locale (so app starts with right locale)
+  await TranslationService.init();
   final localeCtrl = Get.put(LocaleController());
   await localeCtrl.init();
+  await Get.putAsync(() => AppService().init());
 
-  // 3) Run app
-  runApp(
-    Sizer(
+
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness:
+    Brightness.dark, // Set your desired status bar color
+  ));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(Phoenix(child: Sizer(
       builder: (context, orientation, deviceType) {
         return const Plex();
       },
-    ),
-  );
+    )));
+  });
+
 }
 
 
 
+class TempContext {
+  static late BuildContext context;
+}

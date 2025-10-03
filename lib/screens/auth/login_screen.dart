@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/modules/contollers/auth/auth_controller.dart';
 
 import 'package:plex_user/routes/appRoutes.dart';
 import '../../constant/app_colors.dart';
+import '../widgets/custom_text_field.dart';
 
 
 class LoginScreen extends StatelessWidget {
@@ -11,8 +13,7 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
+    final c = Get.put(AuthController());
 
     return Scaffold(
       backgroundColor: AppColors.secondary,
@@ -83,49 +84,37 @@ class LoginScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      Text(
-                        "email_label".tr,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      // Email
-                      TextField(
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          hintText: "email_hint".tr,
-                        ),
+                      CustomTextField(
+                        controller: c.emailController,
+                        label: "email_label".tr,
+                        hint: "email_hint".tr,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        focusNode: c.emailFocus,
+                        nextFocusNode: c.passwordFocus,
                       ),
                       const SizedBox(height: 16),
-// Password
-                      Text(
-                        "password_label".tr,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-
-                      // Password
-                      TextField(
-                        controller: passwordController,
-                        obscureText: true,
-
-                        decoration: InputDecoration(
-                          hintText: "password_hint".tr,
-                          suffixIcon: const Icon(Icons.visibility_off),
-                        ),
+                      CustomTextField(
+                        controller: c.passwordController,
+                        label: "password_label".tr,
+                        hint: "password_hint".tr,
+                        isPassword: true,
+                        textInputAction: TextInputAction.done,
+                        focusNode: c.passwordFocus,
+                        onSubmitted: () {
+                          c.login();
+                        },
                       ),
                       const SizedBox(height: 24),
 
-                      // Login Button
-                      ElevatedButton(
-                        onPressed: () {},
-                        child: Text("login_btn".tr),
-                      ),
+                      Obx(() {
+                        return ElevatedButton(
+                          onPressed: c.isLoading.value ? null : () => c.login(),
+                          child: c.isLoading.value
+                              ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                              : Text("login_btn".tr),
+                        );
+                      }),
                       const SizedBox(height: 16),
 
                       Center(

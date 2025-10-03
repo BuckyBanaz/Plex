@@ -19,6 +19,8 @@
   "have_account": "لديك حساب بالفعل؟ سجل دخولك",
 
 
+
+
   "registration_title": "تسجيل شركة جديدة",
   "registration_subtitle": "انضم إلى شبكة PLEX اللوجستية",
   "step_progress": "الخطوة {step} من {total}",
@@ -32,6 +34,7 @@
   "commercial_register_label": "رقم السجل التجاري",
   "tax_register_label": "الرقم الضريبي",
   "next": "التالي",
+
   "limited_liability": "شركة ذات مسؤولية محدودة",
   "joint_stock": "شركة مساهمة",
   "partnership": "شراكة",
@@ -40,6 +43,69 @@
   "non_profit": "منظمة غير ربحية",
   "select_business_type": "اختر نوع النشاط",
   "select_sector": "اختر القطاع",
+
+  "contact_info_title": "معلومات الاتصال",
+  "contact_info_subtitle": "بيانات الحساب والتواصل",
+ "enter_strong_password": "أدخل كلمة مرور قوية",
+  "confirm_password_label": "تأكيد كلمة المرور",
+  "re_enter_password": "أعد إدخال كلمة المرور",
+  "phone_label": "رقم الهاتف",
+  "website_label": "الموقع الإلكتروني",
+
+  "address_title": "العنوان",
+  "address_subtitle": "عنوان الشركة الرئيسي",
+  "country_label": "الدولة",
+  "select_country": "اختر الدولة",
+  "city_label": "المدينة",
+  "district_label": "الحي",
+  "street_label": "الشارع",
+  "building_no_label": "رقم المبنى",
+  "postal_code_label": "الرمز البريدي",
+
+  "Saudi Arabia": "المملكة العربية السعودية",
+  "United Arab Emirates": "الإمارات العربية المتحدة",
+  "Kuwait": "الكويت",
+  "Qatar": "قطر",
+  "Bahrain": "البحرين",
+  "Oman": "عُمان",
+
+  "auth_person_title": "المسؤول المفوض",
+  "auth_person_subtitle": "بيانات الشخص المسؤول عن الحساب",
+  "full_name_label": "الاسم الكامل",
+  "position_label": "المنصب",
+
+  "activity_details_title": "تفاصيل النشاط",
+  "activity_details_subtitle": "معلومات إضافية عن الشركة",
+  "employee_count_label": "عدد الموظفين",
+  "select_employee_count": "اختر عدد الموظفين",
+  "shipment_volume_label": "حجم الشحنات المتوقع",
+  "select_shipment_volume": "اختر حجم الشحنات",
+  "1-10_employees": "موظف 1-10",
+  "11-50_employees": "موظف 11-50",
+  "51-100_employees": "موظف 51-100",
+  "101-500_employees": "موظف 101-500",
+  "500+_employees": "أكثر من 500 موظف",
+  "1-10_shipments_monthly": "شحنات شهرياً 1-10",
+  "11-50_shipments_monthly": "شحنة شهرياً 11-50",
+  "51-100_shipments_monthly": "شحنة شهرياً 51-100",
+  "101-500_shipments_monthly": "شحنة شهرياً 101-500",
+  "500+_shipments_monthly": "أكثر من 500 شحنة شهرياً",
+  "review_data_title": "مراجعة البيانات",
+  "create_account": "إنشاء الحساب",
+  "Required field": "حقل مطلوب",
+  "Enter a valid email address": "أدخل بريد إلكتروني صالح",
+  "Password must be at least 6 characters": "يجب أن لا تقل كلمة المرور عن 6 أحرف",
+  "Passwords do not match": "كلمات المرور غير متطابقة",
+
+
+
+
+
+
+
+
+
+
 
   "app_tagline": "Prime Loops Logistics",
 
@@ -51,6 +117,23 @@
   "account_vendor": "تاجر / بائع",
 
   "back_to_login": "العودة لتسجيل الدخول",
-  "footer_text": "تطبيق تجريبي - قم بإنشاء أي حساب للبدء"
+  "footer_text": "تطبيق تجريبي - قم بإنشاء أي حساب للبدء",
+
+
+
+
+
+
+
+  "otp_title": "أدخل الرمز",
+  "otp_subtitle": "لقد أرسلنا رمزًا مكونًا من 6 أرقام إلى بريدك الإلكتروني: @email",
+  "otp_required": "الرمز مطلوب",
+  "otp_verified": "تم التحقق من الرمز بنجاح",
+  "invalid_otp": "رمز غير صالح",
+  "verify_btn": "تحقق",
+
+  "otp_resent": "تم إرسال الرمز مرة أخرى",
+  "resend_in": "إعادة الإرسال خلال",
+  "resend_otp": "إعادة إرسال الرمز"
 
 }

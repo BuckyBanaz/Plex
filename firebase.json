@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"plex-42cc3","appId":"1:1089328963003:android:bb75010c2418531843b89e","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"plex-42cc3","configurations":{"android":"1:1089328963003:android:bb75010c2418531843b89e","ios":"1:1089328963003:ios:b35ad06a03c9f58b43b89e"}}}}}}
