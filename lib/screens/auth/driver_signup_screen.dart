@@ -1,19 +1,17 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:plex_user/modules/contollers/auth/auth_controller.dart';
-
-import 'package:plex_user/routes/appRoutes.dart';
 import '../../common/validators/validators.dart';
 import '../../constant/app_colors.dart';
+import '../../modules/contollers/auth/auth_controller.dart';
 import '../widgets/custom_text_field.dart';
 
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class DriverSignupScreen extends StatelessWidget {
+  const DriverSignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     final c = Get.put(AuthController());
 
     return Scaffold(
@@ -25,7 +23,7 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Logo & Title
+                // Logo + Title
                 Align(
                   alignment: AlignmentGeometry.topLeft,
 
@@ -36,7 +34,7 @@ class LoginScreen extends StatelessWidget {
                 ),
 
                 Text(
-                  "welcome_title".tr, // PLEX مرحباً بك في
+                  "welcome_title".tr, // مرحباً بك في PLEX
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.textPrimary,
@@ -46,7 +44,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "welcome_subtitle".tr, // شبكة الحلقات الأولى اللوجستية
+                  "welcome_subtitle".tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.textSecondary,
@@ -55,9 +53,9 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // Login Card
+                // Signup Card
                 Form(
-                  key: c.loginKey,
+                  key: c.signupDriverKey,
                   child: Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
@@ -69,7 +67,7 @@ class LoginScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          "login_title".tr, // مرحباً بعودتك
+                          "driver_signup_title".tr,
                           style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 18,
@@ -79,7 +77,7 @@ class LoginScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "login_subtitle".tr, // سجل دخولك إلى حسابك
+                          "signup_subtitle".tr,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: AppColors.textSecondary,
@@ -87,6 +85,21 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
+
+                        // Full Name
+                        CustomTextField(
+                          controller: c.nameController,
+                          label: "name_label".tr,
+                          hint: "name_hint".tr,
+                          textInputAction: TextInputAction.next,
+                          focusNode: c.nameFocus,
+                          nextFocusNode: c.emailFocus,
+
+                          // validator: emailValidator,
+                        ),
+
+                        // Email
+                        SizedBox(height: 16),
                         CustomTextField(
                           controller: c.emailController,
                           label: "email_label".tr,
@@ -94,30 +107,32 @@ class LoginScreen extends StatelessWidget {
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           focusNode: c.emailFocus,
-                          validator: emailValidator,
                           nextFocusNode: c.passwordFocus,
+                          validator: emailValidator,
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         CustomTextField(
                           controller: c.passwordController,
                           label: "password_label".tr,
                           hint: "password_hint".tr,
                           isPassword: true,
-
                           textInputAction: TextInputAction.done,
                           focusNode: c.passwordFocus,
+                          validator: passwordValidator,
                           onSubmitted: () {
-                            c.login();
+                            // signup action
+                            c.registerDriver();
+                            // _performSignup(nameController.text, emailController.text, passwordController.text);
                           },
                         ),
                         const SizedBox(height: 24),
 
                         Obx(() {
                           return ElevatedButton(
-                            onPressed: c.isLoading.value ? null : () => c.login(),
-                            child: c.isLoading.value
-                                ? SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 3,color: AppColors.primary,))
-                                : Text("login_btn".tr),
+                            onPressed: c.isDriverLoading.value ? null : () => c.registerDriver(),
+                            child: c.isDriverLoading.value
+                                ?  SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2,color: AppColors.primary,))
+                                : Text("signup_btn".tr),
                           );
                         }),
                         const SizedBox(height: 16),
@@ -125,10 +140,11 @@ class LoginScreen extends StatelessWidget {
                         Center(
                           child: TextButton(
                             onPressed: () {
-                              Get.toNamed(AppRoutes.choose);
+                              // back to login
+                              Get.back();
                             },
                             child: Text(
-                              "no_account".tr, // ليس لديك حساب؟ سجل الآن
+                              "have_account".tr, //
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontSize: 14,
@@ -142,7 +158,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  "footer_note".tr, // تطبيق تجريبي - قم بإنشاء أي حساب للبدء
+                  "footer_note".tr,
                   style: TextStyle(
                     color: AppColors.textSecondary,
                     fontSize: 12,

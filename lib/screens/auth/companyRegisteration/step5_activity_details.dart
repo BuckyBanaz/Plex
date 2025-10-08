@@ -68,10 +68,26 @@ class Step5ActivityDetails extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Create Account Button (Final Step)
-              FormWidgets.buildNextButton(
-                onPressed: controller.nextStep,
-                buttonText: 'create_account'.tr, // New translation key
+              Center(
+                child: Obx(() {
+                  return controller.isLoading.value
+                      ? SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  )
+                      : FormWidgets.buildNextButton(
+                    onPressed: controller.nextStep,
+                    buttonText: 'create_account'.tr, // New translation key
+                  );
+                }),
               ),
+
+
+
             ],
           ),
         ),
@@ -182,10 +198,10 @@ class Step5ActivityDetails extends StatelessWidget {
             ),
           ),
           const Divider(color: AppColors.primary),
-          _buildReviewItem('company_name_label', 'sldkskl'),
-          _buildReviewItem('business_type_label', 'joint_stock'.tr),
-          _buildReviewItem('email_label', 'company@ex.com'),
-          _buildReviewItem('phone_label', '+9667012345678'),
+          _buildReviewItem('company_name_label', controller.companyNameController.text),
+          _buildReviewItem('business_type_label', controller.selectedBusinessType.value ?? ''),
+          _buildReviewItem('email_label', controller.emailController.text),
+          _buildReviewItem('phone_label', controller.phoneController.text),
         ],
       ),
     );

@@ -11,8 +11,10 @@ class TranslationService extends Translations {
   static const List<String> supportedCodes = ['en_US', 'ar_SA'];
 
   // Defaults
-  static const Locale defaultLocale = Locale('en', 'US');
-  static const Locale defaultFallback = Locale('en', 'US');
+  // Defaults: Change here
+  static const Locale defaultLocale = Locale('ar', 'SA');   // Saudi Arabic as default
+  static const Locale defaultFallback = Locale('ar', 'SA'); // Fallback also Arabic
+
 
   static late Map<String, Map<String, String>> _translations;
 

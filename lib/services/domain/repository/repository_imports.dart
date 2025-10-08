@@ -1,10 +1,12 @@
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
+import '../../../models/corporate_register_model.dart';
 import '../../../models/user_models.dart';
 import '../service/api/api_import.dart';
 import '../service/app/app_service_imports.dart';

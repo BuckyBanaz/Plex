@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart'; // Import Dio for proper error handling
+import 'package:plex_user/common/Toast/toast.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 
@@ -15,6 +16,11 @@ class AuthController extends GetxController {
   final passwordController = TextEditingController();
   final conPasswordController = TextEditingController();
 
+  // Form keys
+  final loginKey = GlobalKey<FormState>();
+  final signupKey = GlobalKey<FormState>();
+  final signupDriverKey = GlobalKey<FormState>();
+
   // Focus nodes
   final nameFocus = FocusNode();
   final phoneFocus = FocusNode();
@@ -24,9 +30,11 @@ class AuthController extends GetxController {
 
   // state
   final isLoading = false.obs;
+  final isSignupLoading = false.obs;
+  final isDriverLoading = false.obs;
 
   // repo (resolved via Get)
-   final AuthRepository _authRepo = AuthRepository();
+  final AuthRepository _authRepo = AuthRepository();
   Rx<UserModel?> currentUser = Rx<UserModel?>(null);
 
   @override
@@ -52,54 +60,66 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
-  // Login
+  /// Helper to clear fields (call this when you navigate back to login or when needed)
+  void clearControllers() {
+    nameController.clear();
+    phoneController.clear();
+    emailController.clear();
+    passwordController.clear();
+    conPasswordController.clear();
 
+    // optionally unfocus
+    nameFocus.unfocus();
+    phoneFocus.unfocus();
+    emailFocus.unfocus();
+    passwordFocus.unfocus();
+    conPasswordFocus.unfocus();
+  }
+
+  // Login
   Future<void> login() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text;
-    Get.offAllNamed(AppRoutes.otp,arguments: email);
-    if (email.isEmpty || password.isEmpty) {
-      Get.snackbar("Error", "Email and password required");
+    // Validate the form first
+    if (loginKey.currentState == null || !loginKey.currentState!.validate()) {
       return;
     }
+
+    final email = emailController.text.trim();
+    final password = passwordController.text;
 
     try {
       isLoading.value = true;
       final user = await _authRepo.login(email: email, password: password);
       currentUser.value = user;
-      Get.snackbar("Success", "Login successful");
 
-      // Navigate to home/dashboard
+      showToast(message: "Login successful");
+      clearControllers(); // optional: clear after successful login
       Get.offAllNamed(AppRoutes.home);
-
+    } on DioError catch (dioErr) {
+      // better error message from server
+      final msg = dioErr.response?.data?['message'] ??
+          dioErr.message ??
+          'Something went wrong';
+      showToast(message: ' Server is busy! Please try after sometimes');
+      // Get.snackbar("Error", msg);
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      // Get.snackbar("Error", e.toString());
     } finally {
       isLoading.value = false;
     }
   }
 
-
-
-
-
   Future<void> signup() async {
+    // Validate signup form
+    if (signupKey.currentState == null || !signupKey.currentState!.validate()) {
+      return;
+    }
+
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
-    final conPass = conPasswordController.text;
-
-    if (name.isEmpty || email.isEmpty || password.isEmpty || conPass.isEmpty) {
-      Get.snackbar('Error', 'Please fill all fields.');
-      return;
-    }
-    if (password != conPass) {
-      Get.snackbar('Error', 'Passwords do not match.');
-      return;
-    }
 
     try {
-      isLoading.value = true;
+      isSignupLoading.value = true;
 
       final message = await _authRepo.register(
         name: name,
@@ -107,18 +127,61 @@ class AuthController extends GetxController {
         password: password,
       );
 
-      // Success
-      Get.snackbar('Success', message);
+      showToast(message: message);
+      // do not immediately clear if you want to show email on OTP screen;
+      // but if you want them cleared here:
+      clearControllers();
 
-      // Navigate to OTP screen if needed
+      // Navigate to OTP screen passing email
       Get.offAllNamed(AppRoutes.otp, arguments: email);
-
+    } on DioError catch (dioErr) {
+      final msg = dioErr.response?.data?['message'] ??
+          dioErr.message ??
+          'Registration failed';
+      // Get.snackbar('Error', msg);
+      showToast(message: ' Server is busy! Please try after sometimes');
     } catch (e) {
-      Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''));
+      showToast(message: ' Server is busy! Please try after sometimes');
+      // Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''));
     } finally {
-      isLoading.value = false;
+      isSignupLoading.value = false;
     }
   }
 
+  Future<void> registerDriver() async {
+    // Validate driver signup form
+    if (signupDriverKey.currentState == null || !signupDriverKey.currentState!.validate()) {
+      return;
+    }
 
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    try {
+      isDriverLoading.value = true;
+      final response = await _authRepo.registerDriver(
+        name: name,
+        email: email,
+        password: password,
+      );
+
+      print("✅ Driver registered: $response");
+      showToast(message: "Driver registered successfully!");
+      clearControllers(); // optional
+      Get.offAllNamed(AppRoutes.otp, arguments: email);
+    } on DioError catch (dioErr) {
+      final msg = dioErr.response?.data?['message'] ??
+          dioErr.message ??
+          'Driver registration failed';
+      // Get.snackbar("Error", msg);
+      showToast(message: ' Server is busy! Please try after sometimes');
+    } catch (e) {
+      print("❌ Error: $e");
+      // Get.snackbar("Error", e.toString());
+      showToast(message: ' Server is busy! Please try after sometimes');
+    } finally {
+      isDriverLoading.value = false;
+    }
+  }
 }

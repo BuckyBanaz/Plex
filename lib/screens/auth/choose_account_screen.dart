@@ -103,7 +103,7 @@ class ChooseAccountScreen extends StatelessWidget {
                       icon: Icons.local_shipping_outlined,
                       text: "account_shipping".tr,
                       onTap: () {
-                        Get.toNamed(AppRoutes.signup);
+                        Get.toNamed(AppRoutes.driverSignup);
 
                       },
                     ),

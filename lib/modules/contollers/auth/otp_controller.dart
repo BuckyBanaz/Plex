@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plex_user/routes/appRoutes.dart';
+import '../../../common/Toast/toast.dart';
 import '../../../services/domain/repository/repository_imports.dart';
 
 class OtpController extends GetxController {
@@ -32,7 +33,8 @@ class OtpController extends GetxController {
 
   Future<void> resendOtp(String email) async {
     // yaha apna resend OTP API call karo
-    Get.snackbar('Info'.tr, 'otp_resent'.tr);
+    // Get.snackbar('Info'.tr, 'otp_resent'.tr);
+    showToast(message: 'otp_resent'.tr);
     startTimer(); // reset timer
   }
 
@@ -40,25 +42,35 @@ class OtpController extends GetxController {
     final otp = otpController.text.trim();
 
     if (otp.isEmpty) {
-      Get.snackbar('Error'.tr, 'otp_required'.tr);
+      showToast(message: 'otp_required'.tr);
+      // Get.snackbar('Error'.tr, 'otp_required'.tr);
       return;
     }
 
     try {
       isLoading.value = true;
-      // final isVerified = await _authRepo.verifyOtp(email: email, otp: otp);
-      Get.snackbar('Success'.tr, 'otp_verified'.tr);
-      // if (isVerified) {
-      //   Get.offAllNamed(AppRoutes.home);
-      // } else {
-      //   Get.snackbar('Error'.tr, 'invalid_otp'.tr);
-      // }
+      final isVerified = await _authRepo.verifyOtp(
+        keyType: 'email',
+        keyValue: email,
+        otp: otp,
+      );
+
+      if (isVerified) {
+        showToast(message: 'otp_verified'.tr);
+        // Get.snackbar('Success'.tr, 'otp_verified'.tr);
+        Get.offAllNamed(AppRoutes.login); // OTP success → go to Home
+      } else {
+        showToast(message: 'invalid_otp'.tr);
+        // Get.snackbar('Error'.tr, 'invalid_otp'.tr);
+      }
     } catch (e) {
-      Get.snackbar('Error'.tr, e.toString());
+      showToast(message: ' Server is busy! Please try after sometimes');
+      // Get.snackbar('Error'.tr, e.toString());
     } finally {
       isLoading.value = false;
     }
   }
+
 
   @override
   void onClose() {

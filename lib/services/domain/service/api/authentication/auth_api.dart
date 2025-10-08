@@ -1,114 +1,70 @@
 part of 'package:plex_user/services/domain/service/api/api_import.dart';
 
+
 class AuthApi {
   final Dio dio;
   AuthApi(this.dio);
-  final basePath = '/auth';
 
-  // LOGIN
-  Future<Map<String, dynamic>> login({required String email, required String password}) async {
-    try {
-      final response = await dio.post(
-        '${basePath}${ApiEndpoint.login}',
-        data: {
-          "email": email,
-          "password": password,
-        },
-      );
-      return response.data;
-    } catch (e) {
-      rethrow;
-    }
+  final basePath = '';
+
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    final response = await dio.post('$basePath${ApiEndpoint.login}', data: {'email': email, 'password': password});
+    // fast return
+    return (response.data is Map<String, dynamic>) ? Map<String, dynamic>.from(response.data) : {'message': response.data?.toString()};
   }
 
-  // REGISTER
   Future<Map<String, dynamic>> register({
     required String name,
     required String email,
     required String password,
   }) async {
     try {
-      final response = await dio.post(
-        '${basePath}${ApiEndpoint.individualSignup}', // your register endpoint
-        data: {
-          "name": name,
-          "email": email,
-          "password": password,
-        },
-      );
-      return response.data;
+      final response = await dio.post('$basePath${ApiEndpoint.individualSignup}', data: {'name': name, 'email': email, 'password': password});
+      return (response.data is Map<String, dynamic>) ? Map<String, dynamic>.from(response.data) : {'message': response.data?.toString()};
     } on DioError catch (dioError) {
-      final errorMessage = dioError.response?.data['error'] ??
-          dioError.message;
-      throw Exception("Registration failed: $errorMessage");
-    } catch (e) {
-      throw Exception("An unexpected error occurred: ${e.toString()}");
+      final serverData = dioError.response?.data;
+      if (serverData is Map && serverData.containsKey('error')) throw Exception(serverData['error']);
+      throw Exception(dioError.message);
     }
   }
 
+  Future<Response> registerDriver({
+    required String name,
+    required String email,
+    required String password,
+  }) {
+    return dio.post('$basePath${ApiEndpoint.driverSignup}', data: {
+      "name": name,
+      "email": email,
+      "password": password,
+      "mobile": "9999999999",
+      "vehicleType": "car",
+      "licenseNo": "DL12345",
+    });
+  }
 
+  Future<Map<String, dynamic>> registerCorporate({
+    required Map<String, dynamic> body,
+  }) async {
+    try {
+      final response = await dio.post(ApiEndpoint.corporateSignup, data: body);
+      return (response.data is Map<String, dynamic>) ? Map<String, dynamic>.from(response.data) : {'message': response.data?.toString()};
+    } on DioError catch (dioError) {
+      final serverData = dioError.response?.data;
+      if (serverData is Map && serverData.containsKey('error')) throw Exception(serverData['error']);
+      if (serverData is String) throw Exception(serverData);
+      throw Exception(dioError.message);
+    }
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-  // /// Otp Less Authentication
-  // Future<Response<dynamic>> loginUser1(
-  //     {required String deviceId,
-  //     required String phone,
-  //     required String country}) async {
-  //   try {
-  //     return await dio.post('$basePath/login',
-  //         data: {'phone': phone, 'deviceId': deviceId, 'country': country});
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
-  //
-  // /// Otp Verification
-  // Future<Response<dynamic>> verifyOtp(
-  //     {required String phone,
-  //     required String otp,
-  //     required String country,
-  //     required DeviceInfoModel deviceInfo}) async {
-  //   try {
-  //     return await dio.post(
-  //       '$basePath/verify',
-  //       data: {
-  //         'phone': phone,
-  //         'role': 'mentee',
-  //         'country': country,
-  //         'deviceInfo': deviceInfo,
-  //         'otp': otp
-  //       },
-  //     );
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
-  //
-  // /// Firebase Authentication
-  // Future<Response<dynamic>> loginUser2(
-  //     {required DeviceInfoModel deviceInfo,
-  //     required String phone,
-  //     required int countryCode,
-  //     required String uid}) async {
-  //   try {
-  //     return await dio.post('$basePath/login2', data: {
-  //       'device_info': deviceInfo,
-  //       'phone': phone,
-  //       'country_code': countryCode,
-  //       'uid': uid
-  //     });
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-  // }
+  Future<Response> verifyOtp({
+    required String keyType,
+    required String keyValue,
+    required String otp,
+  }) {
+    return dio.post('$basePath${ApiEndpoint.verifyOtp}', data: {'keyType': keyType, 'keyValue': keyValue, 'otp': otp});
+  }
 }

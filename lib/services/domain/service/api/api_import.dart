@@ -22,4 +22,4 @@ part 'dio_interceptors.dart';
 part 'dio_exceptions.dart';
 
 part 'authentication/auth_api.dart';
-part 'user/user.dart';
+// part 'user/user.dart';

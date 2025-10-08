@@ -8,9 +8,6 @@ Future<void> initializeRepositories() async {
     // Get.put(FileRepository());
     Get.put(AuthRepository());
 
-    // Get.put(SearchRepository());
-    //  Get.put(UserRepository());
-    // Get.put(NotificationRepository());
 
     print('repository initialize');
 

@@ -106,10 +106,10 @@ class OtpScreen extends StatelessWidget {
                   onPressed:
                   c.isLoading.value ? null : () => c.verifyOtp(email),
                   child: c.isLoading.value
-                      ? const SizedBox(
+                      ?  SizedBox(
                     height: 18,
                     width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(strokeWidth: 2,color: AppColors.primary,),
                   )
                       : Text('verify_btn'.tr),
                 );

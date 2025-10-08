@@ -251,11 +251,7 @@ class FormWidgets {
       height: 55,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        gradient: const LinearGradient(
-          colors: [Color(0xFFC09B4E), Color(0xFFA77C2B)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
+        color: AppColors.primary,
       ),
       child: ElevatedButton(
         onPressed: onPressed,

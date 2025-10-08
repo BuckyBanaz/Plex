@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../../constant/app_colors.dart';
 import '../../../modules/contollers/company_registration/company_registration_controller.dart';
 
+import '../../widgets/custom_text_field.dart';
 import 'company_registration_view.dart'; // Import FormWidgets
 
 class Step1CompanyInfo extends StatelessWidget {
@@ -35,7 +36,7 @@ class Step1CompanyInfo extends StatelessWidget {
       icon: Icons.assignment, // Changed icon to match image_7e0d72.png
       fields: [
         // Company name (AR)
-        FormWidgets.buildTextField(
+        CustomTextField(
           controller: controller.companyNameController,
           label: 'company_name_label'.tr,
           hint: 'company_name_hint'.tr,
@@ -43,9 +44,10 @@ class Step1CompanyInfo extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Company name (EN)
-        FormWidgets.buildTextField(
+        CustomTextField(
           controller: controller.companyNameEnController,
           label: 'company_name_en_label'.tr,
+          hint: 'e.g., Advanced Path Trading Company'.tr,
         ),
         const SizedBox(height: 16),
 
@@ -84,7 +86,7 @@ class Step1CompanyInfo extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Commercial register
-        FormWidgets.buildTextField(
+        CustomTextField(
           controller: controller.commercialRegisterController,
           label: 'commercial_register_label'.tr,
           hint: '1010123456',
@@ -93,7 +95,7 @@ class Step1CompanyInfo extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Tax register
-        FormWidgets.buildTextField(
+        CustomTextField(
           controller: controller.taxRegisterController,
           label: 'tax_register_label'.tr,
           hint: '300123456789003',

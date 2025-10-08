@@ -8,6 +8,7 @@
   "no_account": "Don’t have an account? Sign up now",
   "footer_note": "Demo app - create any account to get started",
   "signup_title": "Create an Individual Account",
+  "driver_signup_title": "Create a Shipping Company Account",
   "signup_subtitle": "Join PLEX to start shipping",
   "name_label": "Full Name",
   "name_hint": "Enter your full name",
@@ -76,7 +77,7 @@
 
   "registration_title": "New Company Registration",
   "registration_subtitle": "Join PLEX Logistics Network",
-  "step_progress": "Step {step} of {total}",
+  "step_progress": "Step @step of @total",
   "company_info_title": "Company Information",
   "company_info_subtitle": "Basic Company Details",
   "company_name_label": "Company Name",
@@ -123,5 +124,16 @@
   "verify_btn": "Verify",
   "otp_resent": "OTP resent successfully",
   "resend_in": "Resend in",
-  "resend_otp": "Resend OTP"
+  "resend_otp": "Resend OTP",
+
+
+  "city": "Riyadh",
+  "district": "Olaya",
+  "street": "King Fahd Street",
+  "building_number": "1234",
+  "postal_code": "12345",
+  "full_name": "Ahmed Mohammed Alsaad",
+  "position": "Operations Manager",
+  "authorized_phone": "+966512345678",
+  "authorized_email": "ahmed@company.com"
 }

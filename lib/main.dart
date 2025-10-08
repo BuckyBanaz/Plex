@@ -16,11 +16,11 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  await Get.putAsync(() => AppService().init());
   await TranslationService.init();
   final localeCtrl = Get.put(LocaleController());
   await localeCtrl.init();
-  await Get.putAsync(() => AppService().init());
+
 
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

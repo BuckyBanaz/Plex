@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../modules/contollers/company_registration/company_registration_controller.dart';
 
+import '../../widgets/custom_text_field.dart';
 import 'company_registration_view.dart';
 
 class Step3Address extends StatelessWidget {
@@ -43,22 +44,25 @@ class Step3Address extends StatelessWidget {
         const SizedBox(height: 16),
 
         // City
-        FormWidgets.buildTextField(
+        CustomTextField(
           controller: controller.cityController,
+          hint: 'city'.tr,
           label: 'city_label'.tr, // New translation key
         ),
         const SizedBox(height: 16),
 
         // District
-        FormWidgets.buildTextField(
+        CustomTextField(
           controller: controller.districtController,
+          hint: 'district'.tr,
           label: 'district_label'.tr, // New translation key
         ),
         const SizedBox(height: 16),
 
         // Street
-        FormWidgets.buildTextField(
+        CustomTextField(
           controller: controller.streetController,
+          hint: 'street'.tr,
           label: 'street_label'.tr, // New translation key
         ),
         const SizedBox(height: 16),
@@ -67,19 +71,19 @@ class Step3Address extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: FormWidgets.buildTextField(
+              child: CustomTextField(
                 controller: controller.buildingNumberController,
                 label: 'building_no_label'.tr, // New translation key
-                hint: '1234',
+                hint: 'building_number'.tr,
                 keyboardType: TextInputType.number,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: FormWidgets.buildTextField(
+              child: CustomTextField(
                 controller: controller.postalCodeController,
                 label: 'postal_code_label'.tr, // New translation key
-                hint: '12345',
+                hint: 'postal_code'.tr,
                 keyboardType: TextInputType.number,
               ),
             ),

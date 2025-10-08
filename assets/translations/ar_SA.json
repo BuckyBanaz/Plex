@@ -8,6 +8,7 @@
   "no_account": "ليس لديك حساب؟ سجل الآن",
   "footer_note": "تطبيق تجريبي - قم بإنشاء أي حساب للبدء",
   "signup_title": "إنشاء حساب فردي",
+  "driver_signup_title": "إنشاء حساب شركة شحن",
   "signup_subtitle": "لبدء الشحن PLEX انضم إلى",
   "name_label": "الاسم الكامل",
   "name_hint": "أدخل اسمك الكامل",
@@ -23,7 +24,7 @@
 
   "registration_title": "تسجيل شركة جديدة",
   "registration_subtitle": "انضم إلى شبكة PLEX اللوجستية",
-  "step_progress": "الخطوة {step} من {total}",
+  "step_progress": "الخطوة @step من @total",
   "company_info_title": "معلومات الشركة",
   "company_info_subtitle": "تفاصيل الشركة الأساسية",
   "company_name_label": "اسم الشركة",
@@ -134,6 +135,17 @@
 
   "otp_resent": "تم إرسال الرمز مرة أخرى",
   "resend_in": "إعادة الإرسال خلال",
-  "resend_otp": "إعادة إرسال الرمز"
+  "resend_otp": "إعادة إرسال الرمز",
+
+
+  "city": "الرياض",
+  "district": "العليا",
+  "street": "شارع الملك فهد",
+  "building_number": "١٢٣٤",
+  "postal_code": "١٢٣٤٥",
+  "full_name": "أحمد محمد السعد",
+  "position": "مدير العمليات",
+  "authorized_phone": "+٩٦٦٥١٢٣٤٥٦٧٨",
+  "authorized_email": "ahmed@company.com"
 
 }
