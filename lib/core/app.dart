@@ -33,7 +33,7 @@ class Plex extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        initialRoute: AppRoutes.splash,
+        initialRoute: AppRoutes.home,
         getPages: AppRoutes.routes,
         defaultTransition: Transition.cupertino,
       );

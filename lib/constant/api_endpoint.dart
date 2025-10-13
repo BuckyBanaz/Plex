@@ -1,5 +1,5 @@
 class ApiEndpoint {
-  static const baseUrl = "https://node-plex-backend.onrender.com/api";
+  static const baseUrl = "https://node-plex-backend-5ca6.onrender.com/api";
   static const login = "/login";
   static const individualSignup = "/individual";
   static const driverSignup = "/driver";

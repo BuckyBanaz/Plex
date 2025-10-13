@@ -146,6 +146,25 @@
   "full_name": "أحمد محمد السعد",
   "position": "مدير العمليات",
   "authorized_phone": "+٩٦٦٥١٢٣٤٥٦٧٨",
-  "authorized_email": "ahmed@company.com"
+  "authorized_email": "ahmed@company.com",
+
+
+  "getReady": "استعد",
+  "moveOn": "انطلق!",
+  "bookNow": "احجز الآن!",
+  "min": "دقيقة",
+  "timerValue": "١٠",
+
+
+  "sendAnything": "أرسل أي شيء،",
+  "anywhere": "في أي مكان",
+
+  "exploreRewards": "استكشف مكافآت PIEX",
+  "getHelp": "احصل على المساعدة",
+  "menus": "القوائم",
+  "deliveries": "التسليمات",
+  "myOrder": "طلباتي",
+  "support": "الدعم",
+  "setting": "الإعدادات"
 
 }

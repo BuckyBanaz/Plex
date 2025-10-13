@@ -112,6 +112,25 @@ class DriverSignupScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 16),
                         CustomTextField(
+                          controller: c.phoneController,
+                          label: 'phone_label'.tr,
+                          hint: '+966512345678',
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Required field'.tr;
+                            }
+                            // Regex: + aur 1-3 digit country code phir 6-12 digit phone number
+                            final pattern = r'^\+\d{1,3}\d{6,12}$';
+                            final regExp = RegExp(pattern);
+                            if (!regExp.hasMatch(value)) {
+                              return 'Enter a valid phone number with country code'.tr;
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        CustomTextField(
                           controller: c.passwordController,
                           label: "password_label".tr,
                           hint: "password_hint".tr,
@@ -123,6 +142,22 @@ class DriverSignupScreen extends StatelessWidget {
                             // signup action
                             c.registerDriver();
                             // _performSignup(nameController.text, emailController.text, passwordController.text);
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Confirm Password
+                        CustomTextField(
+                          controller: c.conPasswordController,
+                          label: 'confirm_password_label'.tr, // New translation key
+                          hint: 're_enter_password'.tr, // New translation key
+                          isPassword: true,
+                          validator: (value) {
+                            if (value!.isEmpty) return 'Required field'.tr;
+                            if (value != c.passwordController.text) {
+                              return 'Passwords do not match'.tr;
+                            }
+                            return null;
                           },
                         ),
                         const SizedBox(height: 24),

@@ -127,6 +127,7 @@
   "resend_otp": "Resend OTP",
 
 
+
   "city": "Riyadh",
   "district": "Olaya",
   "street": "King Fahd Street",
@@ -135,5 +136,24 @@
   "full_name": "Ahmed Mohammed Alsaad",
   "position": "Operations Manager",
   "authorized_phone": "+966512345678",
-  "authorized_email": "ahmed@company.com"
+  "authorized_email": "ahmed@company.com",
+
+
+  "getReady": "Get ready",
+  "moveOn": "Move on!",
+  "bookNow": "Book now!",
+  "min": "min",
+  "timerValue": "10",
+
+  "sendAnything": "Send Anything,",
+  "anywhere": "Anywhere",
+
+
+  "exploreRewards": "Explore PIEX Rewards",
+  "getHelp": "Get help",
+  "menus": "Menus",
+  "deliveries": "Deliveries",
+  "myOrder": "My Order",
+  "support": "Support",
+  "setting": "Setting"
 }

@@ -167,7 +167,7 @@ class AuthController extends GetxController {
       );
 
       print("✅ Driver registered: $response");
-      showToast(message: "Driver registered successfully!");
+      // showToast(message: "Driver registered successfully!");
       clearControllers(); // optional
       Get.offAllNamed(AppRoutes.otp, arguments: email);
     } on DioError catch (dioErr) {
