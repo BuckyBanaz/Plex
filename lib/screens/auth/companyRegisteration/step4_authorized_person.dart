@@ -35,11 +35,11 @@ class Step4AuthorizedPerson extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Phone Number
-        CustomTextField(
+        PhoneTextField(
           controller: controller.authPhoneController,
           hint: 'authorized_phone'.tr,
           label: 'phone_label'.tr,
-          keyboardType: TextInputType.phone,
+          // keyboardType: TextInputType.phone,
         ),
         const SizedBox(height: 16),
 

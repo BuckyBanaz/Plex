@@ -55,11 +55,11 @@ class Step2ContactInfo extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Phone Number
-        CustomTextField(
+        PhoneTextField(
           controller: controller.phoneController,
           label: 'phone_label'.tr, // New translation key
-          hint: '+966512345678',
-          keyboardType: TextInputType.phone,
+          hint: '512345678',
+          // keyboardType: TextInputType.phone,
         ),
         const SizedBox(height: 16),
 

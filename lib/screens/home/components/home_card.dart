@@ -26,8 +26,8 @@ class RewardsCard extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                      height: 24,
-                      width: 24,
+                      height: 30,
+                      width: 30,
                       child: Image.asset(AppAssets.trophy)),
                   SizedBox(width: 10,),
                   Text('exploreRewards'.tr, style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),

@@ -111,23 +111,23 @@ class DriverSignupScreen extends StatelessWidget {
                           validator: emailValidator,
                         ),
                         SizedBox(height: 16),
-                        CustomTextField(
+                        PhoneTextField(
                           controller: c.phoneController,
                           label: 'phone_label'.tr,
-                          hint: '+966512345678',
-                          keyboardType: TextInputType.phone,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Required field'.tr;
-                            }
-                            // Regex: + aur 1-3 digit country code phir 6-12 digit phone number
-                            final pattern = r'^\+\d{1,3}\d{6,12}$';
-                            final regExp = RegExp(pattern);
-                            if (!regExp.hasMatch(value)) {
-                              return 'Enter a valid phone number with country code'.tr;
-                            }
-                            return null;
-                          },
+                          hint: '512345678',
+                          // keyboardType: TextInputType.phone,
+                          // validator: (value) {
+                          //   if (value == null || value.isEmpty) {
+                          //     return 'Required field'.tr;
+                          //   }
+                          //   // Regex: + aur 1-3 digit country code phir 6-12 digit phone number
+                          //   final pattern = r'^\+\d{1,3}\d{6,12}$';
+                          //   final regExp = RegExp(pattern);
+                          //   if (!regExp.hasMatch(value)) {
+                          //     return 'Enter a valid phone number with country code'.tr;
+                          //   }
+                          //   return null;
+                          // },
                         ),
                         SizedBox(height: 16),
                         CustomTextField(

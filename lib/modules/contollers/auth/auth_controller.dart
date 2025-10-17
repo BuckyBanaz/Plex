@@ -76,7 +76,6 @@ class AuthController extends GetxController {
     conPasswordFocus.unfocus();
   }
 
-  // Login
   Future<void> login() async {
     // Validate the form first
     if (loginKey.currentState == null || !loginKey.currentState!.validate()) {
@@ -92,21 +91,31 @@ class AuthController extends GetxController {
       currentUser.value = user;
 
       showToast(message: "Login successful");
-      clearControllers(); // optional: clear after successful login
-      Get.offAllNamed(AppRoutes.home);
+      clearControllers();
+
+      // Defensive: userType could be null or different casing
+      final userType = (user.userType ?? '').toLowerCase();
+
+      if (userType == 'individual') {
+        Get.offAllNamed(AppRoutes.userDashBoard);
+      } else if (userType == 'driver') {
+        Get.offAllNamed(AppRoutes.partnerHome);
+      } else {
+        // fallback route: handle unknown user types
+        Get.offAllNamed(AppRoutes.userDashBoard);
+      }
+
     } on DioError catch (dioErr) {
-      // better error message from server
-      final msg = dioErr.response?.data?['message'] ??
-          dioErr.message ??
-          'Something went wrong';
-      showToast(message: ' Server is busy! Please try after sometimes');
-      // Get.snackbar("Error", msg);
+      final resp = dioErr.response?.data;
+      final msg = resp is Map ? (resp['message'] ?? resp['error']) : dioErr.message;
+      showToast(message: msg ?? 'Server is busy! Please try again later');
     } catch (e) {
-      // Get.snackbar("Error", e.toString());
+      showToast(message: e.toString());
     } finally {
       isLoading.value = false;
     }
   }
+
 
   Future<void> signup() async {
     // Validate signup form
@@ -139,7 +148,7 @@ class AuthController extends GetxController {
           dioErr.message ??
           'Registration failed';
       // Get.snackbar('Error', msg);
-      showToast(message: ' Server is busy! Please try after sometimes');
+      showToast(message: '$msg');
     } catch (e) {
       showToast(message: ' Server is busy! Please try after sometimes');
       // Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''));
@@ -157,6 +166,7 @@ class AuthController extends GetxController {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
+    final phone = phoneController.text;
 
     try {
       isDriverLoading.value = true;
@@ -164,6 +174,7 @@ class AuthController extends GetxController {
         name: name,
         email: email,
         password: password,
+        phone: phone
       );
 
       print("✅ Driver registered: $response");

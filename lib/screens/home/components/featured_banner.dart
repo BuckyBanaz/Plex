@@ -129,7 +129,7 @@ class FeaturedBanner extends StatelessWidget {
                           ),
                           const Spacer(),
                           // Timer Graphic
-                          DonutTimerExact(),
+                          DonutTimerExact(timer: 'timerValue'.tr,),
                         ],
                       ),
                     ),
@@ -184,7 +184,10 @@ class FeaturedBanner extends StatelessWidget {
 
 
 class DonutTimerExact extends StatelessWidget {
-  const DonutTimerExact({super.key});
+  final String timer;
+  const DonutTimerExact({
+
+    super.key, required this.timer});
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +205,7 @@ class DonutTimerExact extends StatelessWidget {
               ),
               children: [
                 TextSpan(
-                  text: "timerValue".tr,
+                  text: timer,
                   style: TextStyle(
                     color: AppColors.primary,
                     fontWeight: FontWeight.w700,

@@ -14,7 +14,7 @@ class TopBar extends StatelessWidget {
 
       child: Row(
         children: [
-          Icon(IconlyLight.location, color: AppColors.primary,size: 35,),
+          Icon(IconlyBold.location, color: AppColors.primary,size: 35,),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -22,12 +22,12 @@ class TopBar extends StatelessWidget {
               children: const [
                 Text(
                   'Pick Up From',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
                 SizedBox(height: 2),
                 Text(
                   '4372 Laal Khothi, Jaipur(Raj), 01730',
-                  style: TextStyle(fontSize: 12,),
+                  style: TextStyle(fontSize: 14,),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],

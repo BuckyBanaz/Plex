@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
+import '../../../models/common/device_info.dart';
 import '../../../models/corporate_register_model.dart';
 import '../../../models/user_models.dart';
 import '../service/api/api_import.dart';
