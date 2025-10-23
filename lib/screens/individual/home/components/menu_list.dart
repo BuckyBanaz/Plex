@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../../constant/app_colors.dart';
+import '../../../../constant/app_colors.dart';
 
 class MenusGrid extends StatelessWidget {
   const MenusGrid({super.key});
@@ -66,10 +66,10 @@ class MenuCard extends StatelessWidget {
           height: 100,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.textPrimary),
-            boxShadow: [
-              BoxShadow(color: Colors.black12, blurRadius: 2, offset: const Offset(0, 1)),
-            ],
+            border: Border.all(color: AppColors.primary),
+            // boxShadow: [
+            //   BoxShadow(color: Colors.black12, blurRadius: 2, offset: const Offset(0, 1)),
+            // ],
           ),
           child: Center(child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

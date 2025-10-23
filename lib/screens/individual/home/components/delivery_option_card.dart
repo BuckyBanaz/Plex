@@ -26,7 +26,7 @@ class DeliveryOptionCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.cardColor, // light cream background
+          color: AppColors.cardBg, // light cream background
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -50,14 +50,14 @@ class DeliveryOptionCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFE2B8),
+                          color: AppColors.primary.withOpacity(0.4),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           badgeText!,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Colors.brown,
+                            color: AppColors.textColor,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -67,10 +67,10 @@ class DeliveryOptionCard extends StatelessWidget {
                   const SizedBox(height: 5),
                   Text(
                     title,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black87,
+                      color: AppColors.textColor,
                     ),
                   ),
                   const SizedBox(height: 5),

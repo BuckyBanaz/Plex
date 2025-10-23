@@ -15,7 +15,7 @@ class Plex extends StatelessWidget {
   const Plex({super.key});
   @override
   Widget build(BuildContext context) {
-    final localeCtrl = Get.find<LocaleController>(); // put in main()
+    final localeCtrl = Get.find<LocaleController>();
 
     return Obx(() {
       return GetMaterialApp(
@@ -33,7 +33,7 @@ class Plex extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        initialRoute: AppRoutes.splash,
+        initialRoute: AppRoutes.userDashBoard,
         getPages: AppRoutes.routes,
         defaultTransition: Transition.cupertino,
       );

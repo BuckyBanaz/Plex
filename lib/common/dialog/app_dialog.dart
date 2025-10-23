@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/constant/app_colors.dart';
 
 import '../alert/alert.dart';
 import '../loading/loading.dart';
@@ -39,7 +40,7 @@ class AppDialog {
   static Widget loader() {
     return Center(
       child: SpinKitCircle(
-        color: Colors.blue, // Specify a default color
+        color: AppColors.primary, // Specify a default color
         size: 40.0,
       ),
     );

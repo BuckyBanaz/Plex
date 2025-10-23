@@ -9,6 +9,7 @@ class PreferenceKeys{
   final String customAccent = 'custom_accent';
 
   final String accessToken = 'access_token';
+  final String apiKey = 'api_key';
 
   final String customAccessToken = 'custom_access_token';
 

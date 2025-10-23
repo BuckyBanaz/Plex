@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 //Package Dependancy
 import 'package:get/get.dart';
+import 'package:plex_user/constant/app_colors.dart';
 
 import '../../constant/app_strings.dart';
 
@@ -21,6 +22,7 @@ class Alert extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: AppColors.secondary,
       title: title,
       content: content,
      //titleTextStyle: theme.textTheme.titleLarge,
@@ -33,7 +35,7 @@ class Alert extends StatelessWidget {
           ),
         ),
         TextButton(
-          child: Text(confirmText ?? AppStrings.ok.toUpperCase(),style: TextStyle()),
+          child: Text(confirmText ?? AppStrings.ok.toUpperCase(),style: TextStyle(color: AppColors.primary)),
           onPressed: ()=> Get.back(result: true),
         )
       ],

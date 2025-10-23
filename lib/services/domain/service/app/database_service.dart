@@ -68,6 +68,8 @@ class DatabaseService {
 
   Future<void> putAccessToken(String value) async => await putStringPref(_preferenceKeys.accessToken, value);
   String? get accessToken => getStringPref(_preferenceKeys.accessToken) ;
+  Future<void> putApiKey(String value) async => await putStringPref(_preferenceKeys.apiKey, value);
+  String? get apiKey => getStringPref(_preferenceKeys.apiKey) ;
 
   Future<void> putUser(UserModel value) async => await putStringPref(_preferenceKeys.user, value.toRawJson());
   UserModel? get user => getStringPref(_preferenceKeys.user) == null ? null : UserModel.fromRawJson(getStringPref(_preferenceKeys.user)!);

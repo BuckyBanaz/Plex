@@ -15,6 +15,7 @@ class AuthController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final conPasswordController = TextEditingController();
+  String? countryCode;
 
   // Form keys
   final loginKey = GlobalKey<FormState>();
@@ -126,6 +127,8 @@ class AuthController extends GetxController {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
+    final phone = "${countryCode ?? '+91'}${phoneController.text}";
+
 
     try {
       isSignupLoading.value = true;
@@ -133,6 +136,7 @@ class AuthController extends GetxController {
       final message = await _authRepo.register(
         name: name,
         email: email,
+        phone: phone,
         password: password,
       );
 
@@ -174,7 +178,7 @@ class AuthController extends GetxController {
         name: name,
         email: email,
         password: password,
-        phone: phone
+        phone: "${countryCode}${phone}"
       );
 
       print("✅ Driver registered: $response");

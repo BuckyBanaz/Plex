@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
+import 'package:plex_user/constant/app_assets.dart';
 import 'package:plex_user/constant/app_colors.dart';
 
 class FooterBanner extends StatelessWidget {
@@ -9,7 +10,7 @@ class FooterBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+      padding: const EdgeInsets.only(bottom: 50,left: 16),
       child: Row(
 
         children: [
@@ -18,12 +19,12 @@ class FooterBanner extends StatelessWidget {
             children:  [
               Row(
                 children: [
-                  Text('sendAnything'.tr, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  Text('sendAnything'.tr, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
                   SizedBox(width: 40,),
-                  Image.asset('assets/images/truck.png',)
+                  Image.asset(AppAssets.truck,)
                 ],
               ),
-              Text( 'anywhere'.tr, style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Color(0xFFFF9800))),
+              Text( 'anywhere'.tr, style: TextStyle(fontSize: 45, fontWeight: FontWeight.bold, color: Color(0xFFFF9800))),
             ],
           ),
 

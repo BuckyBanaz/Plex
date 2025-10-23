@@ -38,7 +38,7 @@ class ChooseAccountScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textColor,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -76,7 +76,7 @@ class ChooseAccountScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textColor,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -157,12 +157,13 @@ class ChooseAccountScreen extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         height: 55,
         decoration: BoxDecoration(
-          color: AppColors.textPrimary,
-          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          border: Border.all(),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

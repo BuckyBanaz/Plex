@@ -76,14 +76,14 @@ class _Header extends StatelessWidget {
             style: GoogleFonts.tajawal(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: AppColors.textColor,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'registration_subtitle'.tr,
             style: Get.textTheme.bodyLarge!.copyWith(
-              color: AppColors.textPrimary.withOpacity(0.8),
+              color: AppColors.textColor.withOpacity(0.8),
             ),
           ),
         ],
@@ -123,7 +123,7 @@ class _ProgressIndicator extends StatelessWidget {
           Text(
             '${progressPercentage}%',
             style: Get.textTheme.bodyMedium!.copyWith(
-              color: AppColors.textPrimary,
+              color: AppColors.textColor,
             ),
           ),
           const SizedBox(width: 16),
@@ -133,7 +133,7 @@ class _ProgressIndicator extends StatelessWidget {
               'total': '$totalSteps',
             }),
             style: Get.textTheme.bodyMedium!.copyWith(
-              color: AppColors.textPrimary,
+              color: AppColors.textColor,
             ),
           ),
         ],
@@ -158,7 +158,7 @@ class FormWidgets {
         Text(
           '* ${label}',
           style: Get.textTheme.bodyMedium!.copyWith(
-            color: AppColors.textPrimary.withOpacity(0.8),
+            color: AppColors.textColor.withOpacity(0.8),
             fontSize: 14,
           ),
         ),
@@ -195,7 +195,7 @@ class FormWidgets {
         Text(
           '* ${label}',
           style: Get.textTheme.bodyMedium!.copyWith(
-            color: AppColors.textPrimary.withOpacity(0.8),
+            color: AppColors.textColor.withOpacity(0.8),
             fontSize: 14,
           ),
         ),
@@ -269,13 +269,13 @@ class FormWidgets {
             Text(
               buttonText.tr,
               style: Get.textTheme.titleMedium!.copyWith(
-                color: AppColors.textPrimary,
+                color: AppColors.textColor,
               ),
             ),
             const SizedBox(width: 8),
             Icon(
               Icons.arrow_forward,
-              color: AppColors.textPrimary,
+              color: AppColors.textColor,
               textDirection: Get.locale?.languageCode == 'ar'
                   ? TextDirection.rtl
                   : TextDirection.ltr,
@@ -303,7 +303,7 @@ class FormWidgets {
           child: Text(
             titleKey.tr,
             style: Get.textTheme.titleLarge!.copyWith(
-              color: AppColors.textPrimary,
+              color: AppColors.textColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -313,7 +313,7 @@ class FormWidgets {
           child: Text(
             subtitleKey.tr,
             style: Get.textTheme.bodyMedium!.copyWith(
-              color: AppColors.textPrimary.withOpacity(0.8),
+              color: AppColors.textColor.withOpacity(0.8),
             ),
           ),
         ),

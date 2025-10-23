@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import '../../../models/common/device_info.dart';
 import '../../../models/corporate_register_model.dart';
 import '../../../models/user_models.dart';
+import '../../translations/locale_controller.dart';
 import '../service/api/api_import.dart';
 import '../service/app/app_service_imports.dart';
 

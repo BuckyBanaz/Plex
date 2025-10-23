@@ -9,13 +9,20 @@ class AuthApi {
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
+    required int langKey,
   }) async {
+
     final response = await dio.post(
       '$basePath${ApiEndpoint.login}',
       data: {
         'email': email,
         'password': password},
+      options: Options(
+        headers: {
+          'lang_id': langKey,},
+      ),
     );
+
     // fast return
     return (response.data is Map<String, dynamic>)
         ? Map<String, dynamic>.from(response.data)
@@ -25,30 +32,40 @@ class AuthApi {
   Future<Map<String, dynamic>> register({
     required String name,
     required String email,
-    // required String phone,
+    required String phone,
     required String password,
     required String deviceId,
+    required String otpType , // default to email
+    required int langKey,
   }) async {
     try {
       final response = await dio.post(
         '$basePath${ApiEndpoint.individualSignup}',
+        options: Options(
+          headers: {'lang_id': langKey},
+        ),
         data: {
           'name': name,
           'email': email,
+          'mobile': phone,
           'password': password,
           'deviceId': deviceId,
+          'otpType': otpType,
         },
       );
+
       return (response.data is Map<String, dynamic>)
           ? Map<String, dynamic>.from(response.data)
           : {'message': response.data?.toString()};
     } on DioError catch (dioError) {
       final serverData = dioError.response?.data;
-      if (serverData is Map && serverData.containsKey('error'))
+      if (serverData is Map && serverData.containsKey('error')) {
         throw Exception(serverData['error']);
+      }
       throw Exception(dioError.message);
     }
   }
+
 
   Future<Response> registerDriver({
     required String name,
@@ -56,9 +73,13 @@ class AuthApi {
     required String phone,
     required String password,
     required String deviceId,
+    required int langKey,
   }) {
     return dio.post(
       '$basePath${ApiEndpoint.driverSignup}',
+      options: Options(
+        headers: {'lang_id': langKey},
+      ),
       data: {
         "name": name,
         "email": email,
@@ -91,11 +112,29 @@ class AuthApi {
   Future<Response> verifyOtp({
     required String keyType,
     required String keyValue,
+    required String apiKey,
     required String otp,
+    required int langKey,
   }) {
     return dio.post(
       '$basePath${ApiEndpoint.verifyOtp}',
+      options: Options(
+        headers: {
+          'api_key':apiKey,
+          'lang_id': langKey,},
+      ),
       data: {'keyType': keyType, 'keyValue': keyValue, 'otp': otp},
     );
+  }
+
+
+  Future<Response> refreshToken(String currentToken) {
+    final options = Options(
+      headers: {
+        'token': currentToken,
+        // don't include Authorization if the server expects 'token' header only
+      },
+    );
+    return dio.post('$basePath${ApiEndpoint.refreshToken}', options: options);
   }
 }

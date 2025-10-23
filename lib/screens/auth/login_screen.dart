@@ -39,7 +39,7 @@ class LoginScreen extends StatelessWidget {
                   "welcome_title".tr, // PLEX مرحباً بك في
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.textColor,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -71,7 +71,7 @@ class LoginScreen extends StatelessWidget {
                         Text(
                           "login_title".tr, // مرحباً بعودتك
                           style: TextStyle(
-                            color: AppColors.textPrimary,
+                            color: AppColors.textColor,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),

@@ -25,7 +25,9 @@ class AppColors {
   );
 
   static const Color secondary = Color(0xFF1E2A47); // Dark navy bg
-  static const Color textPrimary = Colors.white;
+  static const Color textColor = Colors.white;
+  static const Color textGrey = Color(0XFF77869E);
+  static const Color textPrimary = Colors.black;
   static const Color textSecondary = Color(0xFFB0BEC5); // greyish
   static const Color cardBg = Color(0xFF24314F); // login card bg
   static const Color cardColor = Color(0xFFFDF1DE); // login card bg

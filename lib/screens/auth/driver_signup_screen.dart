@@ -37,7 +37,7 @@ class DriverSignupScreen extends StatelessWidget {
                   "welcome_title".tr, // مرحباً بك في PLEX
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.textColor,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -69,7 +69,7 @@ class DriverSignupScreen extends StatelessWidget {
                         Text(
                           "driver_signup_title".tr,
                           style: TextStyle(
-                            color: AppColors.textPrimary,
+                            color: AppColors.textColor,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),

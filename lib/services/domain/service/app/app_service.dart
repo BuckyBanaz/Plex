@@ -11,11 +11,14 @@ class AppService extends GetxService {
     await Future.wait([
      Get.putAsync(() => DatabaseService().init()),
       Get.putAsync(() => DeviceInfoService().init()),
+
     ]);
 
     await Get.putAsync(() => ApiService().init());
 
-
+    await Future.wait([
+      Get.putAsync(() => GeolocationService().init())
+    ]);
      await initializeApiServices(Get.find<ApiService>());
      await initializeRepositories();
 

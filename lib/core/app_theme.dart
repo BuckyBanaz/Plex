@@ -18,7 +18,7 @@ class AppTheme {
     // Font selection
     final baseTextTheme = isArabic
         ? GoogleFonts.tajawalTextTheme()
-        : GoogleFonts.poppinsTextTheme();
+        : GoogleFonts.interTextTheme();
 
     final textTheme = baseTextTheme.apply(
       bodyColor: AppColors.textPrimary,
@@ -48,7 +48,7 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.light,
       primaryColor: AppColors.primary,
-      scaffoldBackgroundColor: AppColors.secondary,
+      scaffoldBackgroundColor: Colors.white,
       textTheme: textTheme,
       primaryTextTheme: textTheme,
 

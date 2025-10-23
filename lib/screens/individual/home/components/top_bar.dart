@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 
-import '../../../constant/app_colors.dart';
+import '../../../../constant/app_colors.dart';
+
 
 class TopBar extends StatelessWidget {
   const TopBar({super.key});
@@ -22,7 +23,7 @@ class TopBar extends StatelessWidget {
               children: const [
                 Text(
                   'Pick Up From',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                 ),
                 SizedBox(height: 2),
                 Text(

@@ -37,7 +37,7 @@ class SignupScreen extends StatelessWidget {
                   "welcome_title".tr, // مرحباً بك في PLEX
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: AppColors.textPrimary,
+                    color: AppColors.textColor,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
@@ -69,7 +69,7 @@ class SignupScreen extends StatelessWidget {
                         Text(
                           "signup_title".tr,
                           style: TextStyle(
-                            color: AppColors.textPrimary,
+                            color: AppColors.textColor,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -114,19 +114,9 @@ class SignupScreen extends StatelessWidget {
                           controller: c.phoneController,
                           label: 'phone_label'.tr,
                           hint: '512345678',
-
-                          // validator: (value) {
-                          //   if (value == null || value.isEmpty) {
-                          //     return 'Required field'.tr;
-                          //   }
-                          //   // Regex: + aur 1-3 digit country code phir 6-12 digit phone number
-                          //   final pattern = r'^\+\d{1,3}\d{6,12}$';
-                          //   final regExp = RegExp(pattern);
-                          //   if (!regExp.hasMatch(value)) {
-                          //     return 'Enter a valid phone number with country code'.tr;
-                          //   }
-                          //   return null;
-                          // },
+                          onCountryChanged: (code, iso) {
+                            c.countryCode = code; // save country code to controller
+                          },
                         ),
 
                         SizedBox(height: 16),
