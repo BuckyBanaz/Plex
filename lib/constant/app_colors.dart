@@ -28,7 +28,16 @@ class AppColors {
   static const Color textColor = Colors.white;
   static const Color textGrey = Color(0XFF77869E);
   static const Color textPrimary = Colors.black;
-  static const Color textSecondary = Color(0xFFB0BEC5); // greyish
-  static const Color cardBg = Color(0xFF24314F); // login card bg
-  static const Color cardColor = Color(0xFFFDF1DE); // login card bg
+  static const Color textSecondary = Color(0xFFB0BEC5);
+  static const Color cardBg = Color(0xFF24314F);
+  static const Color cardColor = Color(0xFFF7F7F7);
+  static const Color driverCard = Color(0xFFFEF3E0);
+  static const Color driverCardBorderColor = Color(0xFFCCCCCC);
+
+
+  static const Color lightGreyButton = Color(0xFFBDBDBD);
+  static const Color darkOrangeIcon = Color(0xFFF39C12);
+  static const Color greenPaid = Color(0xFF2ECC71);
+  static const Color redUnpaid = Color(0xFFE74C3C);
+
 }

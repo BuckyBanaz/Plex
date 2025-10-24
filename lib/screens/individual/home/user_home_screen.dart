@@ -1,27 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import 'package:iconly/iconly.dart';
-import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/routes/appRoutes.dart';
-import 'package:plex_user/screens/widgets/search_field.dart';
 
 import '../../../constant/app_assets.dart';
-import 'components/featured_banner.dart';
+
 import 'components/footer_banner.dart';
 import 'components/delivery_option_card.dart';
-import 'components/home_card.dart';
 import 'components/menu_list.dart';
 import 'components/top_bar.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class UserHomeScreen extends StatefulWidget {
+  const UserHomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<UserHomeScreen> createState() => _UserHomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _UserHomeScreenState extends State<UserHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

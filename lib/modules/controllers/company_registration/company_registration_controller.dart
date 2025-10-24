@@ -113,7 +113,7 @@ class CompanyRegistrationController extends GetxController {
         currentKey = formKeyStep1;
     }
 
-    final valid = currentKey?.currentState?.validate() ?? true;
+    final valid = currentKey.currentState?.validate() ?? true;
     // Note: here we assume if currentState is null treat as valid (prevents crash).
     if (valid) {
       if (currentPage.value < totalSteps) {

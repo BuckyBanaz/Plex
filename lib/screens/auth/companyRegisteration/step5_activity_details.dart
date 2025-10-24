@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../modules/contollers/company_registration/company_registration_controller.dart';
+import '../../../modules/controllers/company_registration/company_registration_controller.dart';
 
 import '../../../../constant/app_colors.dart';
 import 'company_registration_view.dart';
@@ -112,7 +112,7 @@ class Step5ActivityDetails extends StatelessWidget {
           child: Text(
             titleKey.tr,
             style: Get.textTheme.titleLarge!.copyWith(
-                color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+                color: AppColors.textColor, fontWeight: FontWeight.bold),
           ),
         ),
         Align(
@@ -120,7 +120,7 @@ class Step5ActivityDetails extends StatelessWidget {
           child: Text(
             subtitleKey.tr,
             style: Get.textTheme.bodyMedium!
-                .copyWith(color: AppColors.textPrimary.withOpacity(0.8)),
+                .copyWith(color: AppColors.textColor.withOpacity(0.8)),
           ),
         ),
         const SizedBox(height: 24),
@@ -145,7 +145,7 @@ class Step5ActivityDetails extends StatelessWidget {
         Text(
           '* ${label}',
           style: Get.textTheme.bodyMedium!.copyWith(
-            color: AppColors.textPrimary.withOpacity(0.8),
+            color: AppColors.textColor.withOpacity(0.8),
             fontSize: 14,
           ),
         ),
@@ -193,7 +193,7 @@ class Step5ActivityDetails extends StatelessWidget {
           Text(
             'review_data_title'.tr, // New translation key
             style: Get.textTheme.titleMedium!.copyWith(
-              color: AppColors.textPrimary,
+              color: AppColors.textColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -221,7 +221,7 @@ class Step5ActivityDetails extends StatelessWidget {
           Text(
             value,
             style: Get.textTheme.bodyMedium!
-                .copyWith(color: AppColors.textPrimary),
+                .copyWith(color: AppColors.textColor),
           ),
         ],
       ),

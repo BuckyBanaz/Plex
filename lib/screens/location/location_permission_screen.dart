@@ -4,10 +4,9 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import '../../modules/contollers/location/location_permission_controller.dart';
+import '../../modules/controllers/location/location_permission_controller.dart';
 import '../../routes/appRoutes.dart';
 import '../../routes/navigator_service.dart';
-import '../../services/domain/service/app/app_service_imports.dart';
 
 class LocationPermissionScreen extends StatefulWidget {
   const LocationPermissionScreen({super.key});
@@ -67,12 +66,12 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                     child: _isLoading
                         ? CircularProgressIndicator(color: Colors.white)
                         : const Text(
-                      'Allow Permission',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                            'Allow Permission',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                   const SizedBox(height: 12),
 
@@ -103,7 +102,7 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
     PermissionStatus status = await Permission.location.request();
 
     if (status.isGranted) {
-      NavigatorService.pushNamed(AppRoutes.home);
+      NavigatorService.pushNamed(AppRoutes.userHome);
     } else if (status.isDenied) {
       Get.snackbar(
         "Error",

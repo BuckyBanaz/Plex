@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:plex_user/modules/contollers/auth/auth_controller.dart';
+import 'package:plex_user/modules/controllers/auth/auth_controller.dart';
 
 import 'package:plex_user/routes/appRoutes.dart';
 import '../../common/validators/validators.dart';

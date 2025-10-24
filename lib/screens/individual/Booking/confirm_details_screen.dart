@@ -3,17 +3,18 @@ import 'package:flutter_svg/flutter_svg.dart'; // Vehicle icon ke liye
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import '../../../modules/contollers/booking/booking_controller.dart';
+import 'package:plex_user/screens/widgets/custom_button.dart';
+import '../../../constant/app_assets.dart';
+import '../../../modules/controllers/booking/booking_controller.dart';
+import 'components/fare_row_item.dart';
+
 
 class ConfirmDetailsScreen extends StatelessWidget {
   const ConfirmDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    final BookingController controller = Get.put(
-      BookingController(),
-    );
+   final controller =  Get.put(BookingController());
 
     return Scaffold(
       appBar: AppBar(
@@ -25,31 +26,39 @@ class ConfirmDetailsScreen extends StatelessWidget {
           "Confirm Details",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        elevation: 1,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
-        children: [
-          _buildLocationSection(controller),
-          const SizedBox(height: 24),
-          _buildInfoSection(controller),
-          const SizedBox(height: 24),
-          _buildDiscountSection(controller),
-          const SizedBox(height: 24),
-          _buildFareDetailsSection(controller),
+        children: const [
+
+          LocationSection(),
+          SizedBox(height: 24),
+          InfoSection(),
+          SizedBox(height: 24),
+          DiscountSection(),
+          SizedBox(height: 24),
+          FareDetailsSection(),
         ],
       ),
-      bottomNavigationBar: _buildOrderNowButton(controller),
+      bottomNavigationBar: CustomButton(onTap: controller.orderNow,label: "Order Now",),
     );
   }
+}
 
-  Widget _buildLocationSection(BookingController controller) {
 
-    String vehicleIconAsset = 'assets/icons/bike.svg';
+/// Section 1: Location Details Card
+class LocationSection extends StatelessWidget {
+  const LocationSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final BookingController controller = Get.find<BookingController>();
+
+    String vehicleIconAsset = AppAssets.bike;
     if (controller.selectedVehicleIndex.value == 1) {
-      vehicleIconAsset = 'assets/icons/car.svg';
+      vehicleIconAsset = AppAssets.car;
     } else if (controller.selectedVehicleIndex.value == 2) {
-      vehicleIconAsset = 'assets/icons/van.svg';
+      vehicleIconAsset = AppAssets.van;
     }
 
     return Container(
@@ -69,37 +78,36 @@ class ConfirmDetailsScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Column(
             children: [
               const SizedBox(height: 4),
-              const Icon(Icons.gps_fixed, color: Colors.orange, size: 12),
+              Icon(Icons.gps_fixed, color: AppColors.primary, size: 12),
               SizedBox(height: 2),
               Icon(
                 Icons.fiber_manual_record,
-                color: Colors.orange[200],
+                color: AppColors.primarySwatch.shade200,
                 size: 4,
               ),
               SizedBox(height: 2),
               Icon(
                 Icons.fiber_manual_record,
-                color: Colors.orange[200],
+                color: AppColors.primarySwatch.shade200,
                 size: 4,
               ),
               SizedBox(height: 2),
               Icon(
                 Icons.fiber_manual_record,
-                color: Colors.orange[200],
+                color:AppColors.primarySwatch.shade200,
                 size: 4,
               ),
               SizedBox(height: 2),
               Icon(
                 Icons.fiber_manual_record,
-                color: Colors.orange[200],
+                color: AppColors.primarySwatch.shade200,
                 size: 4,
               ),
               SizedBox(height: 2),
-              const Icon(Icons.circle_outlined, color: Colors.orange, size: 12),
+              const Icon(Icons.circle_outlined, color: AppColors.primary, size: 12),
             ],
           ),
           const SizedBox(width: 12),
@@ -116,18 +124,29 @@ class ConfirmDetailsScreen extends StatelessWidget {
                       style: TextStyle(color: AppColors.textGrey, fontSize: 16),
                     ),
                     // Vehicle Icon
-                    SvgPicture.asset(
-                      vehicleIconAsset,
-                      height: 24,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.black,
-                        BlendMode.srcIn,
+                    Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color:AppColors.cardColor,
+                        borderRadius: BorderRadius.circular(8),
+
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          vehicleIconAsset,
+                          height: 24,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.black,
+                            BlendMode.srcIn,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
                 Text(
-                   controller.pAddressController.text,
+                  controller.pAddressController.text,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -139,8 +158,7 @@ class ConfirmDetailsScreen extends StatelessWidget {
                   style: TextStyle(color: AppColors.textGrey, fontSize: 16),
                 ),
                 Text(
-                  // "21b, Karimu Kotun Street, Victoria Island",
-                   controller.daddressController.text,
+                  controller.daddressController.text,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -153,36 +171,53 @@ class ConfirmDetailsScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildInfoSection(BookingController controller) {
+
+class InfoSection extends StatelessWidget {
+  const InfoSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final BookingController controller = Get.find<BookingController>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildInfoColumn(
+            InfoColumnItem(
               "Collect time",
               controller.selectedTime.value == 0
                   ? "Immediate"
                   : "Scheduled", // Example
             ),
-            _buildInfoColumn(
+            InfoColumnItem(
               "Weight",
               "${controller.weight.value} ${controller.selectedWeightUnit.value}",
             ),
           ],
         ),
         const SizedBox(height: 16),
-        _buildInfoColumn(
+        InfoColumnItem(
           "Contact number",
           controller.dmobileController.text,
         ),
       ],
     );
   }
+}
 
-  Widget _buildInfoColumn(String title, String subtitle) {
+/// Reusable helper widget for the Info Section
+class InfoColumnItem extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const InfoColumnItem(this.title, this.subtitle, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -193,13 +228,22 @@ class ConfirmDetailsScreen extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600,color: Colors.black),
+          style: const TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black),
         ),
       ],
     );
   }
+}
 
-  Widget _buildDiscountSection(BookingController controller) {
+/// Section 3: Discount Offers
+class DiscountSection extends StatelessWidget {
+  const DiscountSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final BookingController controller = Get.find<BookingController>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -208,84 +252,90 @@ class ConfirmDetailsScreen extends StatelessWidget {
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-
         Obx(
-          () => controller.isCouponApplied.value
+              () => controller.isCouponApplied.value
               ? Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 12.0,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3A3A5C), // Dark blue
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Text("🎉", style: TextStyle(fontSize: 18)),
-                          const SizedBox(width: 8),
-                          Text(
-                            "You applied 20 with ${controller.appliedCouponCode.value}",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.cardBg, // Dark blue
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Text("🎉", style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 8),
+                    Text(
+                      "You applied 20 with ${controller.appliedCouponCode.value}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
                       ),
-                      GestureDetector(
-                        onTap: controller.removeCoupon,
-                        child: const Text(
-                          "Remove",
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : Center(
-                  child: Text(
-                    "No coupon applied.",
-                    style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: controller.removeCoupon,
+                  child: const Text(
+                    "Remove",
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
+              ],
+            ),
+          )
+              : const Center(
+            child: Text(
+              "No coupon applied.",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildFareDetailsSection(BookingController controller) {
+/// Section 4: Fare Details
+class FareDetailsSection extends StatelessWidget {
+  const FareDetailsSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final BookingController controller = Get.find<BookingController>();
+
     return Column(
       children: [
-        const Divider(height: 20),
-        _buildFareRow(
+        FareRowItem(
           "Trip fare",
           "₹${controller.tripFare.value.toStringAsFixed(2)}",
           isBold: true,
         ),
         const SizedBox(height: 12),
         Obx(
-          () => _buildFareRow(
+              () => FareRowItem(
             "Coupon Discount",
             "-₹${controller.isCouponApplied.value ? controller.couponDiscount.value.toStringAsFixed(2) : '0.00'}",
             isBold: true,
           ),
         ),
         const SizedBox(height: 12),
-        _buildFareRow(
+        FareRowItem(
           "GST Charges (included in fare)",
           "₹${controller.gstCharges.value.toStringAsFixed(2)}",
           isBold: true,
         ),
         const Divider(height: 24),
         Obx(
-          () => _buildFareRow(
+              () => FareRowItem(
             "Total fare",
             "₹${controller.totalFare.toStringAsFixed(2)}",
             isBold: true,
@@ -293,7 +343,7 @@ class ConfirmDetailsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Obx(
-          () => _buildFareRow(
+              () => FareRowItem(
             "Amount payable",
             "₹${controller.amountPayable.toStringAsFixed(2)}",
             isBold: true,
@@ -302,56 +352,7 @@ class ConfirmDetailsScreen extends StatelessWidget {
       ],
     );
   }
-
-  Widget _buildFareRow(String title, String amount, {bool isBold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 15,
-            color: isBold ? Colors.black : Colors.grey[700],
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-        Text(
-          amount,
-          style: TextStyle(
-            fontSize: 15,
-            color: Colors.black,
-            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildOrderNowButton(BookingController controller) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 24.0),
-      color: Colors.white,
-      child: GestureDetector(
-        onTap: controller.orderNow,
-        child: Container(
-          height: 55.0,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.orange, // Orange color
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: const Center(
-            child: Text(
-              "Order Now",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
+
+
+

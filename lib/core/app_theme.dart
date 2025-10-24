@@ -73,7 +73,7 @@ class AppTheme {
 
       // AppBar
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
         titleTextStyle: (isArabic

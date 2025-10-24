@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../constant/app_colors.dart';
-import '../../../../modules/contollers/booking/booking_controller.dart';
+import '../../../../modules/controllers/booking/booking_controller.dart';
 
 class CollectTimeSelector extends StatelessWidget {
   const CollectTimeSelector({super.key});

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import 'package:plex_user/screens/individual/home/home_screen.dart';
+import 'package:plex_user/screens/individual/home/user_home_screen.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../notification/user_notification_screen.dart';
@@ -18,12 +18,11 @@ class UserMainScreenController extends GetxController {
   }
 }
 
-
 class UserMainNavController extends GetxController {
   final currentIndex = 0.obs;
 
   final List<Widget> tabs = [
-    const HomeScreen(),
+    const UserHomeScreen(),
     UserOrderScreen(),
     UserNotification(),
     const Center(child: Text("Profile Screen")),
@@ -31,18 +30,20 @@ class UserMainNavController extends GetxController {
 
   final List<IconData> icons = const [
     IconlyLight.home,
- Icons.inventory_2_outlined,
+    Icons.inventory_2_outlined,
     IconlyLight.notification,
     IconlyLight.profile,
   ];
 
   final List<String> labels = const [
-    "Home", "Orders", "Notification", "Profile"
+    "Home",
+    "Orders",
+    "Notification",
+    "Profile",
   ];
 
   void setIndex(int i) => currentIndex.value = i;
 }
-
 
 class UserMainScreen extends StatelessWidget {
   const UserMainScreen({super.key});
@@ -50,8 +51,6 @@ class UserMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(UserMainNavController(), permanent: true);
-
-    final scheme = Theme.of(context).colorScheme;
 
     return Obx(() {
       final idx = c.currentIndex.value;
@@ -63,7 +62,9 @@ class UserMainScreen extends StatelessWidget {
         bottomNavigationBar: AnimatedBottomNavigationBar.builder(
           itemCount: c.icons.length,
           tabBuilder: (index, isActive) {
-            final color = isActive ? Colors.white: Colors.white.withOpacity(0.5);
+            final color = isActive
+                ? Colors.white
+                : Colors.white.withOpacity(0.5);
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,

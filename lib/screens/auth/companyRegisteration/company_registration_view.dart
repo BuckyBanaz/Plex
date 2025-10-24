@@ -7,7 +7,7 @@ import 'package:plex_user/screens/auth/companyRegisteration/step3_address.dart';
 import 'package:plex_user/screens/auth/companyRegisteration/step4_authorized_person.dart';
 import 'package:plex_user/screens/auth/companyRegisteration/step5_activity_details.dart';
 import '../../../constant/app_colors.dart';
-import '../../../modules/contollers/company_registration/company_registration_controller.dart';
+import '../../../modules/controllers/company_registration/company_registration_controller.dart';
 
 class CompanyRegistrationScreen extends StatelessWidget {
   const CompanyRegistrationScreen({Key? key}) : super(key: key);

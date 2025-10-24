@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_assets.dart';
 import 'package:plex_user/constant/app_colors.dart';
 

@@ -94,15 +94,15 @@ class AuthController extends GetxController {
       showToast(message: "Login successful");
       clearControllers();
 
-      // Defensive: userType could be null or different casing
-      final userType = (user.userType ?? '').toLowerCase();
+
+      final userType = (user.userType ).toLowerCase();
 
       if (userType == 'individual') {
         Get.offAllNamed(AppRoutes.userDashBoard);
       } else if (userType == 'driver') {
-        Get.offAllNamed(AppRoutes.partnerHome);
+        Get.offAllNamed(AppRoutes.driverHome);
       } else {
-        // fallback route: handle unknown user types
+
         Get.offAllNamed(AppRoutes.userDashBoard);
       }
 

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
-import 'package:plex_user/routes/appRoutes.dart';
 import 'package:plex_user/screens/individual/Booking/components/delivery_card.dart';
 import 'package:plex_user/screens/individual/Booking/components/collect_time_selector.dart';
+import 'package:plex_user/screens/widgets/custom_button.dart';
+import 'package:plex_user/screens/widgets/custom_text_field.dart';
 
-import '../../../modules/contollers/booking/booking_controller.dart';
-import 'components/description_input.dart';
+import '../../../modules/controllers/booking/booking_controller.dart';
 import 'components/photo_upload_section.dart';
 import 'components/vehicle_type_selector.dart';
-import 'components/weight_input.dart';
 
 class BookingScreen extends StatefulWidget {
   const BookingScreen({super.key});
@@ -88,21 +87,13 @@ class _BookingScreenState extends State<BookingScreen> {
           const PhotoUploadSection(),
 
           const SizedBox(height: 24.0),
-          ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: ()=>controller.next() ,
 
-
-              child: Text("Next")),
+          // CustomButton(onTap: ()=>controller.next(), label: "Next"),
 
           const SizedBox(height: 24.0),
         ],
       ),
+      bottomNavigationBar:  CustomButton(onTap: ()=>controller.next(), label: "Next") ,
     );
   }
 }

@@ -20,8 +20,6 @@ class _SearchAndFilterComponentState extends State<SearchAndFilterComponent> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
 

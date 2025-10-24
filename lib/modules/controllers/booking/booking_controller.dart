@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
-import '../../../routes/appRoutes.dart'; // Naya import
+import '../../../routes/appRoutes.dart';
 
 class BookingController extends GetxController {
   // Booking
@@ -248,7 +248,7 @@ class BookingController extends GetxController {
           TextButton(
             onPressed: () {
               Get.back();
-              // Get.offAll(() => HomeScreen()); // User ko Home screen par bhej dein
+              Get.toNamed(AppRoutes.payment);
             },
             child: const Text("OK"),
           ),

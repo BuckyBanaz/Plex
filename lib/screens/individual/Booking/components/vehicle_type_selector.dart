@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:plex_user/constant/app_assets.dart';
 import '../../../../constant/app_colors.dart';
-import '../../../../modules/contollers/booking/booking_controller.dart';
+import '../../../../modules/controllers/booking/booking_controller.dart';
 
 import 'package:get/get.dart';
 
@@ -19,19 +20,19 @@ class VehicleTypeSelector extends StatelessWidget {
         children: [
           _buildVehicleOption(
             controller: controller,
-            svgAsset: 'assets/icons/bike.svg',
+            svgAsset: AppAssets.bike,
             index: 0,
             isSelected: controller.selectedVehicleIndex.value == 0,
           ),
           _buildVehicleOption(
             controller: controller,
-            svgAsset: 'assets/icons/car.svg',
+            svgAsset: AppAssets.car,
             index: 1,
             isSelected: controller.selectedVehicleIndex.value == 1,
           ),
           _buildVehicleOption(
             controller: controller,
-            svgAsset: 'assets/icons/van.svg',
+            svgAsset: AppAssets.van,
             index: 2,
             isSelected: controller.selectedVehicleIndex.value == 2,
           ),

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../constant/app_colors.dart';
-import '../../../modules/contollers/company_registration/company_registration_controller.dart';
+import '../../../modules/controllers/company_registration/company_registration_controller.dart';
 
 import '../../widgets/custom_text_field.dart';
-import 'company_registration_view.dart'; // Import FormWidgets
+import 'company_registration_view.dart';
 
 class Step1CompanyInfo extends StatelessWidget {
   final CompanyRegistrationController controller;

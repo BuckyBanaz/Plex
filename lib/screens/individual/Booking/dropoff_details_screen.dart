@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart'; // Aapke pichle code se import
 import 'package:plex_user/constant/app_colors.dart';
-import 'package:plex_user/modules/contollers/booking/booking_controller.dart';
-import 'package:plex_user/screens/individual/Booking/components/simple_text_field.dart';
+import 'package:plex_user/modules/controllers/booking/booking_controller.dart';
+import 'package:plex_user/screens/widgets/custom_button.dart';
+import 'package:plex_user/screens/widgets/custom_text_field.dart';
 import 'components/address_chip.dart';
-import 'components/confirm_button.dart';
 import 'components/location_card.dart';
 class DropOffDetailsScreen extends StatelessWidget {
   const DropOffDetailsScreen({super.key});

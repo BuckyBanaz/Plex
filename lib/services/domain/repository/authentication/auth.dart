@@ -1,6 +1,5 @@
 part of 'package:plex_user/services/domain/repository/repository_imports.dart';
 
-
 class AuthRepository {
   final AuthApi authApi = Get.find<AuthApi>();
   final DatabaseService databaseService = Get.find<DatabaseService>();
@@ -24,18 +23,18 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-      final data = await authApi.login(email: email, password: password,langKey: langKey);
+      final data = await authApi.login(
+        email: email,
+        password: password,
+        langKey: langKey,
+      );
 
-      if (data == null || data['user'] == null) {
-        throw Exception("Invalid response from server");
-      }
 
       // store token only if present
       final token = data['token'] as String?;
       if (token != null && token.isNotEmpty) {
         await databaseService.putAccessToken(token);
       } else {
-
         print("Auth token not present in login response");
       }
 
@@ -70,12 +69,12 @@ class AuthRepository {
         password: password,
         deviceId: deviceInfo.deviceId,
         phone: phone,
-          langKey:langKey ,
-          otpType : 'email'
+        langKey: langKey,
+        otpType: 'email',
       );
 
-
-      final statusCode = response['statusCode'] ?? 200; // fallback 200 if not provided
+      final statusCode =
+          response['statusCode'] ?? 200; // fallback 200 if not provided
       if (statusCode != 200 && statusCode != 201) {
         final error = response['error'] ?? 'Registration failed';
         throw Exception(error.toString());
@@ -89,12 +88,13 @@ class AuthRepository {
       // return success message
       return response['message']?.toString() ?? 'Registered successfully';
     } catch (e) {
-      final msg = e is Exception ? e.toString().replaceFirst('Exception: ', '') : 'Registration failed';
+      final msg = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : 'Registration failed';
       debugPrint('register() failed: $msg');
       throw Exception(msg);
     }
   }
-
 
   Future<Map<String, dynamic>> registerDriver({
     required String name,
@@ -120,7 +120,9 @@ class AuthRepository {
       final status = response.statusCode ?? 0;
       if (status != 200 && status != 201) {
         final serverMsg = (response.data is Map)
-            ? (response.data['error'] ?? response.data['message'] ?? 'Unknown error')
+            ? (response.data['error'] ??
+                  response.data['message'] ??
+                  'Unknown error')
             : 'Registration failed: $status';
         throw Exception(serverMsg);
       }
@@ -149,10 +151,6 @@ class AuthRepository {
     try {
       final data = await authApi.registerCorporate(body: model.toJson());
 
-      if (data == null) {
-        throw Exception('No response from server');
-      }
-
       if (data.containsKey('error')) {
         throw Exception(data['error'].toString());
       }
@@ -176,8 +174,8 @@ class AuthRepository {
     required String otp,
   }) async {
     try {
-    final apiKey = databaseService.apiKey.toString();
-    final response = await authApi.verifyOtp(
+      final apiKey = databaseService.apiKey.toString();
+      final response = await authApi.verifyOtp(
         keyType: keyType,
         keyValue: keyValue,
         otp: otp,
@@ -186,7 +184,8 @@ class AuthRepository {
       );
 
       if (response.statusCode == 200) return true;
-      if (response.statusCode == 400 || response.statusCode == 401) return false;
+      if (response.statusCode == 400 || response.statusCode == 401)
+        return false;
 
       final msg = (response.data is Map)
           ? (response.data['message'] ?? response.data['error'])
@@ -243,7 +242,9 @@ class AuthRepository {
         // refresh attempt invalid -> return false (caller will handle logout)
         return false;
       } else {
-        debugPrint('Unexpected status code while refreshing token: ${response.statusCode}');
+        debugPrint(
+          'Unexpected status code while refreshing token: ${response.statusCode}',
+        );
         return false;
       }
     } catch (e, st) {
@@ -252,6 +253,4 @@ class AuthRepository {
       return false;
     }
   }
-
-
 }

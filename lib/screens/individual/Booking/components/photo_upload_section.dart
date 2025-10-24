@@ -1,13 +1,11 @@
 import 'dart:io';
-import 'dart:ui' as BorderType;
 
 import 'package:flutter/material.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../constant/app_colors.dart';
-import '../../../../modules/contollers/booking/booking_controller.dart';
+import '../../../../modules/controllers/booking/booking_controller.dart';
 
 class PhotoUploadSection extends StatelessWidget {
   const PhotoUploadSection({super.key});

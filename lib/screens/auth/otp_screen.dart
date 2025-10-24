@@ -1,9 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import '../../constant/app_colors.dart';
-import '../../modules/contollers/auth/otp_controller.dart';
+import '../../modules/controllers/auth/otp_controller.dart';
 
 class OtpScreen extends StatelessWidget {
   const OtpScreen({super.key});
