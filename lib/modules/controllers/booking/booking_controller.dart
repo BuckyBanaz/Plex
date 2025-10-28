@@ -3,16 +3,19 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:plex_user/services/domain/repository/repository_imports.dart';
 
 import '../../../routes/appRoutes.dart';
 
 class BookingController extends GetxController {
+  final ShipmentRepository repo = ShipmentRepository();
   // Booking
   var selectedTime = 0.obs;
   var selectedVehicleIndex = 0.obs;
   var weight = 0.0.obs;
   var selectedWeightUnit = 'Kg'.obs;
   var description = ''.obs;
+  var isLoading = false.obs;
   var selectedImages = <XFile>[].obs;
   void selectTime(int index) => selectedTime.value = index;
   void selectVehicle(int index) => selectedVehicleIndex.value = index;
@@ -91,18 +94,17 @@ class BookingController extends GetxController {
     }
   }
 
-  void next(){
+  Future<void> next() async {
     if (dnameController.text.isEmpty ||
         dmobileController.text.isEmpty ||
-        daddressController.text.isEmpty ||
-        dpincodeController.text.isEmpty||pNameController.text.isEmpty ||
+        dlankmarkController.text.isEmpty ||
+        dpincodeController.text.isEmpty ||
+        pNameController.text.isEmpty ||
         pMobileController.text.isEmpty ||
-        pAddressController.text.isEmpty ||
-        pPincodeController.text.isEmpty || weight.value == 0 ||description.value == '') {
-
-
-
-
+        pLandMarkController.text.isEmpty ||
+        pPincodeController.text.isEmpty ||
+        weight.value == 0 ||
+        description.value == '') {
       Get.snackbar(
         "Error",
         "Please fill all required fields.",
@@ -111,10 +113,74 @@ class BookingController extends GetxController {
         colorText: Colors.white,
       );
 
-
       return;
+    } else {
+      try {
+        isLoading.value = true;
+        await fetchShipmentEstimate(
+          originLat: pLat.value.toDouble(),
+          originLng: pLng.value.toDouble(),
+          destinationLat: dLat.value.toDouble(),
+          destinationLng: dLng.value.toDouble(),
+          weight: weight.value,
+        );
+        Get.toNamed(AppRoutes.confirm);
+
+        isLoading.value = false;
+      } catch (e) {}
     }
-    Get.toNamed(AppRoutes.confirm);
+  }
+  Future<void> fetchShipmentEstimate({
+    required double originLat,
+    required double originLng,
+    required double destinationLat,
+    required double destinationLng,
+    required double weight,
+  }) async {
+    try {
+      final res = await repo.estimateShipment(
+        originLat: originLat,
+        originLng: originLng,
+        destinationLat: destinationLat,
+        destinationLng: destinationLng,
+        weight: weight,
+      );
+
+      // check success
+      if (res['success'] == true && res['data'] != null) {
+        final data = res['data'] as Map<String, dynamic>;
+
+        // parse and update controller observables safely
+        distance.value = (data['distanceKm'] is num)
+            ? (data['distanceKm'] as num).toDouble()
+            : distance.value;
+        durationText.value = (data['durationText'] ?? '').toString();
+        estimatedCostINR.value = (data['estimatedCostINR'] is num)
+            ? (data['estimatedCostINR'] as num).toDouble()
+            : estimatedCostINR.value;
+        estimatedCostUSD.value = (data['estimatedCostUSD'] is num)
+            ? (data['estimatedCostUSD'] as num).toDouble()
+            : estimatedCostUSD.value;
+        currency.value = (data['currency'] ?? '').toString();
+
+        // Use estimatedCostINR to show tripFare (optional)
+        if (estimatedCostINR.value > 0) {
+          tripFare.value = estimatedCostINR.value;
+        }
+
+        debugPrint('Shipment estimate updated in controller: $data');
+      } else {
+        debugPrint('Shipment create returned error or unexpected format: $res');
+        // optionally show message
+        Get.snackbar(
+          'Estimate Failed',
+          res['message']?.toString() ?? 'Unable to get estimate',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error fetching shipment estimate: $e');
+      Get.snackbar('Error', 'Failed to fetch estimate');
+    }
   }
   void removeImage(int index) {
     if (index >= 0 && index < selectedImages.length) {
@@ -125,10 +191,22 @@ class BookingController extends GetxController {
   //  Pickup
   final pNameController = TextEditingController();
   final pMobileController = TextEditingController();
-  final pAddressController = TextEditingController();
+  final pLandMarkController = TextEditingController();
   final pPincodeController = TextEditingController();
+  var pLocality = ''.obs;
+  var pAddress = ''.obs;
   var pselectedAddressType = 'Home'.obs;
   var isPickUpFormValid = false.obs;
+  var pLat = 0.0.obs;
+  var pLng = 0.0.obs;
+
+  void updatePickUpReactive() {
+    // Combine address + landmark + pincode for display
+    pAddress.value =
+        "${pLocality},${dlankmarkController.text}, ${dpincodeController.text}";
+
+    validatePickupForm();
+  }
 
   void pselectAddressType(String type) {
     pselectedAddressType.value = type;
@@ -138,16 +216,15 @@ class BookingController extends GetxController {
     final bool allFieldsFilled =
         pNameController.text.isNotEmpty &&
         pMobileController.text.isNotEmpty &&
-        pAddressController.text.isNotEmpty &&
+        pLandMarkController.text.isNotEmpty &&
         pPincodeController.text.isNotEmpty;
     isPickUpFormValid.value = allFieldsFilled;
   }
 
   void confirmPickupDetails() {
-
     if (pNameController.text.isEmpty ||
         pMobileController.text.isEmpty ||
-        pAddressController.text.isEmpty ||
+        pLandMarkController.text.isEmpty ||
         pPincodeController.text.isEmpty) {
       Get.snackbar(
         "Error",
@@ -158,30 +235,48 @@ class BookingController extends GetxController {
       );
       return;
     }
-
-     print("Name: ${pNameController.text}");
+    updatePickUpReactive();
+    print("Name: ${pNameController.text}");
     print("Mobile: ${pMobileController.text}");
+    print("Lat: ${pLat}");
+    print("Lang: ${pLng}");
     print("Address Type: ${pselectedAddressType.value}");
-
 
     Get.back();
   }
 
-  // Drop off
+  // Drop-off controllers
   final dnameController = TextEditingController();
   final dmobileController = TextEditingController();
-  final daddressController = TextEditingController();
+  final dlankmarkController = TextEditingController(); // landmark / house no
   final dpincodeController = TextEditingController();
+
+  var dName = ''.obs;
+  var dPhone = ''.obs;
+  var dLocality = ''.obs;
+  var dAddress = ''.obs;
   var dselectedAddressType = 'Home'.obs;
   var isDropOffFormValid = false.obs;
+  var dLat = 0.0.obs;
+  var dLng = 0.0.obs;
+
+  // Update reactive fields whenever controllers change
+  void updateDropOffReactive() {
+    dName.value = dnameController.text;
+    dPhone.value = dmobileController.text;
+    // Combine address + landmark + pincode for display
+    dAddress.value =
+        "${dLocality},${dlankmarkController.text}, ${dpincodeController.text}";
+
+    validateDropOffForm();
+  }
 
   void validateDropOffForm() {
-    final bool allFieldsFilled =
+    isDropOffFormValid.value =
         dnameController.text.isNotEmpty &&
         dmobileController.text.isNotEmpty &&
-        daddressController.text.isNotEmpty &&
+        dlankmarkController.text.isNotEmpty &&
         dpincodeController.text.isNotEmpty;
-    isDropOffFormValid.value = allFieldsFilled;
   }
 
   void dselectAddressType(String type) {
@@ -189,10 +284,7 @@ class BookingController extends GetxController {
   }
 
   void confirmDropOffDetails() {
-    if (dnameController.text.isEmpty ||
-        dmobileController.text.isEmpty ||
-        daddressController.text.isEmpty ||
-        dpincodeController.text.isEmpty) {
+    if (!isDropOffFormValid.value) {
       Get.snackbar(
         "Error",
         "Please fill all required fields.",
@@ -203,11 +295,15 @@ class BookingController extends GetxController {
       return;
     }
 
-    print("Name: ${dnameController.text}");
-    print("Mobile: ${dmobileController.text}");
+    // Update reactive values before going back
+    updateDropOffReactive();
+
+    print("Name: ${dName.value}");
+    print("Mobile: ${dPhone.value}");
+    print("Address: ${dAddress.value}");
+    print("Lat: ${dLat}");
+    print("Lang: ${dLng}");
     print("Address Type: ${dselectedAddressType.value}");
-
-
 
     Get.back();
   }
@@ -219,7 +315,14 @@ class BookingController extends GetxController {
   var tripFare = 1500.0.obs;
   var couponDiscount = 100.0.obs;
   var gstCharges = 200.0.obs;
+  var distance = 0.0.obs;
 
+  var durationText = ''.obs;
+  var estimatedCostINR = 0.0.obs;
+  var estimatedCostUSD = 0.0.obs;
+  var currency = ''.obs;
+  var paypalApproveLink = ''.obs;
+  var paypalOrderId = ''.obs;
   double get totalFare =>
       tripFare.value -
       (isCouponApplied.value ? couponDiscount.value : 0) +
@@ -236,41 +339,93 @@ class BookingController extends GetxController {
     );
   }
 
-  void orderNow() {
 
+
+  // void orderNow() {
+  //   Get.dialog(
+  //     AlertDialog(
+  //       title: const Text("Order Placed!"),
+  //       content: Text(
+  //         "Placing your order for ₹${amountPayable.toStringAsFixed(2)}...",
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () async {
+  //             try {
+  //               isLoading.value = true;
+  //               final res = await repo.createShipment(
+  //                 originLat: pLat.value.toDouble(),
+  //                 originLng: pLng.value.toDouble(),
+  //                 destinationLat: dLat.value.toDouble(),
+  //                 destinationLng: dLng.value.toDouble(),
+  //                 weight: weight.value,
+  //               );
+  //
+  //               isLoading.value = false;
+  //
+  //               if (res['success'] == true) {
+  //                 // some APIs return approveLink under different keys — adapt if needed
+  //                 final approveLink = res['approveLink'] ?? res['data']?['approveLink'] ?? res['shipment']?['approveLink'] ?? res['approve_link'] ?? res['approveUrl'];
+  //                 final orderId = res['orderId'] ?? res['shipment']?['paypalOrderId'] ?? res['order_id'];
+  //
+  //                 paypalApproveLink.value = approveLink?.toString() ?? '';
+  //                 paypalOrderId.value = orderId?.toString() ?? '';
+  //
+  //                 debugPrint('Approve link: ${paypalApproveLink.value}');
+  //
+  //                 Get.back(); // close dialog
+  //                 // Navigate to payment screen — pass nothing, controller holds link
+  //                 Get.toNamed(AppRoutes.payment);
+  //               } else {
+  //                 Get.back();
+  //                 Get.snackbar('Failed', res['message']?.toString() ?? 'Unable to create shipment');
+  //               }
+  //             } catch (e) {
+  //               Get.back();
+  //               isLoading.value = false;
+  //               Get.snackbar('Error', 'Something went wrong');
+  //             }
+  //           },
+  //           child: const Text("OK"),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+  void orderNow() {
     Get.dialog(
       AlertDialog(
         title: const Text("Order Placed!"),
         content: Text(
-          "Your order for ₹${amountPayable.toStringAsFixed(2)} has been confirmed.",
+          "Placing your order for ₹${amountPayable.toStringAsFixed(2)}...",
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              Get.toNamed(AppRoutes.payment);
-            },
-            child: const Text("OK"),
-          ),
-        ],
       ),
     );
+
+    // Delay 2 seconds before moving to payment screen
+    Future.delayed(const Duration(seconds: 2), () {
+      // Assuming approveLink and orderId are already set somewhere
+      paypalApproveLink.value = "your_approve_link_here"; // replace if dynamic
+      paypalOrderId.value = "your_order_id_here";         // replace if dynamic
+
+      Get.back(); // close dialog
+      Get.toNamed(AppRoutes.payment);
+    });
   }
 
   @override
   void onInit() {
     super.onInit();
-
     dnameController.addListener(validateDropOffForm);
     dmobileController.addListener(validateDropOffForm);
-    daddressController.addListener(validateDropOffForm);
+    dlankmarkController.addListener(validateDropOffForm);
     dpincodeController.addListener(validateDropOffForm);
 
     ever(dselectedAddressType, (_) => validateDropOffForm());
 
     pNameController.addListener(validatePickupForm);
     pMobileController.addListener(validatePickupForm);
-    pAddressController.addListener(validatePickupForm);
+    pLandMarkController.addListener(validatePickupForm);
     pPincodeController.addListener(validatePickupForm);
 
     ever(pselectedAddressType, (_) => validatePickupForm());
@@ -280,11 +435,11 @@ class BookingController extends GetxController {
   void onClose() {
     pNameController.dispose();
     pMobileController.dispose();
-    pAddressController.dispose();
+    pLandMarkController.dispose();
     pPincodeController.dispose();
     dnameController.dispose();
     dmobileController.dispose();
-    daddressController.dispose();
+    dlankmarkController.dispose();
     dpincodeController.dispose();
     super.onClose();
   }

@@ -55,6 +55,7 @@ class OtpScreen extends StatelessWidget {
                 controller: c.otpController,
                 keyboardType: TextInputType.number,
                 autoFocus: true,
+                textStyle: TextStyle(color: AppColors.textColor),
                 animationType: AnimationType.fade,
                 backgroundColor: Colors.transparent,
                 pinTheme: PinTheme(

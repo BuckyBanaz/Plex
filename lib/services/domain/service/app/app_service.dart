@@ -11,6 +11,7 @@ class AppService extends GetxService {
     await Future.wait([
      Get.putAsync(() => DatabaseService().init()),
       Get.putAsync(() => DeviceInfoService().init()),
+      Get.putAsync(() => LocaleController().init()),
 
     ]);
 
@@ -31,6 +32,15 @@ class AppService extends GetxService {
 
     /// Initialize and put the AuthApi
     Get.put( AuthApi(apiService.dio));
+
+    /// Initialize and put the UserApi
+    Get.put( UserApi(apiService.dio));
+
+    /// Initialize and put the MapApi
+    Get.put( MapApi());
+
+    /// Initialize and put the ShipmentApi
+    Get.put( ShipmentApi(apiService.dio));
 //
 //    /// Initialize and put the SearchApi
 //    Get.put( SearchApi(apiService.dio));

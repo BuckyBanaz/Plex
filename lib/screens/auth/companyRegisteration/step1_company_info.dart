@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../modules/controllers/company_registration/company_registration_controller.dart';
 
 import '../../widgets/custom_text_field.dart';
+import '../compnents/selector_field.dart';
 import 'company_registration_view.dart';
 
 class Step1CompanyInfo extends StatelessWidget {
@@ -51,36 +52,38 @@ class Step1CompanyInfo extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Business type
-        FormWidgets.buildDropdown(
+        SelectorField(
           label: 'business_type_label'.tr,
           hint: 'select_business_type'.tr,
           value: controller.selectedBusinessType,
-          items: businessTypes
-              .map((type) => DropdownMenuItem(
-            value: type,
-            child: Text(type.tr,
-                style: const TextStyle(color: Colors.black)),
-          ))
-              .toList(),
-          validator: (val) =>
-          controller.selectedBusinessType.value == null ? 'Required field'.tr : null,
+          options: businessTypes,
+          // items: businessTypes
+          //     .map((type) => DropdownMenuItem(
+          //   value: type,
+          //   child: Text(type.tr,
+          //       style: const TextStyle(color: Colors.black)),
+          // ))
+          //     .toList(),
+          // validator: (val) =>
+          // controller.selectedBusinessType.value == null ? 'Required field'.tr : null,
         ),
         const SizedBox(height: 16),
 
         // Business sector
-        FormWidgets.buildDropdown(
+        SelectorField(
           label: 'business_sector_label'.tr,
           hint: 'select_sector'.tr,
           value: controller.selectedBusinessSector,
-          items: businessSectors
-              .map((sector) => DropdownMenuItem(
-            value: sector,
-            child: Text(sector.tr,
-                style: const TextStyle(color: Colors.black)),
-          ))
-              .toList(),
-          validator: (val) =>
-          controller.selectedBusinessSector.value == null ? 'Required field'.tr : null,
+          options: businessSectors,
+          // items: businessSectors
+          //     .map((sector) => DropdownMenuItem(
+          //   value: sector,
+          //   child: Text(sector.tr,
+          //       style: const TextStyle(color: Colors.black)),
+          // ))
+          //     .toList(),
+          // validator: (val) =>
+          // controller.selectedBusinessSector.value == null ? 'Required field'.tr : null,
         ),
         const SizedBox(height: 16),
 

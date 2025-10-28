@@ -18,8 +18,8 @@ Future<void> main() async {
   );
   await Get.putAsync(() => AppService().init());
   await TranslationService.init();
-  final localeCtrl = Get.put(LocaleController());
-  await localeCtrl.init();
+  // final localeCtrl = Get.put(LocaleController());
+  // await localeCtrl.init();
 
 
 
@@ -32,7 +32,7 @@ Future<void> main() async {
       .then((_) {
     runApp(Phoenix(child: Sizer(
       builder: (context, orientation, deviceType) {
-        return const Plex();
+        return  Plex();
       },
     )));
   });
@@ -41,6 +41,3 @@ Future<void> main() async {
 
 
 
-class TempContext {
-  static late BuildContext context;
-}

@@ -4,8 +4,8 @@ import 'package:plex_user/constant/app_colors.dart';
 
 class CustomButton extends StatelessWidget {
   final VoidCallback onTap;
-  final String label;
-  const CustomButton({super.key, required this.onTap, required this.label});
+  final Widget widget;
+  const CustomButton({super.key, required this.onTap, required this.widget});
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +22,7 @@ class CustomButton extends StatelessWidget {
             color: AppColors.primary, // Orange color
             borderRadius: BorderRadius.circular(12.0),
           ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          child: widget,
         ),
       ),
     );

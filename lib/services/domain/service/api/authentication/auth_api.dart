@@ -1,5 +1,13 @@
 part of 'package:plex_user/services/domain/service/api/api_import.dart';
 
+
+
+enum RefreshStatus {
+  success,
+  failedInvalidToken,
+  failedOther,
+}
+
 class AuthApi {
   final Dio dio;
   AuthApi(this.dio);
@@ -72,6 +80,8 @@ class AuthApi {
     required String email,
     required String phone,
     required String password,
+    required String vehicleType,
+    required String licenseNo,
     required String deviceId,
     required int langKey,
   }) {
@@ -86,8 +96,8 @@ class AuthApi {
         "password": password,
         'deviceId': deviceId,
         "mobile": phone,
-        "vehicleType": "car",
-        "licenseNo": "DL12345",
+        "vehicleType": vehicleType,
+        "licenseNo": licenseNo,
       },
     );
   }
@@ -132,9 +142,14 @@ class AuthApi {
     final options = Options(
       headers: {
         'token': currentToken,
-        // don't include Authorization if the server expects 'token' header only
+      },
+
+      extra: {
+        'skipToken': true,
+        'isRefreshCall': true,
       },
     );
+
     return dio.post('$basePath${ApiEndpoint.refreshToken}', options: options);
   }
 }

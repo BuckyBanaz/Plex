@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/screens/auth/compnents/selector_field.dart';
 import '../../common/validators/validators.dart';
 import '../../constant/app_colors.dart';
 import '../../modules/controllers/auth/auth_controller.dart';
 import '../widgets/custom_text_field.dart';
-
 
 class DriverSignupScreen extends StatelessWidget {
   const DriverSignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     final c = Get.put(AuthController());
 
     return Scaffold(
@@ -27,10 +26,7 @@ class DriverSignupScreen extends StatelessWidget {
                 Align(
                   alignment: AlignmentGeometry.topLeft,
 
-                  child: Image.asset(
-                    "assets/images/logo.png",
-                    width: 120,
-                  ),
+                  child: Image.asset("assets/images/logo.png", width: 120),
                 ),
 
                 Text(
@@ -93,9 +89,33 @@ class DriverSignupScreen extends StatelessWidget {
                           hint: "name_hint".tr,
                           textInputAction: TextInputAction.next,
                           focusNode: c.nameFocus,
-                          nextFocusNode: c.emailFocus,
+                          nextFocusNode: c.licenseFocus,
 
                           // validator: emailValidator,
+                        ),
+                        SizedBox(height: 16),
+                        //licenseNo
+                        CustomTextField(
+                          controller: c.licenseNoController,
+                          label: "License No.".tr,
+                          hint: "Enter Your License No.".tr,
+                          textInputAction: TextInputAction.next,
+                          focusNode: c.licenseFocus,
+                          nextFocusNode: c.vehicleFocus,
+
+                          // validator: emailValidator,
+                        ),
+
+                        SizedBox(height: 16),
+                        // vehicleType
+                        SelectorField(
+                          label: "VehicleType",
+                          hint: "Selected vehicleType",
+                          value: c.selectedVehicle,
+                          isDropdown: true,
+                          options: c.vehicles,
+                          focusNode: c.vehicleFocus,
+                          nextFocusNode: c.emailFocus,
                         ),
 
                         // Email
@@ -107,7 +127,7 @@ class DriverSignupScreen extends StatelessWidget {
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           focusNode: c.emailFocus,
-                          nextFocusNode: c.passwordFocus,
+                          nextFocusNode: c.phoneFocus,
                           validator: emailValidator,
                         ),
                         SizedBox(height: 16),
@@ -115,7 +135,9 @@ class DriverSignupScreen extends StatelessWidget {
                           controller: c.phoneController,
                           label: 'phone_label'.tr,
                           hint: '512345678',
-                          // keyboardType: TextInputType.phone,
+                          focusNode:c.phoneFocus ,
+                          nextFocusNode: c.passwordFocus,
+                         
                           // validator: (value) {
                           //   if (value == null || value.isEmpty) {
                           //     return 'Required field'.tr;
@@ -149,7 +171,8 @@ class DriverSignupScreen extends StatelessWidget {
                         // Confirm Password
                         CustomTextField(
                           controller: c.conPasswordController,
-                          label: 'confirm_password_label'.tr, // New translation key
+                          label: 'confirm_password_label'
+                              .tr, // New translation key
                           hint: 're_enter_password'.tr, // New translation key
                           isPassword: true,
                           validator: (value) {
@@ -164,9 +187,18 @@ class DriverSignupScreen extends StatelessWidget {
 
                         Obx(() {
                           return ElevatedButton(
-                            onPressed: c.isDriverLoading.value ? null : () => c.registerDriver(),
+                            onPressed: c.isDriverLoading.value
+                                ? null
+                                : () => c.registerDriver(),
                             child: c.isDriverLoading.value
-                                ?  SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2,color: AppColors.primary,))
+                                ? SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
                                 : Text("signup_btn".tr),
                           );
                         }),

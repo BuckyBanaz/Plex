@@ -5,87 +5,94 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 
 class DeliveryCard extends StatelessWidget {
-  const DeliveryCard({super.key});
+  final String collectLabel;
+  final String collectAddress;
+  final VoidCallback? onEditCollect;
+
+  final String deliveryLabel;
+  final String deliveryName;
+  final String deliveryPhone;
+  final String deliveryAddress;
+  final VoidCallback? onEditDelivery;
+
+  final String durationText;
+  final VoidCallback? onMapViewTap;
+
+  const DeliveryCard({
+    super.key,
+    required this.collectLabel,
+    required this.collectAddress,
+    this.onEditCollect,
+    required this.deliveryLabel,
+    required this.deliveryName,
+    required this.deliveryPhone,
+    required this.deliveryAddress,
+    this.onEditDelivery,
+    required this.durationText,
+    this.onMapViewTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.cardBg, // Dark background
+        color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Left side icons + dashed line
+          // Left icons + dashed line
           Column(
             children: [
-              // Top icon (Collect)
               Container(
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
                 padding: const EdgeInsets.all(6),
-                child: const Icon(
-                  Icons.my_location,
-                  color: Colors.white,
-                  size: 18,
-                ),
+                child: const Icon(Icons.my_location, color: Colors.white, size: 18),
               ),
-
-              // Dashed line
               SizedBox(
-                height: 40, // distance between icons
-                child: CustomPaint(
-                  painter: DashedLinePainter(),
-                ),
+                height: 40,
+                child: CustomPaint(painter: DashedLinePainter()),
               ),
-
-              // Bottom icon (Delivery)
               Container(
                 decoration: const BoxDecoration(
                   color: AppColors.primary,
                   shape: BoxShape.circle,
                 ),
                 padding: const EdgeInsets.all(6),
-                child: const Icon(
-                  Icons.location_on,
-                  color: Colors.white,
-                  size: 18,
-                ),
+                child: const Icon(Icons.location_on, color: Colors.white, size: 18),
               ),
             ],
           ),
-
           const SizedBox(width: 16),
-
-          // Right side text details
+          // Right text section
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Collect from section
+                // Collect from
                 Row(
-
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Collect from",
-                            style: TextStyle(
+                          Text(
+                            collectLabel,
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            "Kilometer 6, 278H, Street 201R, Kroalkor Village, Unnamed Road, Jaipur (Raj.)",
-                            style: TextStyle(
+                          Text(
+                            collectAddress,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               height: 1.4,
@@ -94,23 +101,24 @@ class DeliveryCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    IconButton(onPressed: (){
-                      Get.toNamed(AppRoutes.pickup);
-                    }, icon: Icon(IconlyLight.edit,color: AppColors.primary,))
+                    if (onEditCollect != null)
+                      IconButton(
+                        onPressed: onEditCollect,
+                        icon: Icon(IconlyLight.edit, color: AppColors.primary),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // Delivery to section
+                // Delivery to
                 Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            "Delivery to",
-                            style: TextStyle(
+                          Text(
+                            deliveryLabel,
+                            style: const TextStyle(
                               color: AppColors.textSecondary,
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
@@ -119,11 +127,11 @@ class DeliveryCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(IconlyLight.user,color: AppColors.textColor,size: 16,),
-                               SizedBox(width: 2,),
-                               Text(
-                                "Delivery to",
-                                style: TextStyle(
+                              Icon(IconlyLight.user, color: AppColors.textColor, size: 16),
+                              const SizedBox(width: 2),
+                              Text(
+                                deliveryName,
+                                style: const TextStyle(
                                   color: AppColors.textColor,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
@@ -134,11 +142,11 @@ class DeliveryCard extends StatelessWidget {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(IconlyLight.call,color: AppColors.textColor,size: 16,),
-                              SizedBox(width: 2,),
+                              Icon(IconlyLight.call, color: AppColors.textColor, size: 16),
+                              const SizedBox(width: 2),
                               Text(
-                                "+91 XXXXXXXX",
-                                style: TextStyle(
+                                deliveryPhone,
+                                style: const TextStyle(
                                   color: AppColors.textColor,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w500,
@@ -147,9 +155,9 @@ class DeliveryCard extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          const Text(
-                            "2nd Floor 01, 25 Mao Tse Toung Blvd (245), Phnom Penh 12302, Jaipur (Raj.)",
-                            style: TextStyle(
+                          Text(
+                            deliveryAddress,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               height: 1.4,
@@ -158,15 +166,15 @@ class DeliveryCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    IconButton(onPressed: (){
-                      Get.toNamed(AppRoutes.dropOff);
-                    }, icon: Icon(IconlyLight.edit,color: AppColors.primary,))
-
+                    if (onEditDelivery != null)
+                      IconButton(
+                        onPressed: onEditDelivery,
+                        icon: Icon(IconlyLight.edit, color: AppColors.primary),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 20),
-
-                // Bottom row (time + map)
+                // Bottom row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -177,22 +185,18 @@ class DeliveryCard extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       child: Row(
-                        children:  [
-                          Icon(Icons.access_time, color: AppColors.textColor, size: 16),
-                          SizedBox(width: 6),
+                        children: [
+                          const Icon(Icons.access_time, color: AppColors.textColor, size: 16),
+                          const SizedBox(width: 6),
                           Text(
-                            "Take around 20 min",
-                            style: TextStyle(color: AppColors.textColor, fontSize: 12),
+                            durationText,
+                            style: const TextStyle(color: AppColors.textColor, fontSize: 12),
                           ),
                         ],
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Opening Map View...')),
-                        );
-                      },
+                      onTap: onMapViewTap,
                       child: const Text(
                         "Map View",
                         style: TextStyle(
@@ -213,7 +217,7 @@ class DeliveryCard extends StatelessWidget {
   }
 }
 
-// Custom Painter for dashed vertical line
+// Custom Painter for dashed line
 class DashedLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

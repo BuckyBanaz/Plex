@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../modules/controllers/company_registration/company_registration_controller.dart';
 
 import '../../widgets/custom_text_field.dart';
+import '../compnents/selector_field.dart';
 import 'company_registration_view.dart';
 
 class Step3Address extends StatelessWidget {
@@ -27,19 +28,21 @@ class Step3Address extends StatelessWidget {
       icon: Icons.location_on_outlined, // Icon from image_7e110c.png
       fields: [
         // Country
-        FormWidgets.buildDropdown(
+        SelectorField(
           label: 'country_label'.tr, // New translation key
           hint: 'select_country'.tr, // New translation key
           value: controller.selectedCountry,
-          items: countries
-              .map((country) => DropdownMenuItem(
-            value: country,
-            child: Text(country.tr,
-                style: const TextStyle(color: Colors.black)),
-          ))
-              .toList(),
-          validator: (val) =>
-          controller.selectedCountry.value == null ? 'Required field'.tr : null,
+          isDropdown: true,
+        options:countries,
+          // items: countries
+          //     .map((country) => DropdownMenuItem(
+          //   value: country,
+          //   child: Text(country.tr,
+          //       style: const TextStyle(color: Colors.black)),
+          // ))
+          //     .toList(),
+          // validator: (val) =>
+          // controller.selectedCountry.value == null ? 'Required field'.tr : null,
         ),
         const SizedBox(height: 16),
 
@@ -90,7 +93,11 @@ class Step3Address extends StatelessWidget {
           ],
         ),
       ],
-      onNextPressed: controller.nextStep,
+      onNextPressed: () {
+
+        controller.nextStep();
+        print(controller.selectedCountry);
+      },
       buttonTextKey: 'next',
     );
   }

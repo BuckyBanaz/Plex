@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:iconly/iconly.dart';
 import '../../../../constant/app_colors.dart';
+import '../../../../modules/controllers/location/location_permission_controller.dart';
 
 class TopBar extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
@@ -20,6 +23,7 @@ class TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final LocationController locationController = Get.put(LocationController());
     return Padding(
       padding:
           padding ?? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
@@ -45,16 +49,14 @@ class TopBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  '4372 Laal Khothi, Jaipur(Raj), 01730',
+                Obx(() => Text(
+                  locationController.currentAddress.value, // Controller se value lein
                   style: TextStyle(
-                    fontSize: 14,
-                    color:
-                        subtitleColor ??
-                        Colors.grey.shade700,
+                    fontSize: 12,
+                    color: subtitleColor ?? Colors.grey.shade700,
                   ),
                   overflow: TextOverflow.ellipsis,
-                ),
+                )),
               ],
             ),
           ),

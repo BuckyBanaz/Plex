@@ -6,7 +6,9 @@ import 'package:plex_user/screens/individual/Booking/components/collect_time_sel
 import 'package:plex_user/screens/widgets/custom_button.dart';
 import 'package:plex_user/screens/widgets/custom_text_field.dart';
 
+import '../../../constant/app_colors.dart';
 import '../../../modules/controllers/booking/booking_controller.dart';
+import '../../../routes/appRoutes.dart';
 import 'components/photo_upload_section.dart';
 import 'components/vehicle_type_selector.dart';
 
@@ -23,77 +25,118 @@ class _BookingScreenState extends State<BookingScreen> {
     final BookingController controller = Get.put(
       BookingController(),
     );
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        titleSpacing: 0,
-        title: const Text(
-          "Booking Screen",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        leading: IconButton(
-          onPressed: () {
-            Get.back();
-          },
-          icon: Icon(IconlyLight.arrow_left_2),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: [
-          const Text(
-            "Select Location",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8.0),
-          const DeliveryCard(),
-          const SizedBox(height: 16.0),
-          const Text(
-            "Collect time",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8.0),
-          const CollectTimeSelector(),
-          const SizedBox(height: 16.0),
-          const Text(
-            "Vehicle Type",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8.0),
-          const VehicleTypeSelector(),
-          const SizedBox(height: 16.0),
-          const Text(
-            "Weight",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8.0),
-          const WeightInput(),
-          const SizedBox(height: 16.0),
-          const Text(
-            "Description",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8.0),
-          const DescriptionInput(),
-          const SizedBox(height: 16.0),
-          const Text(
-            "Optional photo upload",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8.0),
-          const PhotoUploadSection(),
+    return Obx(
 
-          const SizedBox(height: 24.0),
+      () {
 
-          // CustomButton(onTap: ()=>controller.next(), label: "Next"),
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            titleSpacing: 0,
+            title: const Text(
+              "Booking Screen",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            leading: IconButton(
+              onPressed: () {
+                Get.back();
+              },
+              icon: Icon(IconlyLight.arrow_left_2),
+            ),
+          ),
+          body: ListView(
+            padding: const EdgeInsets.all(16.0),
+            children: [
+              const Text(
+                "Select Location",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              DeliveryCard(
+                collectLabel: "Collect from",
+                collectAddress: controller.pAddress.value.isEmpty
+                    ? "Tap to select location"
+                    : controller.pAddress.value,
+                onEditCollect: () {
+                  Get.toNamed(AppRoutes.pickup);
+                },
+                deliveryLabel: "Delivery to",
+                deliveryName: controller.dnameController.text.isEmpty
+                    ? "Recipient name"
+                    : controller.dnameController.text,
+                deliveryPhone: controller.dmobileController.text.isEmpty
+                    ? "+91 XXXXXXXXXX"
+                    : controller.dmobileController.text,
+                deliveryAddress: controller.dAddress.value.isEmpty
+                    ? "Tap to select location"
+                    : controller.dAddress.value,
+                onEditDelivery: () {
+                  Get.toNamed(AppRoutes.dropOff);
+                },
+                durationText: "Take around 20 min",
+                onMapViewTap: () {
+                  print("Map opened");
+                },
+              ),
 
-          const SizedBox(height: 24.0),
-        ],
-      ),
-      bottomNavigationBar:  CustomButton(onTap: ()=>controller.next(), label: "Next") ,
+              const SizedBox(height: 16.0),
+              const Text(
+                "Collect time",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              const CollectTimeSelector(),
+              const SizedBox(height: 16.0),
+              const Text(
+                "Vehicle Type",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              const VehicleTypeSelector(),
+              const SizedBox(height: 16.0),
+              const Text(
+                "Weight",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              const WeightInput(),
+              const SizedBox(height: 16.0),
+              const Text(
+                "Description",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              const DescriptionInput(),
+              const SizedBox(height: 16.0),
+              const Text(
+                "Optional photo upload",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),
+              const PhotoUploadSection(),
+
+              const SizedBox(height: 24.0),
+
+              // CustomButton(onTap: ()=>controller.next(), label: "Next"),
+
+              const SizedBox(height: 24.0),
+            ],
+          ),
+          bottomNavigationBar:  CustomButton(onTap: ()=> controller.isLoading.value ?  null : controller.next(), widget: Center(
+            child: controller.isLoading.value ? CircularProgressIndicator(strokeWidth: 3,color: AppColors.textColor,) :Text(
+              "Next",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          )) ,
+        );
+      },
     );
   }
 }

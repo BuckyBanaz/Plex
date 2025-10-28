@@ -8,5 +8,12 @@ class ApiEndpoint {
   static const verifyOtp = "/verify-otp";
   static const resendOtp = "/sms/send-otp";
   static const resendSms = "/verify-otp";
-  static const refreshToken = "/refresh-token'";
+  static const refreshToken = "/refresh-token";
+  static const location = "/location";
+
+
+
+  static const shipment = "/shipments";
+  static const estimateShipment = "$shipment/estimate";
+  static const createShipment = "$shipment/create";
 }

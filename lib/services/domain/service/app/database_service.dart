@@ -10,7 +10,7 @@ class DatabaseService {
   late final SharedPreferences prefs ;
 
   Future<DatabaseService> init() async {
-    prefs =  await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();
     debugPrint('Database service is initialized');
     return this;
   }
@@ -74,6 +74,11 @@ class DatabaseService {
   Future<void> putUser(UserModel value) async => await putStringPref(_preferenceKeys.user, value.toRawJson());
   UserModel? get user => getStringPref(_preferenceKeys.user) == null ? null : UserModel.fromRawJson(getStringPref(_preferenceKeys.user)!);
 
+
+  Future<void> putDriver(DriverUserModel value) async => await putStringPref(_preferenceKeys.driver, value.toRawJson());
+  DriverUserModel? get driver => getStringPref(_preferenceKeys.driver) == null ? null : DriverUserModel.fromRawJson(getStringPref(_preferenceKeys.driver)!);
+  Future<void> putUserType(String? value) async => await putStringPref(_preferenceKeys.userType, value);
+  String? get userType => getStringPref(_preferenceKeys.userType);
   Future<void> putIsLocationScreenShown(bool value) async => await putBoolPref(_preferenceKeys.isLocationScreenShown, value);
   bool? get isLocationScreenShown => getBoolPref(_preferenceKeys.isLocationScreenShown) ;
 

@@ -58,6 +58,7 @@ class DriverMainScreen extends StatelessWidget {
           child: c.tabs[idx],
         ),
         bottomNavigationBar: AnimatedBottomNavigationBar.builder(
+
           itemCount: c.icons.length,
           tabBuilder: (index, isActive) {
             final color = isActive ? Colors.white: Colors.white.withOpacity(0.5);

@@ -254,7 +254,35 @@ class GeolocationService {
       await sendLocationWithApi();
     }
   }
+  Future<String> getAddressFromPosition(Position position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        // Aap address format ko apne hisaab se change kar sakte hain
+        String street = place.street ?? '';
+        String locality = place.locality ?? '';
+        String subLocality = place.subLocality ?? '';
+        String postalCode = place.postalCode ?? '';
+
+        // Saaf address string banayein
+        String address = [street, subLocality, locality, postalCode]
+            .where((s) => s.isNotEmpty) // Khali strings ko hatayein
+            .join(', '); // Comma se join karein
+
+        return address.isEmpty ? 'Unnamed Location' : address;
+      } else {
+        return 'Address not found';
+      }
+    } catch (e) {
+      debugPrint('Error getting address: $e');
+      return 'Could not get address';
+    }
+  }
   /// Sends location and calls API when position changes
   Future<void> sendLocationWithApi() async {
     try {

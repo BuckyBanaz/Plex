@@ -40,7 +40,16 @@ class ConfirmDetailsScreen extends StatelessWidget {
           FareDetailsSection(),
         ],
       ),
-      bottomNavigationBar: CustomButton(onTap: controller.orderNow,label: "Order Now",),
+      bottomNavigationBar: Obx(() => CustomButton(onTap: controller.orderNow,widget: Center(
+        child: controller.isLoading.value ? CircularProgressIndicator(color: AppColors.textColor,strokeWidth: 3,) : Text(
+          "Order Now",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),),)
     );
   }
 }
@@ -146,7 +155,7 @@ class LocationSection extends StatelessWidget {
                   ],
                 ),
                 Text(
-                  controller.pAddressController.text,
+                  controller.pAddress.value,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -158,7 +167,7 @@ class LocationSection extends StatelessWidget {
                   style: TextStyle(color: AppColors.textGrey, fontSize: 16),
                 ),
                 Text(
-                  controller.daddressController.text,
+                  controller.dAddress.value,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -172,6 +181,52 @@ class LocationSection extends StatelessWidget {
     );
   }
 }
+
+
+// class InfoSection extends StatelessWidget {
+//   const InfoSection({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final BookingController controller = Get.find<BookingController>();
+//
+//     return Column(
+//       crossAxisAlignment: CrossAxisAlignment.start,
+//       children: [
+//         Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: [
+//             InfoColumnItem(
+//               "Collect time",
+//               controller.selectedTime.value == 0
+//                   ? "Immediate"
+//                   : "Scheduled", // Example
+//             ),
+//             InfoColumnItem(
+//               "Weight",
+//               "${controller.weight.value} ${controller.selectedWeightUnit.value}",
+//             ),
+//           ],
+//         ),
+//         const SizedBox(height: 16),
+//         Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: [
+//             InfoColumnItem(
+//               "Contact number",
+//               controller.dmobileController.text,
+//             ),
+//             InfoColumnItem(
+//               "Distance",
+//               controller.distance.value.toString(),
+//             ),
+//           ],
+//         ),
+//       ],
+//     );
+//   }
+// }
+
 
 
 class InfoSection extends StatelessWidget {
@@ -189,9 +244,7 @@ class InfoSection extends StatelessWidget {
           children: [
             InfoColumnItem(
               "Collect time",
-              controller.selectedTime.value == 0
-                  ? "Immediate"
-                  : "Scheduled", // Example
+              controller.selectedTime.value == 0 ? "Immediate" : "Scheduled",
             ),
             InfoColumnItem(
               "Weight",
@@ -200,14 +253,43 @@ class InfoSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        InfoColumnItem(
-          "Contact number",
-          controller.dmobileController.text,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+          children: [
+            InfoColumnItem(
+              "Contact number",
+              controller.dmobileController.text,
+            ),
+            // Distance + Duration stacked vertically
+            Obx(
+                  () => Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text("Distance", style: TextStyle(color: AppColors.textGrey, fontSize: 13)),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${controller.distance.value.toStringAsFixed(2)} km",
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 6),
+                  Text("ETA", style: TextStyle(color: AppColors.textGrey, fontSize: 13)),
+                  const SizedBox(height: 4),
+                  Text(
+                    controller.durationText.value.isNotEmpty ? controller.durationText.value : "-",
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 }
+
+
 
 /// Reusable helper widget for the Info Section
 class InfoColumnItem extends StatelessWidget {
@@ -305,6 +387,55 @@ class DiscountSection extends StatelessWidget {
 }
 
 /// Section 4: Fare Details
+// class FareDetailsSection extends StatelessWidget {
+//   const FareDetailsSection({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final BookingController controller = Get.find<BookingController>();
+//
+//     return Column(
+//       children: [
+//         FareRowItem(
+//           "Trip fare",
+//           "₹${controller.tripFare.value.toStringAsFixed(2)}",
+//           isBold: true,
+//         ),
+//         const SizedBox(height: 12),
+//         Obx(
+//               () => FareRowItem(
+//             "Coupon Discount",
+//             "-₹${controller.isCouponApplied.value ? controller.couponDiscount.value.toStringAsFixed(2) : '0.00'}",
+//             isBold: true,
+//           ),
+//         ),
+//         const SizedBox(height: 12),
+//         FareRowItem(
+//           "GST Charges (included in fare)",
+//           "₹${controller.gstCharges.value.toStringAsFixed(2)}",
+//           isBold: true,
+//         ),
+//         const Divider(height: 24),
+//         Obx(
+//               () => FareRowItem(
+//             "Total fare",
+//             "₹${controller.totalFare.toStringAsFixed(2)}",
+//             isBold: true,
+//           ),
+//         ),
+//         const SizedBox(height: 12),
+//         Obx(
+//               () => FareRowItem(
+//             "Amount payable",
+//             "₹${controller.amountPayable.toStringAsFixed(2)}",
+//             isBold: true,
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+// }
+
 class FareDetailsSection extends StatelessWidget {
   const FareDetailsSection({super.key});
 
@@ -314,6 +445,18 @@ class FareDetailsSection extends StatelessWidget {
 
     return Column(
       children: [
+        // Show API estimated cost row (optional)
+        Obx(
+              () => FareRowItem(
+            "Estimated Price",
+            controller.estimatedCostINR.value > 0
+                ? "₹${controller.estimatedCostINR.value.toStringAsFixed(2)} "
+                // ? "₹${controller.estimatedCostINR.value.toStringAsFixed(2)} (${controller.currency.value})"
+                : "Fetching...",
+            isBold: true,
+          ),
+        ),
+        const SizedBox(height: 12),
         FareRowItem(
           "Trip fare",
           "₹${controller.tripFare.value.toStringAsFixed(2)}",
@@ -353,6 +496,5 @@ class FareDetailsSection extends StatelessWidget {
     );
   }
 }
-
 
 

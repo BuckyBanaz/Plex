@@ -8,7 +8,7 @@ class CollectTimeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(BookingController());
+    final c = Get.find<BookingController>();
 
     return Obx(() {
       return Row(

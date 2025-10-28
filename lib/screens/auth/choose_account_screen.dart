@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/common/Toast/toast.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 import '../../constant/app_colors.dart';
 
@@ -112,7 +113,8 @@ class ChooseAccountScreen extends StatelessWidget {
                       icon: Icons.store_outlined,
                       text: "account_vendor".tr,
                       onTap: () {
-                        Get.toNamed(AppRoutes.view);
+                        showToast(message: "This Service currently Unavailable!!");
+                        // Get.toNamed(AppRoutes.view);
                       },
                     ),
 

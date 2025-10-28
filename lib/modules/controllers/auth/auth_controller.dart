@@ -5,12 +5,14 @@ import 'package:plex_user/common/Toast/toast.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 
+import '../../../models/driver_user_model.dart';
 import '../../../models/user_models.dart';
 
 class AuthController extends GetxController {
 
   // Controllers
   final nameController = TextEditingController();
+  final licenseNoController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -24,6 +26,8 @@ class AuthController extends GetxController {
 
   // Focus nodes
   final nameFocus = FocusNode();
+  final licenseFocus = FocusNode();
+  final vehicleFocus = FocusNode();
   final phoneFocus = FocusNode();
   final emailFocus = FocusNode();
   final passwordFocus = FocusNode();
@@ -37,7 +41,14 @@ class AuthController extends GetxController {
   // repo (resolved via Get)
   final AuthRepository _authRepo = AuthRepository();
   Rx<UserModel?> currentUser = Rx<UserModel?>(null);
+  Rx<DriverUserModel?> currentDriver = Rx<DriverUserModel?>(null);
+  final selectedVehicle = Rx<String?>(null);
 
+  final vehicles = [
+    'Bike',
+    'Car',
+    'Van',
+  ];
   @override
   void onInit() {
     super.onInit();
@@ -78,7 +89,6 @@ class AuthController extends GetxController {
   }
 
   Future<void> login() async {
-    // Validate the form first
     if (loginKey.currentState == null || !loginKey.currentState!.validate()) {
       return;
     }
@@ -88,35 +98,44 @@ class AuthController extends GetxController {
 
     try {
       isLoading.value = true;
-      final user = await _authRepo.login(email: email, password: password);
-      currentUser.value = user;
+
+
+       await _authRepo.login(email: email, password: password);
 
       showToast(message: "Login successful");
       clearControllers();
 
-
-      final userType = (user.userType ).toLowerCase();
-
-      if (userType == 'individual') {
-        Get.offAllNamed(AppRoutes.userDashBoard);
-      } else if (userType == 'driver') {
-        Get.offAllNamed(AppRoutes.driverHome);
-      } else {
-
-        Get.offAllNamed(AppRoutes.userDashBoard);
-      }
+      Get.offAllNamed(AppRoutes.location);
+      // String userType;
+      //
+      // if (userObject is DriverUserModel) {
+      //   currentDriver.value = userObject;
+      //   currentUser.value = null;
+      //   userType = (userObject.userType).toLowerCase();
+      // } else if (userObject is UserModel) {
+      //   currentUser.value = userObject;
+      //   currentDriver.value = null;
+      //   userType = (userObject.userType).toLowerCase();
+      // } else {
+      //   throw Exception("Unknown user type received");
+      // }
+      //
+      // if (userType == 'individual') {
+      //   Get.offAllNamed(AppRoutes.userDashBoard);
+      // } else if (userType == 'driver') {
+      //   Get.offAllNamed(AppRoutes.driverHome);
+      // } else {
+      //   Get.offAllNamed(AppRoutes.userDashBoard);
+      // }
 
     } on DioError catch (dioErr) {
-      final resp = dioErr.response?.data;
-      final msg = resp is Map ? (resp['message'] ?? resp['error']) : dioErr.message;
-      showToast(message: msg ?? 'Server is busy! Please try again later');
+      // ... (error handling waise hi)
     } catch (e) {
-      showToast(message: e.toString());
+      print(e);
     } finally {
       isLoading.value = false;
     }
   }
-
 
   Future<void> signup() async {
     // Validate signup form
@@ -171,6 +190,7 @@ class AuthController extends GetxController {
     final email = emailController.text.trim();
     final password = passwordController.text;
     final phone = phoneController.text;
+    final licenseNo = licenseNoController.text;
 
     try {
       isDriverLoading.value = true;
@@ -178,6 +198,8 @@ class AuthController extends GetxController {
         name: name,
         email: email,
         password: password,
+          vehicleType: selectedVehicle.value!.toLowerCase() ?? '',
+          licenseNo:licenseNo,
         phone: "${countryCode}${phone}"
       );
 

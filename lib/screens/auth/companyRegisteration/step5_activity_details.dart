@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../modules/controllers/company_registration/company_registration_controller.dart';
 
 import '../../../../constant/app_colors.dart';
+import '../compnents/selector_field.dart';
 import 'company_registration_view.dart';
 
 class Step5ActivityDetails extends StatelessWidget {
@@ -44,7 +45,7 @@ class Step5ActivityDetails extends StatelessWidget {
               _buildHeader('activity_details_title', 'activity_details_subtitle'),
 
               // Employee Count
-              _buildSelector(
+              SelectorField(
                 label: 'employee_count_label'.tr, // New translation key
                 hint: 'select_employee_count'.tr, // New translation key
                 value: controller.selectedEmployeeCount,
@@ -54,7 +55,7 @@ class Step5ActivityDetails extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Shipment Volume
-              _buildSelector(
+              SelectorField(
                 label: 'shipment_volume_label'.tr, // New translation key
                 hint: 'select_shipment_volume'.tr, // New translation key
                 value: controller.selectedShipmentVolume,
@@ -128,55 +129,55 @@ class Step5ActivityDetails extends StatelessWidget {
     );
   }
 
-  Widget _buildSelector({
-    required String label,
-    required String hint,
-    required Rx<String?> value,
-    required List<String> options,
-    required bool isDropdown,
-  }) {
-    // Note: The images show a radio-button style selector, but a DropdownButtonFormField is often more practical.
-    // I'll provide the dropdown implementation for consistency with the existing code structure.
-    // If you need the exact segmented button style, that requires a different custom widget.
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '* ${label}',
-          style: Get.textTheme.bodyMedium!.copyWith(
-            color: AppColors.textColor.withOpacity(0.8),
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Obx(
-              () => DropdownButtonFormField<String>(
-            value: value.value,
-            items: options
-                .map((option) => DropdownMenuItem(
-              value: option,
-              child: Text(option.tr,
-                  style: const TextStyle(color: Colors.black)),
-            ))
-                .toList(),
-            onChanged: (String? newValue) {
-              value.value = newValue;
-            },
-            style: Get.textTheme.bodyMedium!.copyWith(color: Colors.black),
-            dropdownColor: Colors.white,
-            decoration: InputDecoration(
-              hintText: hint,
-              fillColor: Colors.white,
-              filled: true,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            validator: (val) => val == null ? 'Required field'.tr : null,
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildSeldector({
+  //   required String label,
+  //   required String hint,
+  //   required Rx<String?> value,
+  //   required List<String> options,
+  //   required bool isDropdown,
+  // }) {
+  //   // Note: The images show a radio-button style selector, but a DropdownButtonFormField is often more practical.
+  //   // I'll provide the dropdown implementation for consistency with the existing code structure.
+  //   // If you need the exact segmented button style, that requires a different custom widget.
+  //
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         '* ${label}',
+  //         style: Get.textTheme.bodyMedium!.copyWith(
+  //           color: AppColors.textColor.withOpacity(0.8),
+  //           fontSize: 14,
+  //         ),
+  //       ),
+  //       const SizedBox(height: 8),
+  //       Obx(
+  //             () => DropdownButtonFormField<String>(
+  //           value: value.value,
+  //           items: options
+  //               .map((option) => DropdownMenuItem(
+  //             value: option,
+  //             child: Text(option.tr,
+  //                 style: const TextStyle(color: Colors.black)),
+  //           ))
+  //               .toList(),
+  //           onChanged: (String? newValue) {
+  //             value.value = newValue;
+  //           },
+  //           style: Get.textTheme.bodyMedium!.copyWith(color: Colors.black),
+  //           dropdownColor: Colors.white,
+  //           decoration: InputDecoration(
+  //             hintText: hint,
+  //             fillColor: Colors.white,
+  //             filled: true,
+  //             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+  //           ),
+  //           validator: (val) => val == null ? 'Required field'.tr : null,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildReviewSection(CompanyRegistrationController controller) {
     // Hardcoded example data from the image is used here for simplicity.

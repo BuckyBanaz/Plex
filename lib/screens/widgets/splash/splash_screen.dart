@@ -3,8 +3,8 @@ import 'dart:math' as Math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../constant/app_colors.dart';
-import '../../routes/appRoutes.dart';
+import '../../../constant/app_colors.dart';
+import '../../../routes/appRoutes.dart';
 
 
 class SplashScreen extends StatefulWidget {

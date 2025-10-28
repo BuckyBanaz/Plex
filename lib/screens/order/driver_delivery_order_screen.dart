@@ -19,6 +19,7 @@ class _DriverDeliveryOrderScreenState extends State<DriverDeliveryOrderScreen> {
     final DriverHomeController controller = Get.put(DriverHomeController());
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(onPressed: ()=>Get.back(), icon: Icon(Icons.arrow_back_ios)),
 
         title: Text("Delivery order"),
         elevation: 0,

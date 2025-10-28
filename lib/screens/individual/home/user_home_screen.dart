@@ -5,6 +5,7 @@ import 'package:plex_user/routes/appRoutes.dart';
 
 import '../../../constant/app_assets.dart';
 
+import '../../../services/domain/repository/repository_imports.dart';
 import 'components/footer_banner.dart';
 import 'components/delivery_option_card.dart';
 import 'components/menu_list.dart';
@@ -26,12 +27,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
            children: [
              const TopBar(),
              // SearchAndFilterComponent(onTap: (){},isFilter: true,),
-             const SizedBox(height: 12),
              Expanded(
                child: ListView(
-                 // crossAxisAlignment: CrossAxisAlignment.start,
                  children: [
-                   const SizedBox(height: 8),
 
                    DeliveryOptionCard(
                      title: 'Local Delivery',
@@ -47,8 +45,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                      title: 'City to city',
                      subtitle: 'Book now!',
                      imagePath: AppAssets.intraCity,
-                     onTap: () {
-                       Get.toNamed(AppRoutes.booking);
+                     onTap: () async {
+                       await AuthRepository().refreshToken();
+                       // Get.toNamed(AppRoutes.booking);
                        print('City to city tapped');
                      },
                    ),

@@ -6,15 +6,18 @@ import 'dart:async';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:plex_user/models/driver_user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../common/dialog/app_dialog.dart';
 import '../../../../constant/preference_keys.dart';
 import '../../../../models/common/device_info.dart';
 import '../../../../models/user_models.dart';
+import '../../../translations/locale_controller.dart';
 import '../../repository/initialize_repository.dart';
 import '../api/api_import.dart';
 

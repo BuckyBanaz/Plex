@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:iconly/iconly.dart';
+import 'package:plex_user/constant/app_colors.dart';
 
 class LocationCard extends StatelessWidget {
-  const LocationCard({super.key});
+  final VoidCallback onTap;
+  final String? location;
+  final String? fullLocation;
+  const LocationCard({super.key, required this.onTap, required this.location, this.fullLocation});
 
   @override
   Widget build(BuildContext context) {
@@ -16,22 +21,26 @@ class LocationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // 1. Remove MainAxisAlignment.spaceBetween
             children: [
-              Row(
-                children: [
-                  const Icon(Icons.location_on, color: Colors.orange, size: 20),
-                  const SizedBox(width: 8.0),
-                  const Text(
-                    "Lal Khothi, Jaipur",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
+              // 2. Place Icon and SizedBox as direct children
+               Icon(IconlyLight.location, color: AppColors.primary, size: 20),
+              const SizedBox(width: 3.0),
+
+              // 3. Wrap the Text with Expanded
+              Expanded(
+                child: Text(
+                  location ?? '"Lal Khothi, Jaipur"',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  // 4. Add overflow handling
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               ),
+
+              // 5. Place the TextButton as the last child
               TextButton(
-                onPressed: () {
-                  // TODO: Change location logic
-                },
+                onPressed: onTap,
                 child: const Text(
                   "Change",
                   style: TextStyle(
@@ -45,7 +54,7 @@ class LocationCard extends StatelessWidget {
           ),
           const SizedBox(height: 8.0),
           Text(
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
+            fullLocation ?? "Lorem Ipsum is simply dummy text of the printing and typesetting industry.",
             style: TextStyle(color: Colors.grey[700], fontSize: 13),
           ),
         ],

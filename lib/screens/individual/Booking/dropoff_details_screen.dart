@@ -5,6 +5,7 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/modules/controllers/booking/booking_controller.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
 import 'package:plex_user/screens/widgets/custom_text_field.dart';
+import '../../map/location_picker_screen.dart';
 import 'components/address_chip.dart';
 import 'components/location_card.dart';
 class DropOffDetailsScreen extends StatelessWidget {
@@ -34,7 +35,22 @@ class DropOffDetailsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          LocationCard(),
+          Obx(() => LocationCard(
+            onTap: () async {
+              final result = await Get.to(() => const LocationPickerScreen(isPickup: false));
+              if (result != null) {
+                controller.dLocality.value = result['address'];
+                controller.dpincodeController.text  = result['pincode'];
+                controller.dLat.value = result['lat'];
+                controller.dLng.value = result['lng'];
+              }
+            },
+            location: controller.dLocality.value.isEmpty
+                ? "Tap to select location"
+                : controller.dLocality.value,
+            fullLocation: controller.dLocality.value,
+          )),
+
           const SizedBox(height: 24.0),
 
 
@@ -51,7 +67,7 @@ class DropOffDetailsScreen extends StatelessWidget {
 
           const SizedBox(height: 16.0),
           SimpleTextField(
-            controller: controller.daddressController,
+            controller: controller.dlankmarkController,
             labelText: "House No/Flat No/ Building Name",
           ),
           const SizedBox(height: 16.0),

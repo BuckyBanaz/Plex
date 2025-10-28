@@ -127,7 +127,16 @@ class AddNewCardSheet extends StatelessWidget {
                 ),
                 const SizedBox(height: 32),
 
-                CustomButton(onTap: c.addCard, label: "Add Card"),
+                CustomButton(onTap: c.addCard, widget:Center(
+                  child: Text(
+                    "Add Card",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ) ,),
                 const SizedBox(height: 16),
               ],
             ),

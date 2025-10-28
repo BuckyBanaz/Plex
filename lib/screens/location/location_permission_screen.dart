@@ -25,7 +25,6 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
       init: LocationController(),
       builder: (controller) {
         return Scaffold(
-          backgroundColor: AppColors.secondary,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -34,36 +33,36 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Spacer(),
-                  Image.asset('assets/images/location.png'),
-                  const SizedBox(height: 32),
+                  Image.asset(
+                    'assets/images/location.png',
+                    width: 150,
+                    height: 150,
+                  ),
+                  const SizedBox(height: 10),
 
                   const Text(
                     'Location Permission',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
 
                   const Text(
                     'To show available drivers near you, PLEX needs access to your current location.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    style: TextStyle(fontSize: 16),
                   ),
                   const Spacer(),
 
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _requestLocationPermission,
+                    onPressed: controller.isButtonLoading ? null : controller.onContinueTap,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: _isLoading
+                    child: controller.isButtonLoading
                         ? CircularProgressIndicator(color: Colors.white)
                         : const Text(
                             'Allow Permission',
@@ -74,15 +73,12 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                           ),
                   ),
                   const SizedBox(height: 12),
-
                   TextButton(
-                    onPressed: () {
-                      debugPrint("User chose not to give permission for now.");
-                      Get.offAllNamed(AppRoutes.userDashBoard);
-                    },
+                    // ** 3. UPDATE OnPressed **
+                    onPressed: controller.skipPermissionAndNavigate,
                     child: const Text(
                       'Not Now',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      style: TextStyle( fontSize: 16),
                     ),
                   ),
                   const SizedBox(height: 20),

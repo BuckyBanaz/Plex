@@ -14,6 +14,7 @@ class LocaleController extends GetxService {
 
   // init after Get.put(LocaleController())
   Future<LocaleController> init() async {
+    debugPrint("localizations service initialize");
     await applySavedLocale();
     return this;
   }

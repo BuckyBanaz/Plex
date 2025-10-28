@@ -46,11 +46,11 @@ class DeliveryOptionCard extends StatelessWidget {
                 children: [
                   if (badgeText != null)
                     Align(
-                      alignment: Alignment.topLeft,
+                      alignment: Alignment.topRight,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.4),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -68,7 +68,7 @@ class DeliveryOptionCard extends StatelessWidget {
                   Text(
                     title,
                     style:  TextStyle(
-                      fontSize: 20,
+                      fontSize: 24,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textColor,
                     ),
@@ -78,6 +78,7 @@ class DeliveryOptionCard extends StatelessWidget {
                     subtitle,
                     style:  TextStyle(
                       color: AppColors.primary,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
                       decorationColor: AppColors.primary,

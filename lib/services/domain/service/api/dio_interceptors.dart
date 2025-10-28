@@ -1,96 +1,6 @@
 part of 'api_import.dart';
 
-// class AppInterceptors extends Interceptor {
-//   //  AppInterceptors({required appService}): _appService= appService;
-//   //  AppInterceptors({required appService}): _appService= appService;
-//
-//   final bool isExternal;
-//   AppInterceptors({this.isExternal = false});
-//
-//   @override
-//   void onRequest(
-//       RequestOptions options, RequestInterceptorHandler handler) async {
-//     // printInfo(info: '\nRequest type: ${options.method} API request: ${options.uri}');
-//     // printInfo(info: "\nAPI headers: ${options.headers}");
-//     // printInfo(info: "\nAPI data: ${options.data}");
-//
-//     if (isExternal) return handler.next(options);
-//     var accessToken = gt.Get.find<DatabaseService>().accessToken;
-//     bool? skipToken = options.extra['skipToken'];
-//     debugPrint(accessToken);
-//     if (accessToken != null) {
-//       if (skipToken ?? true) {
-//         options.headers['Authorization'] = 'Bearer $accessToken';
-//       }
-//     }
-//     return handler.next(options);
-//   }
-//
-//   @override
-//   void onError(DioException err, ErrorInterceptorHandler handler) {
-//     debugPrint(
-//         'Api Error: ${err.requestOptions.method} ${err.response?.statusCode} ${err.requestOptions.uri}');
-//     debugPrint('Error Message:  ${err.response?.statusMessage}');
-//     switch (err.type) {
-//       case DioExceptionType.sendTimeout:
-//         throw DefaultException(err.requestOptions, err,
-//             msg: ErrorStrings.timeOut);
-//       case DioExceptionType.receiveTimeout:
-//         throw DeadlineExceededException(err.requestOptions);
-//       case DioExceptionType.badResponse:
-//         switch (err.response?.statusCode) {
-//           case 400:
-//             throw BadRequestException(err.requestOptions, err);
-//           case 401:
-//             throw UnauthorizedException(err.requestOptions);
-//           case 404:
-//             throw NotFoundException(err.requestOptions);
-//           case 409:
-//             throw ConflictException(err.requestOptions);
-//           case 500:
-//             throw InternalServerErrorException(err.requestOptions);
-//           case 504:
-//             throw DeadlineExceededException(err.requestOptions);
-//           case 406:
-//             throw OtpTimeError(err.requestOptions, err);
-//           case 429:
-//             throw OtpTimeError(err.requestOptions, err);
-//         }
-//         break;
-//       case DioExceptionType.cancel:
-//         throw DefaultException(err.requestOptions, err,
-//             msg: ErrorStrings.cancel);
-//
-//       case DioExceptionType.connectionTimeout:
-//         throw DefaultException(err.requestOptions, err,
-//             msg: ErrorStrings.timeOut);
-//
-//       case DioExceptionType.badCertificate:
-//         throw DefaultException(err.requestOptions, err);
-//
-//       case DioExceptionType.connectionError:
-//         throw NoInternetConnectionException(err.requestOptions);
-//
-//       case DioExceptionType.unknown:
-//         throw DefaultException(err.requestOptions, err);
-//     }
-//     return handler.next(err);
-//   }
-//
-//   @override
-//   void onResponse(Response response, ResponseInterceptorHandler handler) {
-//     debugPrint('Request type: ${response.requestOptions.method}');
-//     debugPrint(
-//         'Request Success: ${response.statusCode}\ndata: ${response.data}');
-//     if (response.statusCode.toString().startsWith('2')) {
-//       response.extra['done'] = true;
-//     }
-//     super.onResponse(response, handler);
-//   }
-// }
-
-
-
+// ---------- FILE 1: app_interceptors.dart ----------
 
 class AppInterceptors extends Interceptor {
   final Dio dio;
@@ -99,74 +9,103 @@ class AppInterceptors extends Interceptor {
   AppInterceptors({required this.dio, this.isExternal = false});
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+      RequestOptions options,
+      RequestInterceptorHandler handler,
+      ) async {
     if (isExternal) return handler.next(options);
-    // printInfo(info: '\nRequest type: ${options.method} API request: ${options.uri}');
-    printInfo(info: "\nAPI headers: ${options.headers}");
-    printInfo(info: "\nAPI data: ${options.data}");
-    printInfo( info: '\nAPI request: ${options.uri}');
+
+    printInfo(
+      info:
+      "\nAPI headers: ${options.headers} \nAPI data: ${options.data} \nAPI request: ${options.uri}",
+    );
+
     var accessToken = gt.Get.find<DatabaseService>().accessToken;
-    bool? skipToken = options.extra['skipToken'];
-    // note: your original code used `if (skipToken ?? true)` to add token — keep same semantics
-    if (accessToken != null) {
-      if (skipToken ?? true) {
-        options.headers['Authorization'] = 'Bearer $accessToken';
-      }
+
+    // This logic is correct — skip adding token if 'skipToken' flag is true.
+    final bool skipToken = options.extra['skipToken'] == true;
+
+    if (accessToken != null && accessToken.isNotEmpty && !skipToken) {
+      options.headers['Authorization'] = 'Bearer $accessToken';
     }
+
     return handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    debugPrint('Request type: ${response.requestOptions.method}');
-    debugPrint(
-        'Request Success: ${response.statusCode}\ndata: ${response.data}');
-    if (response.statusCode != null && response.statusCode.toString().startsWith('2')) {
+    printInfo(
+      info:
+      '\nRequest type: ${response.requestOptions.method} \nRequest Success: ${response.statusCode}\nData: ${response.data}',
+    );
+
+    if (response.statusCode != null &&
+        response.statusCode.toString().startsWith('2')) {
       response.extra['done'] = true;
     }
+
     super.onResponse(response, handler);
   }
 
-  /// onError will attempt a token refresh when we get a 401 and retry the original request once.
+  /// Handles token refresh logic when a 401 Unauthorized error occurs.
+  /// Automatically retries the original request once after a successful token refresh.
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     debugPrint(
-        'Api Error: ${err.requestOptions.method} ${err.response?.statusCode} ${err.requestOptions.uri}');
-    debugPrint('Error Message:  ${err.response?.statusMessage}');
+      'API Error: ${err.requestOptions.method} ${err.response?.statusCode} ${err.requestOptions.uri}',
+    );
+    debugPrint('Error Data: ${err.response?.data}');
+    debugPrint('Error Message: ${err.response?.statusMessage}');
 
-    // If this interceptor is for external requests, don't try refresh
     if (isExternal) return handler.next(err);
 
-    // If it's a 401 unauthorized from server, try refresh token flow
     final statusCode = err.response?.statusCode;
     final requestOptions = err.requestOptions;
 
-    // Prevent infinite retry loops
     final alreadyRetried = requestOptions.extra['retried'] == true;
+    // Check if the current request is itself a refresh token call.
+    final isRefreshCall = requestOptions.extra['isRefreshCall'] == true;
 
+    // -----------------------------------------------------------------
+    // SCENARIO 1: Refresh token call itself failed.
+    // Let this propagate to the AuthRepository catch block.
+    // -----------------------------------------------------------------
+    if (isRefreshCall) {
+      debugPrint(
+          'Refresh token request failed. Forwarding error to AuthRepository catch block.');
+      return handler.next(err);
+    }
+
+    // -----------------------------------------------------------------
+    // SCENARIO 2: A normal API call (e.g., /location) returned 401.
+    // Attempt to refresh the access token.
+    // -----------------------------------------------------------------
     if (statusCode == 401 && !alreadyRetried) {
-      try {
-        final authRepo = Get.find<AuthRepository>();
-        final refreshed = await authRepo.refreshToken();
+      debugPrint('Received 401. Attempting token refresh...');
 
-        if (refreshed) {
-          // get the new token from DatabaseService
+      final authRepo = Get.find<AuthRepository>();
+      // The refreshToken() method will return a RefreshStatus enum.
+      final RefreshStatus refreshStatus = await authRepo.refreshToken();
+
+      switch (refreshStatus) {
+      // --- CASE 1: SUCCESS ---
+        case RefreshStatus.success:
+          debugPrint('Token refresh successful. Retrying original request...');
           final newToken = Get.find<DatabaseService>().accessToken;
           if (newToken != null && newToken.isNotEmpty) {
-            // mark as retried
+            // Mark request as retried.
             requestOptions.extra['retried'] = true;
-
-            // update Authorization header and retry original request
             requestOptions.headers['Authorization'] = 'Bearer $newToken';
 
-            // create a new request using the dio instance tied to this interceptor
+            // Retry the original request.
             final clonedRequest = Options(
               method: requestOptions.method,
               headers: requestOptions.headers,
               responseType: requestOptions.responseType,
               followRedirects: requestOptions.followRedirects,
               validateStatus: requestOptions.validateStatus,
-              receiveDataWhenStatusError: requestOptions.receiveDataWhenStatusError,
+              receiveDataWhenStatusError:
+              requestOptions.receiveDataWhenStatusError,
               extra: requestOptions.extra,
               contentType: requestOptions.contentType,
             );
@@ -182,36 +121,51 @@ class AppInterceptors extends Interceptor {
             );
 
             return handler.resolve(response);
-          } else {
-            // refresh succeeded but token missing — treat as unauthorized
-            return handler.reject(DioException(
-                requestOptions: requestOptions,
-                error: 'Token refresh returned no token'));
           }
-        } else {
-          // refresh failed
-          return handler.reject(DioException(
-              requestOptions: requestOptions, error: 'Unable to refresh token'));
-        }
-      } catch (e) {
-        debugPrint('Token refresh attempt failed: $e');
-        // If refresh failed — force logout behavior from your UnauthorizedException
-        return handler.reject(UnauthorizedException(requestOptions));
+          // No new token found — force logout.
+          return handler.reject(UnauthorizedException(requestOptions));
+
+      // --- CASE 2: REFRESH TOKEN INVALID ---
+        case RefreshStatus.failedInvalidToken:
+          debugPrint('Refresh token is invalid. Logging out user.');
+          return handler.reject(UnauthorizedException(requestOptions));
+
+      // --- CASE 3: OTHER FAILURE (Network, 500, etc.) ---
+        case RefreshStatus.failedOther:
+          debugPrint(
+              'Token refresh failed due to network/server error. Returning original failure.');
+          // Do not log out, just forward the original error.
+          return handler.next(err);
       }
     }
 
-    // If not 401 or already retried — map other errors to appropriate exceptions
+    // -----------------------------------------------------------------
+    // SCENARIO 4: If the request was already retried and still returned 401,
+    // logout the user.
+    // -----------------------------------------------------------------
+    if (statusCode == 401) {
+      debugPrint('Already retried but still received 401. Logging out.');
+      return handler.reject(UnauthorizedException(requestOptions));
+    }
+
+    // -----------------------------------------------------------------
+    // Handle other status codes (400, 404, 500, etc.)
+    // -----------------------------------------------------------------
     switch (err.type) {
       case DioExceptionType.sendTimeout:
-        return handler.reject(DioException(requestOptions: requestOptions, error: ErrorStrings.timeOut));
+        return handler.reject(
+          DioException(
+            requestOptions: requestOptions,
+            error: ErrorStrings.timeOut,
+          ),
+        );
       case DioExceptionType.receiveTimeout:
         return handler.reject(DeadlineExceededException(requestOptions));
       case DioExceptionType.badResponse:
         switch (err.response?.statusCode) {
           case 400:
             return handler.reject(BadRequestException(requestOptions, err));
-          case 401:
-            return handler.reject(UnauthorizedException(requestOptions));
+        // 401 handled already
           case 404:
             return handler.reject(NotFoundException(requestOptions));
           case 409:
@@ -224,11 +178,15 @@ class AppInterceptors extends Interceptor {
           case 429:
             return handler.reject(OtpTimeError(requestOptions, err));
         }
-        break;
+        break; // Required to prevent fall-through
       case DioExceptionType.cancel:
-        return handler.reject(DefaultException(requestOptions, err, msg: ErrorStrings.cancel));
+        return handler.reject(
+          DefaultException(requestOptions, err, msg: ErrorStrings.cancel),
+        );
       case DioExceptionType.connectionTimeout:
-        return handler.reject(DefaultException(requestOptions, err, msg: ErrorStrings.timeOut));
+        return handler.reject(
+          DefaultException(requestOptions, err, msg: ErrorStrings.timeOut),
+        );
       case DioExceptionType.badCertificate:
         return handler.reject(DefaultException(requestOptions, err));
       case DioExceptionType.connectionError:
@@ -237,13 +195,10 @@ class AppInterceptors extends Interceptor {
         return handler.reject(DefaultException(requestOptions, err));
     }
 
-    // fallback: forward the original error
+    // Fallback: Forward the original error.
     return handler.next(err);
   }
 }
-
-
-
 
 // class AppInterceptors extends Interceptor {
 //   final bool isExternal;

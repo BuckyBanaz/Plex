@@ -1,69 +1,285 @@
-
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart' hide ServiceStatus;
 
 import '../../../common/Toast/toast.dart';
 import '../../../routes/appRoutes.dart';
+import '../../../services/domain/repository/repository_imports.dart';
 import '../../../services/domain/service/app/app_service_imports.dart';
 
-
-
 class LocationController extends GetxController {
-
   final GeolocationService gl = Get.find<GeolocationService>();
   final DatabaseService db = Get.find<DatabaseService>();
+  final UserRepository userRepo = UserRepository();
+  final AuthRepository authrepo = AuthRepository();
+  StreamSubscription<ServiceStatus>? serviceListener;
+  StreamSubscription<Position>? positionStreamSub;
 
-  StreamSubscription<ServiceStatus>? listener;
   var permissionGranted = false;
   var loadingLocation = false;
+  var isButtonLoading = false;
+
+  var currentAddress = 'Loading location...'.obs;
+
+  // throttle control: minimum duration between API updates
+  final Duration minUpdateInterval = const Duration(seconds: 8);
+  DateTime? _lastUpdateTime;
 
   @override
-  void onInit() async {
-    listener = Geolocator.getServiceStatusStream().listen(onStatusChanged);
-    permissionGranted = await gl.isPermissionGranted();
-    update();
-    if(permissionGranted) onContinueTap();
+  void onInit() {
     super.onInit();
+    serviceListener = Geolocator.getServiceStatusStream().listen(onStatusChanged);
+    _checkPermissionAndStartStream();
   }
 
-  void onGrantPermissionTap() async {
+
+  // Future<void> refreshToken() async {
+  //   try{
+  //     await authrepo.refreshToken();
+  //   }catch(e){
+  //
+  //   }
+  // }
+  @override
+  void onClose() {
+    _stopPositionStream();
+    serviceListener?.cancel();
+    super.onClose();
+  }
+
+  void _navigateToDashboard() {
+    String? userType = db.userType;
+    if (userType == 'individual') {
+      Get.offAllNamed(AppRoutes.userDashBoard);
+    } else if (userType == 'driver') {
+      Get.offAllNamed(AppRoutes.driverHome);
+    } else {
+      Get.offAllNamed(AppRoutes.userDashBoard);
+    }
+  }
+
+  Future<void> requestPermissionAndNavigate() async {
+    isButtonLoading = true;
+    update();
+
+    PermissionStatus status = await Permission.location.request();
+
+    if (status.isGranted) {
+      await db.putIsLocationScreenShown(true);
+      _navigateToDashboard();
+      // start stream after permission granted
+      await _startPositionStreamIfPermitted();
+    } else if (status.isDenied) {
+      Get.snackbar(
+        "Error",
+        "Please Grant Location Permission.",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    }
+
+    isButtonLoading = false;
+    update();
+  }
+
+  Future<void> skipPermissionAndNavigate() async {
+    debugPrint("User chose not to give permission for now.");
+    await db.putIsLocationScreenShown(true);
+    _navigateToDashboard();
+  }
+
+  void _checkPermissionAndStartStream() async {
+    permissionGranted = await gl.isPermissionGranted();
+    if (permissionGranted) {
+      // load cached address & start stream
+      await loadCurrentAddress();
+      await _startPositionStreamIfPermitted();
+    }
+    update();
+  }
+
+  Future<void> onGrantPermissionTap() async {
     var hasPermission = await gl.getPermission();
     permissionGranted = hasPermission;
-    if(permissionGranted) onContinueTap();
+    if (permissionGranted) {
+      await _startPositionStreamIfPermitted();
+      onContinueTap(); // optionally run a one-shot update
+    }
   }
 
+  // Called by UI when user chooses to continue (initial run)
   void onContinueTap() async {
-    try{
-      var position = await gl.determinePosition(forceGivePermission: true, forceTurnOnLocation: true);
-      if(position != null) {
-        // Call your user location API here
+    try {
+      var position = await gl.determinePosition(
+        forceGivePermission: true,
+        forceTurnOnLocation: true,
+      );
+
+      if (position != null) {
+        debugPrint("Location determined. Sending one-shot update via repository...");
+        await _sendLocationAndPersist(position);
+
+        await _fetchAndUpdateAddress(position);
       }
+
       await db.putIsLocationScreenShown(true);
 
-      try{ listener?.cancel(); }catch(e){}
+      try { serviceListener?.cancel(); } catch (e) {}
 
-      Get.offAllNamed(AppRoutes.userDashBoard);
-    }catch(error){
+      if (db.userType == 'individual') {
+        Get.offAllNamed(AppRoutes.userDashBoard);
+      } else if (db.userType == "driver") {
+        Get.offAllNamed(AppRoutes.driverDashBoard);
+      } else {
+        Get.offAllNamed(AppRoutes.userDashBoard);
+      }
+    } catch (error) {
+      currentAddress.value = 'Could not get location';
       showToast(message: error.toString());
     }
   }
 
-  void onStatusChanged(ServiceStatus status) async {
-    if(status == ServiceStatus.enabled) {
-      await gl.sendLocationWithApi();
+  Future<void> loadCurrentAddress() async {
+    loadingLocation = true;
+    update();
+    try {
+      var position = await gl.determinePosition(
+        forceGivePermission: false,
+        forceTurnOnLocation: false,
+      );
+
+      if (position != null) {
+        await _fetchAndUpdateAddress(position);
+      } else {
+        currentAddress.value = 'Location not available';
+      }
+    } catch (e) {
+      currentAddress.value = 'Error loading location';
+    } finally {
+      loadingLocation = false;
+      update();
     }
   }
 
-  @override
-  void dispose() {
-    listener?.cancel();
-    super.dispose();
+  Future<void> _fetchAndUpdateAddress(Position position) async {
+    try {
+      String address = await gl.getAddressFromPosition(position);
+      currentAddress.value = address;
+    } catch (e) {
+      currentAddress.value = 'Could not find address';
+      debugPrint('Error getting address: $e');
+    } finally {
+      update();
+    }
   }
 
-  @override
-  void onClose() {
-    listener?.cancel();
-    super.onClose();
+  void onStatusChanged(ServiceStatus status) async {
+    debugPrint('Service status changed: $status');
+    if (status == ServiceStatus.enabled) {
+      // start sending location again when service is enabled
+      await _startPositionStreamIfPermitted();
+
+      await loadCurrentAddress();
+    } else {
+      // when disabled, stop stream to save resources
+      _stopPositionStream();
+    }
+  }
+
+  // -------------------------
+  // Position stream management
+  // -------------------------
+  Future<void> _startPositionStreamIfPermitted() async {
+    try {
+      permissionGranted = await gl.isPermissionGranted();
+      if (!permissionGranted) {
+        debugPrint('Location permission not granted - not starting stream.');
+        return;
+      }
+
+      // If already started, no-op
+      if (positionStreamSub != null) {
+        debugPrint('Position stream already active.');
+        return;
+      }
+
+      // Configure location settings (adjust for platform if needed)
+      LocationSettings locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // meters - change as required
+        timeLimit: null,
+      );
+
+      positionStreamSub = Geolocator.getPositionStream(locationSettings: locationSettings).listen(
+            (Position position) async {
+          debugPrint('Position stream update: ${position.latitude}, ${position.longitude}');
+
+          // Throttle by minUpdateInterval
+          final now = DateTime.now();
+          if (_lastUpdateTime != null && now.difference(_lastUpdateTime!) < minUpdateInterval) {
+            debugPrint('Skipping update due to throttle.');
+            return;
+          }
+          _lastUpdateTime = now;
+
+          await _sendLocationAndPersist(position);
+        },
+        onError: (err) {
+          debugPrint('Position stream error: $err');
+        },
+        cancelOnError: false,
+      );
+
+      debugPrint('Position stream started.');
+    } catch (e) {
+      debugPrint('Error starting position stream: $e');
+    }
+  }
+
+  void _stopPositionStream() {
+    try {
+      positionStreamSub?.cancel();
+      positionStreamSub = null;
+      debugPrint('Position stream stopped.');
+    } catch (e) {
+      debugPrint('Error stopping position stream: $e');
+    }
+  }
+
+  // -------------------------
+  // Send to API & persist
+  // -------------------------
+  Future<void> _sendLocationAndPersist(Position position) async {
+    try {
+      // Ensure apiKey exists
+      final apiKey = db.apiKey;
+      if (apiKey == null || apiKey.isEmpty) {
+        debugPrint('API key missing in DB - not sending location.');
+        return;
+      }
+
+      // Call repository (which calls API)
+      final result = await userRepo.updateUserLocation(position);
+
+      // result is void in your repo - assuming successful if no exception.
+      // Persist last-known-location as JSON string (latitude,long,timestamp,...)
+      final locationJson = {
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'accuracy': position.accuracy,
+        'heading': position.heading,
+        'speed': position.speed,
+        'recorded_at': position.timestamp?.toIso8601String() ?? DateTime.now().toIso8601String(),
+      };
+
+      await db.putLastKnownLocation(locationJson.toString());
+      debugPrint('Last known location saved to DB.');
+
+    } catch (e) {
+      debugPrint('Failed to send location: $e');
+    }
   }
 }

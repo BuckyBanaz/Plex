@@ -22,6 +22,10 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>GMSApiKey</key>
+    <string>AIzaSyD9IfDEjZn7fDMyqdtl-yqgLNS64D0Z8a8</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>We need your location to show it on the map</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -46,10 +50,24 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 
-    
-	<key>NSLocationWhenInUseUsageDescription</key>
+    <!-- URL Scheme so plexapp:// opens the app -->
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLName</key>
+        <string>com.example.plex_user</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>plexapp</string>
+        </array>
+      </dict>
+    </array>
+
+    <key>NSLocationWhenInUseUsageDescription</key>
         <string>We need your location to show available drivers near you.</string>
-        <key>NSLocationAlwaysUsageDescription</key>
+    <key>NSLocationAlwaysUsageDescription</key>
         <string>This app needs your location to provide better service.</string>
 </dict>
 </plist>

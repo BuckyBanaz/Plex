@@ -24,268 +24,277 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     final DriverHomeController controller = Get.put(DriverHomeController());
     return Scaffold(
       backgroundColor: AppColors.secondary,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              height: h * 0.30,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-              decoration: const BoxDecoration(
-                color: AppColors.secondary,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(22),
-                  bottomRight: Radius.circular(22),
-                ),
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                      onPressed: () =>
-                          Get.toNamed(AppRoutes.driverNotification),
-                      icon: Icon(
-                        IconlyLight.notification,
-                        color: AppColors.textColor,
-                        size: 28,
-                      ),
+      body: Obx(
+        () {
+
+          return controller.isLoading.value ? Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+            ),
+          ):SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: h * 0.30,
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                  decoration: const BoxDecoration(
+                    color: AppColors.secondary,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(22),
+                      bottomRight: Radius.circular(22),
                     ),
                   ),
-
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
-                      TopBar(
-                        titleColor: AppColors.textColor,
-                        subtitleColor: AppColors.textColor,
-                        showLanguageButton: false,
-                        padding: EdgeInsets.symmetric(horizontal: 0),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: IconButton(
+                          onPressed: () =>
+                              Get.toNamed(AppRoutes.driverNotification),
+                          icon: Icon(
+                            IconlyLight.notification,
+                            color: AppColors.textColor,
+                            size: 28,
+                          ),
+                        ),
                       ),
 
-                      const SizedBox(height: 35),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
+                          TopBar(
+                            titleColor: AppColors.textColor,
+                            subtitleColor: AppColors.textColor,
+                            showLanguageButton: false,
+                            padding: EdgeInsets.symmetric(horizontal: 0),
+                          ),
+
+                          const SizedBox(height: 35),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Partner',
+                                    style: TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    controller.currentDriver.value?.name ?? "Driver",
+                                    style: TextStyle(
+                                      color: AppColors.textColor,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text.rich(
+                                    TextSpan(
+                                      text: 'Driver Id: ',
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      children:  [
+                                        TextSpan(
+                                          text: 'PLEX1080',
+                                          style: TextStyle(
+                                            color: AppColors.textColor,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text.rich(
+                                    TextSpan(
+                                      text: 'Vehicle NO. ',
+                                      style: TextStyle(
+                                        color: AppColors.primary,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      children: const [
+                                        TextSpan(
+                                          text: 'RJ14 2025',
+                                          style: TextStyle(
+                                            color: AppColors.textColor,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          const Spacer(),
+
+                          Text(
+                            'My Earnings',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            '\$ 130.00',
+                            style: TextStyle(
+                              color: AppColors.textColor,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+
+                      Positioned(
+                        right: 0,
+                        bottom: -10,
+                        child: Image.asset(
+                          'assets/images/driver.png',
+                          height: h * 0.12,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                Transform.translate(
+                  offset: const Offset(0, -18),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 22),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.textColor,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.6),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Partner',
+                                'Status - ${isOnline ? "Online" : "Offline"}',
+                                style: TextStyle(
+                                  color: AppColors.secondary,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Open to any delivery',
                                 style: TextStyle(
                                   color: AppColors.primary,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Vipin Jain',
-                                style: TextStyle(
+                            ],
+                          ),
+                        ),
+
+                        GestureDetector(
+                          onTap: () => setState(() => isOnline = !isOnline),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            width: 50,
+                            height: 26,
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: isOnline
+                                  ? AppColors.primary
+                                  : AppColors.primarySwatch.shade100,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Align(
+                              alignment: isOnline
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                decoration: const BoxDecoration(
                                   color: AppColors.textColor,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
+                                  shape: BoxShape.circle,
                                 ),
                               ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text.rich(
-                                TextSpan(
-                                  text: 'Driver Id: ',
-                                  style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  children: const [
-                                    TextSpan(
-                                      text: 'PLEX1080',
-                                      style: TextStyle(
-                                        color: AppColors.textColor,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text.rich(
-                                TextSpan(
-                                  text: 'Vehicle NO. ',
-                                  style: TextStyle(
-                                    color: AppColors.primary,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                  children: const [
-                                    TextSpan(
-                                      text: 'RJ14 2025',
-                                      style: TextStyle(
-                                        color: AppColors.textColor,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                      const Spacer(),
-
-                      Text(
-                        'My Earnings',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        '\$ 130.00',
-                        style: TextStyle(
-                          color: AppColors.textColor,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
-
-                  Positioned(
-                    right: 0,
-                    bottom: -10,
-                    child: Image.asset(
-                      'assets/images/driver.png',
-                      height: h * 0.12,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Transform.translate(
-              offset: const Offset(0, -18),
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 22),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.textColor,
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.6),
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Status - ${isOnline ? "Online" : "Offline"}',
-                            style: TextStyle(
-                              color: AppColors.secondary,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Open to any delivery',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    GestureDetector(
-                      onTap: () => setState(() => isOnline = !isOnline),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 220),
-                        width: 50,
-                        height: 26,
-                        padding: const EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: isOnline
-                              ? AppColors.primary
-                              : AppColors.primarySwatch.shade100,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Align(
-                          alignment: isOnline
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: const BoxDecoration(
-                              color: AppColors.textColor,
-                              shape: BoxShape.circle,
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 18,
-                ),
-                decoration: const BoxDecoration(
-                  color: AppColors.textColor,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(22),
-                    topRight: Radius.circular(22),
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    DeliveryNotificationCard(
-                      deliveryCount: controller.orders.length,
-                      onViewDetails: () =>
-                          Get.toNamed(AppRoutes.driverDeliveryOrder),
-                    ),
 
-                    RecentHistoryList(controller: controller),
-                  ],
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 18,
+                    ),
+                    decoration: const BoxDecoration(
+                      color: AppColors.textColor,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(22),
+                        topRight: Radius.circular(22),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DeliveryNotificationCard(
+                          deliveryCount: controller.orders.length,
+                          onViewDetails: () =>
+                              Get.toNamed(AppRoutes.driverDeliveryOrder),
+                        ),
+
+                        RecentHistoryList(controller: controller),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

@@ -18,7 +18,7 @@ class AuthRepository {
     }
   }
 
-  Future<UserModel> login({
+  Future<dynamic> login({
     required String email,
     required String password,
   }) async {
@@ -29,18 +29,52 @@ class AuthRepository {
         langKey: langKey,
       );
 
-
-      // store token only if present
+      // token
       final token = data['token'] as String?;
       if (token != null && token.isNotEmpty) {
         await databaseService.putAccessToken(token);
+        print("Access token saved");
       } else {
         print("Auth token not present in login response");
       }
 
+
+      final apiKeyFromResp = (data['api_key'] ?? data['apiKey'] ?? data['apikey']) as String?;
+      if (apiKeyFromResp != null && apiKeyFromResp.isNotEmpty) {
+        await databaseService.putApiKey(apiKeyFromResp);
+        print("API key saved: ${apiKeyFromResp.substring(0, 6)}...");
+      } else {
+        print("API key not present in top-level response. Checking user object...");
+        final userMap = data['user'] as Map<String, dynamic>?;
+        final apiKeyFromUser = (userMap?['api_key'] ?? userMap?['apiKey']) as String?;
+        if (apiKeyFromUser != null && apiKeyFromUser.isNotEmpty) {
+          await databaseService.putApiKey(apiKeyFromUser);
+          print("API key saved from user object");
+        } else {
+          print("API key not found anywhere in response. Full response: $data");
+        }
+      }
+
+      // user
       final userJson = data['user'];
-      final user = UserModel.fromJson(userJson);
-      return user;
+      if (userJson == null) {
+        throw Exception("User data not found in login response");
+      }
+      final userType = (userJson['userType'] as String? ?? 'individual').toLowerCase();
+
+      await databaseService.putUserType(userType);
+
+      if (userType == 'driver') {
+        final driver = DriverUserModel.fromJson(userJson);
+        await databaseService.putDriver(driver);
+        print("Driver data loaded");
+        return driver;
+      } else {
+        final user = UserModel.fromJson(userJson);
+        await databaseService.putUser(user);
+        print("User data loaded");
+        return user;
+      }
     } on DioError catch (dioError) {
       final respData = dioError.response?.data;
       final msg = respData is Map
@@ -101,6 +135,8 @@ class AuthRepository {
     required String email,
     required String phone,
     required String password,
+    required String vehicleType,
+    required String licenseNo,
   }) async {
     try {
       // get device id
@@ -113,6 +149,8 @@ class AuthRepository {
         phone: phone,
         password: password,
         langKey: langKey,
+        vehicleType: vehicleType,
+        licenseNo:licenseNo,
         deviceId: deviceInfo.deviceId,
       );
 
@@ -199,58 +237,62 @@ class AuthRepository {
     }
   }
 
-  /// Refreshes token using current token stored in DatabaseService.
-  /// Returns true if refresh succeeded and token stored, false otherwise.
-  Future<bool> refreshToken() async {
+  Future<RefreshStatus> refreshToken() async {
     try {
-      final currentToken = databaseService.accessToken;
-      if (currentToken == null || currentToken.isEmpty) {
-        debugPrint('No current token available to refresh.');
-        return false;
+      // Yahaan apna 'refresh token' get karein (Aap abhi 'accessToken' use kar rahe hain)
+      final currentRefreshToken = databaseService.accessToken;
+
+      if (currentRefreshToken == null || currentRefreshToken.isEmpty) {
+        debugPrint('No refresh token available to refresh.');
+        return RefreshStatus.failedOther; // Bina token ke fail
       }
 
-      final response = await authApi.refreshToken(currentToken);
+      debugPrint(
+          'Attempting token refresh using refreshToken: ${currentRefreshToken.substring(0, min(8, currentRefreshToken.length))}...');
 
-      if (response.statusCode == 200) {
-        // Support both shapes:
-        // 1) { "token": { "accessToken": "..." } }
-        // 2) { "accessToken": "..." } or { "token": "..." }
-        String? newToken;
+      // authApi.refreshToken call karein
+      final response = await authApi.refreshToken(currentRefreshToken);
 
-        if (response.data is Map) {
-          final data = response.data as Map;
-          if (data['token'] is Map) {
-            newToken = (data['token'] as Map)['accessToken'] as String?;
-          } else if (data['accessToken'] is String) {
-            newToken = data['accessToken'] as String;
-          } else if (data['token'] is String) {
-            newToken = data['token'] as String;
-          }
-        } else if (response.data is String) {
-          newToken = response.data as String;
+      // --- Token parsing logic ---
+      String? newAccessToken;
+      if (response.data is Map) {
+        final data = response.data as Map;
+        if (data['token'] is Map) {
+          newAccessToken = (data['token'] as Map)['accessToken'] as String?;
         }
+        // ... (aapki baaki parsing logic) ...
+      }
+      // --- End parsing ---
 
-        if (newToken != null && newToken.isNotEmpty) {
-          await databaseService.putAccessToken(newToken);
-          debugPrint('Token refreshed and stored.');
-          return true;
-        } else {
-          debugPrint('Refresh response did not contain an access token.');
-          return false;
-        }
-      } else if (response.statusCode == 400 || response.statusCode == 401) {
-        // refresh attempt invalid -> return false (caller will handle logout)
-        return false;
+      if (newAccessToken != null && newAccessToken.isNotEmpty) {
+        // Naye Access Token ko save karein
+        await databaseService.putAccessToken(newAccessToken);
+        debugPrint('Token refreshed and stored.');
+        return RefreshStatus.success; // Success
       } else {
-        debugPrint(
-          'Unexpected status code while refreshing token: ${response.statusCode}',
-        );
-        return false;
+        debugPrint('Refresh response did not contain an access token.');
+        return RefreshStatus.failedOther; // Server ne token nahi diya
       }
-    } catch (e, st) {
-      debugPrint('refreshToken() failed: $e');
-      debugPrint(st.toString());
-      return false;
+
+    } catch (e) {
+      // YEH HAI AAPKA MAIN LOGIC
+      // Jab authApi.refreshToken fail hoga (401, 404, etc.), error yahaan aayega.
+      debugPrint('refreshToken() caught an error: $e');
+
+      if (e is DioException) {
+        final errorData = e.response?.data;
+
+        // AAPKI SPECIFIC LOGOUT CONDITION
+        if (errorData is Map && errorData['error'] == 'Invalid or expired refresh token') {
+          debugPrint('Refresh token is confirmed invalid or expired. Returning failedInvalidToken.');
+          return RefreshStatus.failedInvalidToken; // Yahi logout trigger karega
+        }
+      }
+
+      // Koi bhi aur error (500, network error, etc.)
+      debugPrint('Refresh token failed due to other error (e.g., network). Returning failedOther.');
+      return RefreshStatus.failedOther; // Is par logout nahi hoga
     }
   }
+
 }

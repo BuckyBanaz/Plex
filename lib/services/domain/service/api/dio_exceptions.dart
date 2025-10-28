@@ -43,6 +43,7 @@ class UnauthorizedException extends DioException {
   UnauthorizedException(
       RequestOptions r,
       ) : super(requestOptions: r);
+
   @override
   String toString() {
     const message = ErrorStrings.unAuthorized;
@@ -56,15 +57,18 @@ void logout() async {
   try {
     await Get.find<DatabaseService>().clearPreference();
     Get.reset();
-    // initializeServices();
+    await Get.putAsync(() => AppService().init());();
+
+    // Yeh app ko restart kar dega
     // ignore: use_build_context_synchronously
     Phoenix.rebirth(TempContext.context);
-    showToast(message: 'Authentication Failed. Please restart the app and try again.');
+
+    showToast(
+        message: 'Authentication Failed. Please restart the app and try again.');
   } catch (e) {
     debugPrint(e.toString());
     showToast(
-        message: "Authentication Failed. Please restart the app and try again."
-    );
+        message: "Authentication Failed. Please restart the app and try again.");
   }
 }
 
@@ -144,56 +148,3 @@ class DefaultException extends DioException {
 String errorToString(RequestOptions ro, String message) {
   return '\nAPI Error:${ro.method} ${ro.uri}\nMessage: $message';
 }
-
-
-// class InternalServerErrorException extends DioException {
-//   InternalServerErrorException(RequestOptions r) : super(requestOptions: r);
-//   @override
-//   String toString() => ErrorStrings.internalServerError;
-// }
-//
-// class ConflictException extends DioException {
-//   ConflictException(RequestOptions r) : super(requestOptions: r);
-//   @override
-//   String toString() => ErrorStrings.conflict;
-// }
-//
-// class UnauthorizedException extends DioException {
-//   UnauthorizedException(RequestOptions r) : super(requestOptions: r);
-//   @override
-//   String toString() {
-//     logout();
-//     return ErrorStrings.unAuthorized;
-//   }
-// }
-//
-// void logout() {
-//   try {
-//     if (gt.Get.isRegistered<DatabaseService>()) {
-//       gt.Get.find<DatabaseService>().clearPreference();
-//     }
-//     gt.Get.reset();
-//     // Rebirth if using Phoenix, safe-guarded
-//     try {
-//       Phoenix.rebirth(TempContext.context);
-//     } catch (_) {}
-//   } catch (_) {}
-// }
-//
-// class NotFoundException extends DioException {
-//   NotFoundException(RequestOptions r) : super(requestOptions: r);
-//   @override
-//   String toString() => ErrorStrings.noFoundError;
-// }
-//
-// class NoInternetConnectionException extends DioException {
-//   NoInternetConnectionException(RequestOptions r) : super(requestOptions: r);
-//   @override
-//   String toString() => ErrorStrings.connectionError;
-// }
-//
-// class DeadlineExceededException extends DioException {
-//   DeadlineExceededException(RequestOptions r) : super(requestOptions: r);
-//   @override
-//   String toString() => ErrorStrings.timeOut;
-// }

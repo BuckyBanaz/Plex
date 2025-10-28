@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart' show Colors;
 import 'package:get/get.dart';
+import 'package:plex_user/routes/appRoutes.dart';
+import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 
 import '../../../models/driver_order_model.dart';
+import '../../../models/driver_user_model.dart';
 import '../../../screens/driver/home/components/new_order_sheet.dart';
 
 class DriverHomeController extends GetxController {
 
+  final DatabaseService db = Get.find<DatabaseService>();
+
+  final Rx<DriverUserModel?> currentDriver = Rx<DriverUserModel?>(null);
+  final Rx<bool> isLoading = false.obs;
   final Map<String, dynamic> newOrder = {
     'earnings': '10.00',
     'isPaid': true,
@@ -104,10 +111,11 @@ class DriverHomeController extends GetxController {
   void onInit() {
     super.onInit();
 
-
-    Future.delayed(const Duration(milliseconds: 100), () {
+    _loadDriverData();
+    Future.delayed(const Duration(milliseconds: 100), () {;
       showNewOrderSheet();
     });
+
   }
 
 
@@ -121,7 +129,23 @@ class DriverHomeController extends GetxController {
     );
   }
 
+  Future<void> _loadDriverData() async {
+    try {
+      isLoading.value = true;
 
+      final driverData = db.driver;
+      if (driverData != null) {
+        currentDriver.value = driverData;
+        print("User:${currentDriver.value?.name}");
+      } else {
+        print("No driver data found in local DB.");
+      }
+    } catch (e) {
+      print("Failed to load driver data: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
   void rejectOrder() {
     Get.back();
 
@@ -129,5 +153,7 @@ class DriverHomeController extends GetxController {
 
   void acceptOrder() {
     Get.back();
+    db.clearPreference();
+    Get.offAllNamed(AppRoutes.splash);
   }
 }

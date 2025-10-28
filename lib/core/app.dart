@@ -10,12 +10,31 @@ import '../services/translations/locale_controller.dart';
 import 'app_theme.dart';
 
 
+class TempContext {
+  static late BuildContext context;
+}
+
+
+class AppLifecycleObserver extends WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // checkConnection();
+      // checkInitialMessage();
+    }
+  }
+}
 
 class Plex extends StatelessWidget {
-  const Plex({super.key});
+   Plex({super.key});
+  final AppLifecycleObserver lifecycleObserver = AppLifecycleObserver();
+
   @override
   Widget build(BuildContext context) {
+
     final localeCtrl = Get.find<LocaleController>();
+    WidgetsBinding.instance.addObserver(lifecycleObserver);
+    TempContext.context = context;
 
     return Obx(() {
       return GetMaterialApp(
@@ -33,7 +52,7 @@ class Plex extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        initialRoute: AppRoutes.driverDashBoard,
+        initialRoute: AppRoutes.login,
         getPages: AppRoutes.routes,
         defaultTransition: Transition.cupertino,
       );

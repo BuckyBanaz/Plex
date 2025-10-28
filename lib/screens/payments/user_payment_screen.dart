@@ -42,15 +42,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
           SizedBox(height: 16,),
           OtherPaymentOptions(),
 
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: FareDetailsSection(),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(16.0),
+          //   child: FareDetailsSection(),
+          // ),
         ],
       ),
       bottomNavigationBar: CustomButton(onTap: (){
-        Get.offAllNamed(AppRoutes.bookingConfirm);
-      },label: "Pay Now",),
+        c.proceedPayment();
+        // Get.offAllNamed(AppRoutes.bookingConfirm);
+      },widget: Center(
+        child: Text(
+          "Pay Now ${c.bookingController.amountPayable.toStringAsFixed(2)}",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),),
     );
   }
 }
