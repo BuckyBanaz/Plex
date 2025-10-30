@@ -139,11 +139,16 @@
   "authorized_email": "ahmed@company.com",
 
 
-  "getReady": "Get ready",
-  "moveOn": "Move on!",
-  "bookNow": "Book now!",
-  "min": "min",
-  "timerValue": "10",
+  "location_permission": "Location Permission",
+  "location_permission_description": "To show available drivers near you, PLEX needs access to your current location.",
+  "allow_permission": "Allow Permission",
+  "not_now": "Not Now",
+  "please_grant_location_permission": "Please grant location permission.",
+  "location_determined": "Location determined. Sending update...",
+  "location_not_available": "Location not available",
+  "could_not_get_location": "Could not get location",
+  "error_loading_location": "Error loading location",
+  "could_not_find_address": "Could not find address",
 
   "sendAnything": "Send Anything,",
   "anywhere": "Anywhere",
@@ -155,5 +160,171 @@
   "deliveries": "Deliveries",
   "myOrder": "My Order",
   "support": "Support",
-  "setting": "Setting"
+  "setting": "Setting",
+  "local_delivery_title": "Local Delivery",
+  "city_to_city_title": "City to city",
+  "book_now_subtitle": "Book now!",
+  "delivery_time_badge": "15 mins",
+  "pick_up_from": "Pick Up From",
+  "loading_location": "Loading location...",
+
+  "nav_home": "Home",
+  "nav_orders": "Orders",
+  "nav_notification": "Notification",
+  "nav_profile": "Profile",
+  "profile_screen_title": "Profile Screen",
+
+
+
+  "booking_screen_title": "Booking Screen",
+  "select_location": "Select Location",
+  "collect_from": "Collect from",
+  "tap_to_select_location": "Tap to select location",
+  "delivery_to": "Delivery to",
+  "recipient_name": "Recipient name",
+  "phone_number_placeholder": "+91 XXXXXXXXXX",
+  "take_around": "Take around 20 min",
+  "collect_time": "Collect time",
+  "vehicle_type": "Vehicle Type",
+  "weight": "Weight",
+  "description": "Description",
+  "optional_photo_upload": "Optional photo upload",
+  "immediate": "Immediate",
+  "collect_time_range": "Collect time 10–20 min",
+  "delivery_to_receiver": "Delivery to receiver\n1–2 hours",
+  "schedule": "Schedule",
+  "choose_available_time": "Choose available time",
+  "plan_2_day_ahead": "Plan 2 day ahead",
+  "map_view": "Map View",
+
+  "select_image_source": "Select Image Source",
+  "camera": "Camera",
+  "gallery": "Gallery",
+  "cancel": "Cancel",
+  "photo_upload": "Photo Upload",
+  "optional": "(Optional)",
+  "add_more_photos": "Add More Photos",
+
+  "required_field": "Required field",
+  "enter_valid_phone": "Enter a valid phone number",
+  "country_code_mismatch": "Country code does not match selected country",
+  "enter_valid_country_phone": "Enter a valid phone number for @country",
+
+  "enter_description": "Enter description here...",
+
+  "permission_required": "Permission Required",
+  "permission_denied": "Permission Denied",
+  "please_enable_permissions": "Please enable permissions from your app settings to continue.",
+  "permission_required_to_select": "Permission is required to select photos. Please try again.",
+  "error": "Error",
+  "fill_all_fields": "Please fill all required fields.",
+  "estimate_failed": "Estimate Failed",
+  "unable_to_get_estimate": "Unable to get estimate",
+  "failed_fetch_estimate": "Failed to fetch estimate",
+  "coupon_removed": "Coupon Removed",
+  "coupon_removed_message": "Coupon has been removed.",
+  "order_placed": "Order Placed!",
+  "placing_order": "Placing your order for ₹@amount...",
+  "enter_dropoff_details": "Enter drop off details",
+  "enter_pickup_details": "Enter pickup details",
+
+  "tap_select_location": "Tap to select location",
+  "mobile_number": "Mobile Number",
+  "house_building": "House No/Flat No/Building Name",
+  "pincode": "Pincode",
+  "save_address_as": "Save address as:",
+  "home": "Home",
+  "shop": "Shop",
+  "other": "Other",
+  "confirm": "Confirm",
+  "change": "Change",
+
+  "confirm_details": "Confirm Details",
+  "order_now": "Order Now",
+  "pickup_location": "Pickup Location",
+  "delivery_location": "Delivery Location",
+  "contact_number": "Contact number",
+  "distance": "Distance",
+  "eta": "ETA",
+  "discount_offers": "Discount offers",
+  "coupon_applied": "You applied 20 with @coupon_code",
+  "remove": "Remove",
+  "no_coupon_applied": "No coupon applied.",
+  "estimated_price": "Estimated Price",
+  "trip_fare": "Trip fare",
+  "coupon_discount": "Coupon Discount",
+  "gst_charges": "GST Charges (included in fare)",
+  "total_fare": "Total fare",
+  "amount_payable": "Amount payable",
+  "booking_confirmed": "Booking Confirmed",
+  "congratulations_shipment": "Congratulations! Your shipment has been placed",
+
+
+
+  "payment_title": "Payment",
+  "saved_cards": "Saved Cards",
+  "add_more_card": "Add More Card",
+  "add_new_card": "Add New Card",
+  "name_on_card": "Name on card",
+  "card_number": "Card number",
+  "expiry_date": "Expiry date",
+  "cvv": "CVV",
+  "add_card_button": "Add Card",
+  "other_payment_options": "Other Payment options",
+  "pay_now": "Pay Now @amount",
+  "processing_payment": "Processing Payment",
+  "please_wait": "Please wait...",
+  "success_card_added": "New card added successfully!",
+  "enter_valid_card_number": "Please enter a valid 16-digit card number",
+  "enter_name_on_card": "Please enter name on card",
+  "enter_expiry_date": "Enter MM/YY",
+  "enter_cvv": "Enter 3-digit CVV",
+
+
+  "select_pickup_location": "Select Pickup Location",
+  "select_dropoff_location": "Select Dropoff Location",
+  "search_location_hint": "Search location...",
+  "location_error_enable_service": "Please enable location service.",
+  "location_permission_denied": "Location permissions are denied",
+  "location_permission_denied_forever": "Location permission permanently denied.",
+  "unknown_location": "Unknown location",
+  "confirm_location": "Confirm Location",
+
+
+
+
+
+
+
+
+
+
+
+
+
+  "partner": "Partner",
+  "driver": "Driver",
+  "driverId": "Driver Id: ",
+  "vehicleNo": "Vehicle NO. ",
+  "myEarnings": "My Earnings",
+  "status": "Status",
+  "online": "Online",
+  "offline": "Offline",
+  "openToAnyDelivery": "Open to any delivery",
+  "deliveryOrdersFound": "Delivery orders found!",
+  "viewDetails": "View details!",
+  "newOrder": "New Order",
+  "earnings": "Earnings",
+  "alreadyPaid": "Already Paid",
+  "pickup": "Pickup",
+  "delivery": "Delivery",
+  "rejectOrder": "Reject Order",
+  "acceptOrder": "Accept Order",
+  "recentHistory": "Recent History",
+
+  "paid": "Paid",
+  "unpaid": "Unpaid",
+  "orderNo": "Order No."
+
+
 }

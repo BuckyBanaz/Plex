@@ -22,13 +22,13 @@ class PhotoUploadSection extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              "Select Image Source",
+              "select_image_source".tr,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
             ListTile(
               leading: Icon(Icons.camera_alt),
-              title: Text("Camera"),
+              title: Text("camera".tr),
               onTap: () {
                 Get.back();
                 controller.pickImage(ImageSource.camera);
@@ -36,7 +36,7 @@ class PhotoUploadSection extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(Icons.photo_library),
-              title: Text("Gallery"),
+              title: Text("gallery".tr),
               onTap: () {
                 Get.back();
                 controller.pickImage(ImageSource.gallery);
@@ -45,7 +45,7 @@ class PhotoUploadSection extends StatelessWidget {
             SizedBox(height: 8),
             TextButton(
               onPressed: () => Get.back(),
-              child: Text("Cancel", style: TextStyle(color: Colors.red)),
+              child: Text("cancel".tr, style: TextStyle(color: Colors.red)),
             ),
           ],
         ),
@@ -120,7 +120,7 @@ class PhotoUploadSection extends StatelessWidget {
                   width: 1.5,
                 ),
               ),
-              child: const Center(
+              child:  Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -128,13 +128,13 @@ class PhotoUploadSection extends StatelessWidget {
                         color: AppColors.primary, size: 40),
                     SizedBox(height: 8),
                     Text(
-                      "Photo Upload",
+                      "photo_upload".tr,
                       style: TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      "(Optional)",
+                      "optional".tr,
                       style: TextStyle(
                           color: AppColors.primary, fontSize: 12),
                     ),
@@ -150,9 +150,9 @@ class PhotoUploadSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12.0),
                 border: Border.all(color: AppColors.primary, width: 1),
               ),
-              child: const Center(
+              child:  Center(
                 child: Text(
-                  "Add More Photos",
+                  "add_more_photos".tr,
                   style: TextStyle(
                       color: AppColors.primary, fontWeight: FontWeight.bold),
                 ),

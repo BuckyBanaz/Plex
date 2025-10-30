@@ -41,6 +41,8 @@ class AppService extends GetxService {
 
     /// Initialize and put the ShipmentApi
     Get.put( ShipmentApi(apiService.dio));
+
+
 //
 //    /// Initialize and put the SearchApi
 //    Get.put( SearchApi(apiService.dio));

@@ -92,7 +92,10 @@ class ApiService {
 
     final baseOptions = BaseOptions(
       baseUrl: isExternal ? '' : customServerURL ?? serverUrl,
-
+      connectTimeout: const Duration(milliseconds: 10000),
+      receiveTimeout: const Duration(milliseconds: 15000),
+      sendTimeout: const Duration(milliseconds: 10000),
+            responseType: ResponseType.json,
       validateStatus: (status) {
         return status != null && status >= 200 && status < 300;
       },
@@ -102,7 +105,7 @@ class ApiService {
       dio = Dio(baseOptions);
     } else {
       dio = Dio(baseOptions);
-      //..interceptors.add(CertificatePinningInterceptor(allowedSHAFingerprints: allowedSHAFingerprints));
+      // dio.interceptors.add(CertificatePinningInterceptor(allowedSHAFingerprints: allowedSHAFingerprints));
     }
 
     dio.interceptors.addAll({

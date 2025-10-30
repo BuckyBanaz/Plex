@@ -49,19 +49,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      Positioned(
-                        top: 0,
-                        right: 0,
-                        child: IconButton(
-                          onPressed: () =>
-                              Get.toNamed(AppRoutes.driverNotification),
-                          icon: Icon(
-                            IconlyLight.notification,
-                            color: AppColors.textColor,
-                            size: 28,
-                          ),
-                        ),
-                      ),
 
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,6 +57,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                             titleColor: AppColors.textColor,
                             subtitleColor: AppColors.textColor,
                             showLanguageButton: false,
+                            iconButton:IconButton(
+                              onPressed: () =>
+                                  Get.toNamed(AppRoutes.driverNotification),
+                              icon: Icon(
+                                IconlyLight.notification,
+                                color: AppColors.textColor,
+                                size: 28,
+                              ),
+                            ),
+                            showIcon: true,
                             padding: EdgeInsets.symmetric(horizontal: 0),
                           ),
 
@@ -82,7 +79,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Partner',
+                                    'partner'.tr,
                                     style: TextStyle(
                                       color: AppColors.primary,
                                       fontSize: 14,
@@ -91,7 +88,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    controller.currentDriver.value?.name ?? "Driver",
+                                    controller.currentDriver.value?.name ?? "driver".tr,
                                     style: TextStyle(
                                       color: AppColors.textColor,
                                       fontSize: 16,
@@ -105,7 +102,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                 children: [
                                   Text.rich(
                                     TextSpan(
-                                      text: 'Driver Id: ',
+                                      text: 'driverId'.tr,
                                       style: TextStyle(
                                         color: AppColors.primary,
                                         fontSize: 13,
@@ -126,7 +123,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                   const SizedBox(height: 4),
                                   Text.rich(
                                     TextSpan(
-                                      text: 'Vehicle NO. ',
+                                      text: 'vehicleNo'.tr,
                                       style: TextStyle(
                                         color: AppColors.primary,
                                         fontSize: 13,
@@ -152,7 +149,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                           const Spacer(),
 
                           Text(
-                            'My Earnings',
+                            'myEarnings'.tr,
                             style: TextStyle(
                               color: AppColors.primary,
                               fontSize: 14,
@@ -172,13 +169,15 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                         ],
                       ),
 
-                      Positioned(
-                        right: 0,
+                      Positioned.directional(
+                        textDirection: Directionality.of(context), // This line is important
+                        end: 0, // 'end' will be 'right' in LTR and 'left' in RTL
                         bottom: -10,
                         child: Image.asset(
                           'assets/images/driver.png',
                           height: h * 0.12,
                           fit: BoxFit.contain,
+                            matchTextDirection: true
                         ),
                       ),
                     ],
@@ -211,7 +210,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Status - ${isOnline ? "Online" : "Offline"}',
+                                '${'status'.tr} - ${isOnline ? 'online'.tr : 'offline'.tr}',
                                 style: TextStyle(
                                   color: AppColors.secondary,
                                   fontWeight: FontWeight.w700,
@@ -220,7 +219,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Open to any delivery',
+                                'openToAnyDelivery'.tr,
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontSize: 12,

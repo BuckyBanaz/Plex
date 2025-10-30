@@ -21,7 +21,7 @@ class LocationController extends GetxController {
   var loadingLocation = false;
   var isButtonLoading = false;
 
-  var currentAddress = 'Loading location...'.obs;
+  var currentAddress = 'loading_location'.tr.obs;
 
   // throttle control: minimum duration between API updates
   final Duration minUpdateInterval = const Duration(seconds: 8);
@@ -73,8 +73,8 @@ class LocationController extends GetxController {
       await _startPositionStreamIfPermitted();
     } else if (status.isDenied) {
       Get.snackbar(
-        "Error",
-        "Please Grant Location Permission.",
+        "error".tr,
+        "please_grant_location_permission".tr,
         snackPosition: SnackPosition.BOTTOM,
       );
     } else if (status.isPermanentlyDenied) {
@@ -137,7 +137,7 @@ class LocationController extends GetxController {
         Get.offAllNamed(AppRoutes.userDashBoard);
       }
     } catch (error) {
-      currentAddress.value = 'Could not get location';
+      currentAddress.value = 'could_not_get_location'.tr;
       showToast(message: error.toString());
     }
   }
@@ -154,10 +154,10 @@ class LocationController extends GetxController {
       if (position != null) {
         await _fetchAndUpdateAddress(position);
       } else {
-        currentAddress.value = 'Location not available';
+        currentAddress.value = 'location_not_available'.tr;
       }
     } catch (e) {
-      currentAddress.value = 'Error loading location';
+      currentAddress.value = 'error_loading_location'.tr;
     } finally {
       loadingLocation = false;
       update();
@@ -169,7 +169,7 @@ class LocationController extends GetxController {
       String address = await gl.getAddressFromPosition(position);
       currentAddress.value = address;
     } catch (e) {
-      currentAddress.value = 'Could not find address';
+      currentAddress.value = 'could_not_find_address'.tr;
       debugPrint('Error getting address: $e');
     } finally {
       update();

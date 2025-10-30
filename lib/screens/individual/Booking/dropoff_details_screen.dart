@@ -1,6 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconly/iconly.dart'; // Aapke pichle code se import
+import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/modules/controllers/booking/booking_controller.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
@@ -8,6 +9,7 @@ import 'package:plex_user/screens/widgets/custom_text_field.dart';
 import '../../map/location_picker_screen.dart';
 import 'components/address_chip.dart';
 import 'components/location_card.dart';
+
 class DropOffDetailsScreen extends StatelessWidget {
   const DropOffDetailsScreen({super.key});
 
@@ -20,11 +22,11 @@ class DropOffDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: const Icon(IconlyLight.arrow_left_2),
+          icon: Icon(CupertinoIcons.back),
         ),
-        title: const Text(
-          "Enter drop off details",
-          style: TextStyle(
+        title: Text(
+          "enter_dropoff_details".tr,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -37,85 +39,82 @@ class DropOffDetailsScreen extends StatelessWidget {
         children: [
           Obx(() => LocationCard(
             onTap: () async {
-              final result = await Get.to(() => const LocationPickerScreen(isPickup: false));
+              final result =
+              await Get.to(() => const LocationPickerScreen(isPickup: false));
               if (result != null) {
                 controller.dLocality.value = result['address'];
-                controller.dpincodeController.text  = result['pincode'];
+                controller.dpincodeController.text = result['pincode'];
                 controller.dLat.value = result['lat'];
                 controller.dLng.value = result['lng'];
               }
             },
             location: controller.dLocality.value.isEmpty
-                ? "Tap to select location"
+                ? "tap_select_location".tr
                 : controller.dLocality.value,
             fullLocation: controller.dLocality.value,
           )),
-
           const SizedBox(height: 24.0),
-
-
           SimpleTextField(
             controller: controller.dnameController,
-            labelText: "Full Name",
+            labelText: "full_name".tr,
+
           ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.dmobileController,
-            labelText: "Mobile Number",
+            labelText: "mobile_number".tr,
             keyboardType: TextInputType.phone,
-          ),
 
+          ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.dlankmarkController,
-            labelText: "House No/Flat No/ Building Name",
+            labelText: "house_building".tr,
+
           ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.dpincodeController,
-            labelText: "Pincode",
+            labelText: "pincode".tr,
             keyboardType: TextInputType.number,
+
           ),
           const SizedBox(height: 24.0),
+          Text(
+            "save_address_as".tr,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
 
-          const Text(
-            "Save address as:",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12.0),
           Obx(
                 () => Row(
               children: [
                 AddressChip(
-                  label: "Home",
+                  label: "home".tr,
                   isSelected: controller.dselectedAddressType.value == "Home",
                   onTap: () => controller.dselectAddressType("Home"),
                 ),
                 const SizedBox(width: 12.0),
                 AddressChip(
-                  label: "Shop",
+                  label: "shop".tr,
                   isSelected: controller.dselectedAddressType.value == "Shop",
                   onTap: () => controller.dselectAddressType("Shop"),
                 ),
                 const SizedBox(width: 12.0),
                 AddressChip(
-                  label: "Other",
+                  label: "other".tr,
                   isSelected: controller.dselectedAddressType.value == "Other",
                   onTap: () => controller.dselectAddressType("Other"),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
-
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8.0),
-
         child: Obx(() {
-
           final bool isValid = controller.isDropOffFormValid.value;
-
           final Color buttonColor = isValid ? AppColors.primary : Colors.grey[300]!;
           final Color textColor = isValid ? Colors.white : Colors.black54;
 
@@ -123,7 +122,7 @@ class DropOffDetailsScreen extends StatelessWidget {
             bg: buttonColor,
             label: Center(
               child: Text(
-                "Confirm",
+                "confirm".tr,
                 style: TextStyle(
                   color: textColor,
                   fontSize: 18.0,
@@ -137,12 +136,4 @@ class DropOffDetailsScreen extends StatelessWidget {
       ),
     );
   }
-
-
-
-
-
-
-
-
 }

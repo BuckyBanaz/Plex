@@ -35,8 +35,8 @@ class CollectTimeSelector extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "Immediate",
+                         Text(
+                           "immediate".tr,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -53,16 +53,16 @@ class CollectTimeSelector extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      "Collect time 10–20 min",
+                     Text(
+                       "collect_time_range".tr,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.black54,
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      "Delivery to receiver\n1–2 hours",
+                     Text(
+                       "delivery_to_receiver".tr,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.black87,
@@ -100,8 +100,8 @@ class CollectTimeSelector extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "Schedule",
+                         Text(
+                           "schedule".tr,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
@@ -118,8 +118,8 @@ class CollectTimeSelector extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      "Choose available time",
+                     Text(
+                       "choose_available_time".tr,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.black54,
@@ -127,7 +127,7 @@ class CollectTimeSelector extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Row(
-                      children: const [
+                      children:  [
                         Icon(
                           Icons.access_time,
                           size: 14,
@@ -135,7 +135,7 @@ class CollectTimeSelector extends StatelessWidget {
                         ),
                         SizedBox(width: 4),
                         Text(
-                          "Plan 2 day ahead",
+                          "plan_2_day_ahead".tr,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.black54,

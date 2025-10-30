@@ -34,10 +34,14 @@ class DriverMainNavController extends GetxController {
     IconlyLight.profile,
   ];
 
-  final List<String> labels = const [
-    "Home", "Orders", "History", "Profile"
+  final List<String> _labelKeys = [
+    'nav_home'.tr,
+    'nav_orders'.tr,
+    'nav_notification'.tr,
+    'nav_profile'.tr,
   ];
 
+  String labelFor(int index) => _labelKeys[index].tr;
   void setIndex(int i) => currentIndex.value = i;
 }
 
@@ -69,7 +73,7 @@ class DriverMainScreen extends StatelessWidget {
                 Icon(c.icons[index], size: 22.sp, color: color),
                 SizedBox(height: 0.6.h),
                 Text(
-                  c.labels[index],
+                  c.labelFor(index),
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,

@@ -71,6 +71,7 @@ dependencies:
   google_maps_flutter: ^2.13.1
   url_launcher: ^6.3.2
   webview_flutter: ^4.13.0
+  flutter_stripe: ^12.1.0
 
 
 

@@ -26,29 +26,39 @@ class _BookingConfirmScreenState extends State<BookingConfirmScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Booking Confirmed",
+        title: Text(
+          "booking_confirmed".tr,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(AppAssets.bookingConfirm, height: 150),
-            const SizedBox(height: 16),
-            Text(
-              "Congratulations! Your shipment has been placed",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-                color: AppColors.cardBg,
+
+        // ADD THESE TWO LINES
+        child: SizedBox(
+          width: double.infinity, // <-- This forces the Column to be full-width
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center, // <-- This centers children inside the full-width Column
+            children: [
+              Image.asset(
+                AppAssets.bookingConfirm,
+                height: 150,
+                matchTextDirection: true,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                "congratulations_shipment".tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.cardBg,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

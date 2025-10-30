@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
 import 'package:plex_user/screens/widgets/custom_text_field.dart';
@@ -21,11 +21,11 @@ class PickupDetailsScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: const Icon(IconlyLight.arrow_left_2),
+          icon: const Icon(CupertinoIcons.back),
         ),
-        title: const Text(
-          "Enter pickup details",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        title: Text(
+          "enter_pickup_details".tr,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 1,
@@ -33,7 +33,6 @@ class PickupDetailsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // LocationCard(
           Obx(() => LocationCard(
             onTap: () async {
               final result = await Get.to(() => const LocationPickerScreen(isPickup: true));
@@ -45,7 +44,7 @@ class PickupDetailsScreen extends StatelessWidget {
               }
             },
             location: controller.pLocality.value.isEmpty
-                ? "Tap to select location"
+                ? "tap_select_location".tr
                 : controller.pLocality.value,
             fullLocation: controller.pLocality.value,
           )),
@@ -53,63 +52,63 @@ class PickupDetailsScreen extends StatelessWidget {
 
           SimpleTextField(
             controller: controller.pNameController,
-            labelText: "Full Name",
+            labelText: "full_name".tr,
+
           ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.pMobileController,
-            labelText: "Mobile Number",
+            labelText: "mobile_number".tr,
             keyboardType: TextInputType.phone,
+
           ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.pLandMarkController,
-            labelText: "House No/Flat No/ Building Name",
+            labelText: "house_building".tr,
+
           ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.pPincodeController,
-            labelText: "Pincode",
+            labelText: "pincode".tr,
             keyboardType: TextInputType.number,
+
           ),
           const SizedBox(height: 24.0),
 
-          const Text(
-            "Save address as:",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          Text(
+            "save_address_as".tr,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+
           ),
           const SizedBox(height: 12.0),
-          Obx(
-            () => Row(
-              children: [
-                AddressChip(
-                  label: "Home",
-                  isSelected: controller.pselectedAddressType.value == "Home",
-                  onTap: () => controller.pselectAddressType("Home"),
-                ),
-                const SizedBox(width: 12.0),
-                AddressChip(
-                  label: "Shop",
-                  isSelected: controller.pselectedAddressType.value == "Shop",
-                  onTap: () => controller.pselectAddressType("Shop"),
-                ),
-                const SizedBox(width: 12.0),
-                AddressChip(
-                  label: "Other",
-                  isSelected: controller.pselectedAddressType.value == "Other",
-                  onTap: () => controller.pselectAddressType("Other"),
-                ),
-              ],
-            ),
-          ),
+          Obx(() => Row(
+            children: [
+              AddressChip(
+                label: "home".tr,
+                isSelected: controller.pselectedAddressType.value == "Home",
+                onTap: () => controller.pselectAddressType("Home"),
+              ),
+              const SizedBox(width: 12.0),
+              AddressChip(
+                label: "shop".tr,
+                isSelected: controller.pselectedAddressType.value == "Shop",
+                onTap: () => controller.pselectAddressType("Shop"),
+              ),
+              const SizedBox(width: 12.0),
+              AddressChip(
+                label: "other".tr,
+                isSelected: controller.pselectedAddressType.value == "Other",
+                onTap: () => controller.pselectAddressType("Other"),
+              ),
+            ],
+          )),
         ],
       ),
-
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8.0),
-
         child: Obx(() {
-
           final bool isValid = controller.isPickUpFormValid.value;
 
           final Color buttonColor = isValid ? AppColors.primary : Colors.grey[300]!;
@@ -119,7 +118,7 @@ class PickupDetailsScreen extends StatelessWidget {
             bg: buttonColor,
             label: Center(
               child: Text(
-                "Confirm",
+                "confirm".tr,
                 style: TextStyle(
                   color: textColor,
                   fontSize: 18.0,

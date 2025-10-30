@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:plex_user/constant/app_colors.dart';
 
 class AddressChip extends StatelessWidget {
   final String label;
@@ -22,14 +23,14 @@ class AddressChip extends StatelessWidget {
           color: isSelected ? const Color(0xFFFEF3E7) : Colors.white, // Orange bg
           borderRadius: BorderRadius.circular(10.0),
           border: Border.all(
-            color: isSelected ? Colors.orange : Colors.grey[400]!,
+            color: isSelected ? AppColors.primary : Colors.grey[400]!,
             width: 1.5,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.orange : Colors.black,
+            color: isSelected ? AppColors.primary : Colors.black,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),

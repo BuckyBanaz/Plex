@@ -40,7 +40,7 @@ class OrderCard extends StatelessWidget {
 
             _buildAddressRow(
               icon: Icons.my_location,
-              title: 'Pickup Center',
+              title: 'pickup'.tr,
               line1: order.pickupAddressLine1,
               line2: order.pickupAddressLine2,
             ),
@@ -48,7 +48,7 @@ class OrderCard extends StatelessWidget {
 
             _buildAddressRow(
               icon: IconlyLight.location,
-              title: 'Delivery',
+              title: 'delivery'.tr,
               line1: order.deliveryAddressLine1,
               line2: order.deliveryAddressLine2,
             ),
@@ -78,7 +78,7 @@ class OrderCard extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             Text(
-              'Order No. ${order.orderNumber}',
+              '${'orderNo'.tr} ${order.orderNumber}',
               style: const TextStyle(fontSize: 14),
             ),
           ],
@@ -102,7 +102,7 @@ class OrderCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  order.isPaid ? 'Paid' : 'Unpaid',
+                  order.isPaid ? 'paid'.tr : 'unpaid'.tr,
                   style: TextStyle(
                     color: order.isPaid
                         ? AppColors.greenPaid
@@ -182,7 +182,7 @@ class OrderCard extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: const Text('Decline'),
+            child: Text('rejectOrder'.tr),
           ),
         ),
         const SizedBox(width: 12),
@@ -197,7 +197,7 @@ class OrderCard extends StatelessWidget {
               ),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: const Text('Accept order'),
+            child: Text('acceptOrder'.tr),
           ),
         ),
       ],

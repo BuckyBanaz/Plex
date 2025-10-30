@@ -65,6 +65,7 @@ class VehicleTypeSelector extends StatelessWidget {
         ),
         child: Center(
           child: SvgPicture.asset(
+            matchTextDirection: true,
             svgAsset,
             height: 30,
             width: 30,

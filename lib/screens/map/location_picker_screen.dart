@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -16,7 +17,11 @@ class LocationPickerScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isPickup ? "Select Pickup Location" : "Select Dropoff Location"),
+        leading: IconButton(
+          onPressed: () => Get.back(),
+          icon:  Icon(CupertinoIcons.back),
+        ),
+        title: Text(isPickup ? "select_pickup_location".tr : "select_dropoff_location".tr),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -61,9 +66,9 @@ class LocationPickerScreen extends StatelessWidget {
                     child: TextField(
                       controller: controller.searchController,
                       onChanged: controller.onSearchChanged,
-                      decoration: const InputDecoration(
+                      decoration:  InputDecoration(
                         prefixIcon: Icon(Icons.search),
-                        hintText: 'Search location...',
+                        hintText: 'search_location_hint'.tr,
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
@@ -139,25 +144,44 @@ class LocationPickerScreen extends StatelessWidget {
               bottom: 20,
               left: 16,
               right: 16,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () {
-                  Get.back(result: {
-                    "address": controller.address.value,
-                    "fullAddress": controller.fullAddress.value,
-                    "pincode": controller.pincode.value,
-                    "lat": controller.currentLatLng.value.latitude,
-                    "lng": controller.currentLatLng.value.longitude,
-                  });
-                },
-                child: const Text("Confirm Location",
-                    style: TextStyle(color: Colors.white, fontSize: 16)),
-              ),
+              child: Obx(() {
+                final loading = controller.isConfirming.value;
+
+                return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                    loading ? Colors.grey : AppColors.primary, // disable color
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: loading
+                      ? null // disable tap
+                      : () {
+                    Get.back(result: {
+                      "address": controller.address.value,
+                      "fullAddress": controller.fullAddress.value,
+                      "pincode": controller.pincode.value,
+                      "lat": controller.currentLatLng.value.latitude,
+                      "lng": controller.currentLatLng.value.longitude,
+                    });
+                  },
+                  child: loading
+                      ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                      :  Text(
+                    "confirm_location".tr,
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                );
+              }),
             ),
+
           ],
         );
       }),

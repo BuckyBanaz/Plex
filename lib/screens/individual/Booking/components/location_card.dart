@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 
@@ -41,10 +42,10 @@ class LocationCard extends StatelessWidget {
               // 5. Place the TextButton as the last child
               TextButton(
                 onPressed: onTap,
-                child: const Text(
-                  "Change",
+                child:  Text(
+                  "change".tr,
                   style: TextStyle(
-                    color: Colors.orange,
+                    color: AppColors.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                   ),

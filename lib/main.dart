@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
@@ -21,7 +22,7 @@ Future<void> main() async {
   // final localeCtrl = Get.put(LocaleController());
   // await localeCtrl.init();
 
-
+  Stripe.publishableKey = "pk_test_51SLeKk6j6LVPNcUmY7DCzoPkKCjUw6ZRJrvPYkBuOyKkPVrh1asHolMVogUcibjlXZa21iWdAWpqOT9PE3dkLu8x00j0btf3Fx";
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

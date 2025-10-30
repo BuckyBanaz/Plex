@@ -153,7 +153,7 @@ class DriverHomeController extends GetxController {
 
   void acceptOrder() {
     Get.back();
-    db.clearPreference();
-    Get.offAllNamed(AppRoutes.splash);
+    // db.clearPreference();
+    // Get.offAllNamed(AppRoutes.splash);
   }
 }

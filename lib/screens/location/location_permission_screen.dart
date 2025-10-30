@@ -40,15 +40,15 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                   ),
                   const SizedBox(height: 10),
 
-                  const Text(
-                    'Location Permission',
+                   Text(
+                    'location_permission'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
 
-                  const Text(
-                    'To show available drivers near you, PLEX needs access to your current location.',
+                   Text(
+                    'location_permission_description'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
                   ),
@@ -64,8 +64,8 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                     ),
                     child: controller.isButtonLoading
                         ? CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Allow Permission',
+                        :  Text(
+                            'allow_permission'.tr,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -76,8 +76,8 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                   TextButton(
                     // ** 3. UPDATE OnPressed **
                     onPressed: controller.skipPermissionAndNavigate,
-                    child: const Text(
-                      'Not Now',
+                    child:  Text(
+                      'not_now'.tr,
                       style: TextStyle( fontSize: 16),
                     ),
                   ),

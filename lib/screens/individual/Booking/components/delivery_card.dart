@@ -197,8 +197,8 @@ class DeliveryCard extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: onMapViewTap,
-                      child: const Text(
-                        "Map View",
+                      child:  Text(
+                        'map_view'.tr,
                         style: TextStyle(
                           color: AppColors.primary,
                           fontSize: 13,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/modules/controllers/payment/stripe_payment_controller.dart';
 
 import '../../../common/Toast/toast.dart';
 import '../../../routes/appRoutes.dart';
@@ -12,6 +13,7 @@ class UserPaymentController extends GetxController {
   final RxInt currentPage = 1.obs;
   var isLoading = false.obs;
   final BookingController bookingController = Get.find<BookingController>();
+  final StripePaymentController stripeController = Get.put(StripePaymentController());
 
   final RxString selectedPaymentOption =
       "PayPal".obs; // default to PayPal, or empty
@@ -44,6 +46,7 @@ class UserPaymentController extends GetxController {
     {'name': 'UPI', 'logo': 'assets/icons/upi.png', 'isAsset': true},
     {'name': 'PayPal', 'logo': 'assets/icons/paypal.png', 'isAsset': true},
     {'name': 'Google Pay', 'logo': 'assets/icons/gpay.png', 'isAsset': true},
+    {'name': 'Stipe', 'logo': 'assets/icons/stripe.png', 'isAsset': true},
     {
       'name': 'Net Banking',
       'logo': Icons.laptop_chromebook_outlined,
@@ -80,12 +83,12 @@ class UserPaymentController extends GetxController {
       cvvController.clear();
 
       Get.back();
-
-      Get.snackbar(
-        'Success',
-        'New card added successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+showToast(message: "success_card_added".tr);
+      // Get.snackbar(
+      //   'Success',
+      //   'New card added successfully!',
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
     }
   }
 
@@ -110,60 +113,52 @@ class UserPaymentController extends GetxController {
     cvvController = TextEditingController();
   }
 
-  // Future<void> proceedPayment() async {
-  //   final selected = selectedPaymentOption.value.trim().toLowerCase();
-  //
-  //   if (selected == 'paypal') {
-  //     final url = bookingController.paypalApproveLink.value;
-  //     if (url.isEmpty) {
-  //       showToast(message: "No PayPal link found. Please try again.");
-  //       return;
-  //     }
-  //     final uri = Uri.tryParse(url);
-  //     if (uri == null) {
-  //       showToast(message: "Invalid PayPal URL.");
-  //       return;
-  //     }
-  //
-  //     try {
-  //       if (await canLaunchUrl(uri)) {
-  //         final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-  //         if (opened) return; // Payment in external app
-  //       }
-  //
-  //       // Fallback: open in-app WebView
-  //       final result = await Get.to(() => PayPalWebView(url: uri.toString()));
-  //       if (result == 'success') {
-  //         showToast(message: "Payment successful!");
-  //         Get.offAllNamed(AppRoutes.bookingConfirm);
-  //       } else if (result == 'cancel') {
-  //         showToast(message: "Payment cancelled.");
-  //       }
-  //     } catch (e) {
-  //       debugPrint('Error launching PayPal: $e');
-  //       showToast(message: "Cannot open PayPal. Opening in-app.");
-  //       final result = await Get.to(() => PayPalWebView(url: uri.toString()));
-  //       if (result == 'success') Get.offAllNamed(AppRoutes.bookingConfirm);
-  //     }
-  //   } else {
-  //     showToast(message: "This payment method is not supported. Please use PayPal.");
-  //   }
-  // }
-
   Future<void> proceedPayment() async {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Processing Payment"),
-        content: const Text("Please wait..."),
-      ),
-    );
+    print("proceedPayment called"); // function entered
 
-    // Wait 2 seconds and then navigate
-    Future.delayed(const Duration(seconds: 2), () {
-      Get.back(); // close dialog
-      Get.offAllNamed(AppRoutes.bookingConfirm); // navigate to confirmation
-    });
+    if (selectedPaymentOption.value != "Stipe") {
+      print("Selected payment option is not Stripe: ${selectedPaymentOption.value}");
+      showToast(message: "This is not valid, you can use Stripe");
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      print("isLoading set to true");
+
+      // Booking se shipment create ho chuka hai, uska clientSecret le lo
+      final clientSecret = bookingController.shipmentClientSecret.value;
+      print("ClientSecret from bookingController: $clientSecret");
+
+      if (clientSecret.isEmpty) {
+        print("ClientSecret is empty!");
+        showToast(message: "Payment not initialized properly");
+        isLoading.value = false;
+        return;
+      }
+
+      stripeController.clientSecret.value = clientSecret;
+      print("Stripe controller clientSecret set: ${stripeController.clientSecret.value}");
+
+      final amountInPaise = (bookingController.amountPayable * 100).toInt();
+      print("Amount in paise: $amountInPaise");
+
+      await stripeController.payWithStripe(
+        amountInPaise: amountInPaise,
+        context: Get.context,
+      );
+
+      print("Stripe Payment completed");
+
+    } catch (e) {
+      print("Error in proceedPayment: $e");
+      showToast(message: "Payment failed: $e");
+    } finally {
+      isLoading.value = false;
+      print("isLoading set to false");
+    }
   }
+
 
   @override
   void onClose() {

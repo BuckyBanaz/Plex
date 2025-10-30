@@ -53,20 +53,27 @@ class UnauthorizedException extends DioException {
 }
 
 /// logout function when user get unauthorized exception
+
 void logout() async {
   try {
-    await Get.find<DatabaseService>().clearPreference();
-    Get.reset();
-    await Get.putAsync(() => AppService().init());();
+    final dbService = Get.find<DatabaseService>();
 
-    // Yeh app ko restart kar dega
-    // ignore: use_build_context_synchronously
+    await dbService.clearPreference();
+
+    Get.reset();
+
     Phoenix.rebirth(TempContext.context);
 
-    showToast(
-        message: 'Authentication Failed. Please restart the app and try again.');
   } catch (e) {
-    debugPrint(e.toString());
+    debugPrint("Logout error: $e");
+
+    try {
+      Get.reset();
+      Phoenix.rebirth(TempContext.context);
+    } catch (e2) {
+      debugPrint("Failed to force restart: $e2");
+    }
+
     showToast(
         message: "Authentication Failed. Please restart the app and try again.");
   }

@@ -71,4 +71,23 @@ class UserApi {
       return {'error': e.toString()};
     }
   }
+
+
+
+
+  /// Create PaymentIntent on server
+  Future<Map<String, dynamic>> createPaymentIntent({ required int amount, required String currency, String? orderId }) async {
+    final resp = await dio.post('/payments/create-payment-intent', data: {
+      'amount': amount,
+      'currency': currency,
+      'orderId': orderId,
+    });
+    return resp.data as Map<String, dynamic>;
+  }
+
+  /// (Optional) endpoint to confirm payment/update order after webhook
+  Future<Map<String, dynamic>> confirmPaymentOnServer(String paymentIntentId) async {
+    final resp = await dio.post('/payments/confirm', data: {'paymentIntentId': paymentIntentId});
+    return resp.data as Map<String, dynamic>;
+  }
 }

@@ -17,7 +17,8 @@ Future<void> initializeRepositories() async {
     // debugPrint('[REPO] MapRepository registered');
 
     Get.put(ShipmentRepository());
-    debugPrint('[REPO] ShipmentRepository registered');
+    // debugPrint('[REPO] ShipmentRepository registered');
+
 
 
     debugPrint('[REPO INIT] all repositories registered successfully');

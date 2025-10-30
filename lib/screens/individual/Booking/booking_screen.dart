@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
@@ -33,8 +34,8 @@ class _BookingScreenState extends State<BookingScreen> {
           appBar: AppBar(
             automaticallyImplyLeading: false,
             titleSpacing: 0,
-            title: const Text(
-              "Booking Screen",
+            title:  Text(
+              "booking_screen_title".tr,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -44,75 +45,75 @@ class _BookingScreenState extends State<BookingScreen> {
               onPressed: () {
                 Get.back();
               },
-              icon: Icon(IconlyLight.arrow_left_2),
+              icon:  Icon(CupertinoIcons.back),
             ),
           ),
           body: ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              const Text(
-                "Select Location",
+               Text(
+                "select_location".tr,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8.0),
               DeliveryCard(
-                collectLabel: "Collect from",
+                collectLabel: "collect_from".tr,
                 collectAddress: controller.pAddress.value.isEmpty
-                    ? "Tap to select location"
+                    ? "tap_to_select_location".tr
                     : controller.pAddress.value,
                 onEditCollect: () {
                   Get.toNamed(AppRoutes.pickup);
                 },
-                deliveryLabel: "Delivery to",
+                deliveryLabel: "delivery_to".tr,
                 deliveryName: controller.dnameController.text.isEmpty
-                    ? "Recipient name"
+                    ? "recipient_name".tr
                     : controller.dnameController.text,
                 deliveryPhone: controller.dmobileController.text.isEmpty
-                    ? "+91 XXXXXXXXXX"
+                    ? "phone_number_placeholder".tr
                     : controller.dmobileController.text,
                 deliveryAddress: controller.dAddress.value.isEmpty
-                    ? "Tap to select location"
+                    ? "tap_to_select_location".tr
                     : controller.dAddress.value,
                 onEditDelivery: () {
                   Get.toNamed(AppRoutes.dropOff);
                 },
-                durationText: "Take around 20 min",
+                durationText: "take_around".tr,
                 onMapViewTap: () {
                   print("Map opened");
                 },
               ),
 
               const SizedBox(height: 16.0),
-              const Text(
-                "Collect time",
+               Text(
+                "collect_time".tr,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8.0),
               const CollectTimeSelector(),
               const SizedBox(height: 16.0),
-              const Text(
-                "Vehicle Type",
+               Text(
+                "vehicle_type".tr,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8.0),
               const VehicleTypeSelector(),
               const SizedBox(height: 16.0),
-              const Text(
-                "Weight",
+               Text(
+                "weight".tr,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8.0),
               const WeightInput(),
               const SizedBox(height: 16.0),
-              const Text(
-                "Description",
+               Text(
+                "description".tr,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8.0),
               const DescriptionInput(),
               const SizedBox(height: 16.0),
-              const Text(
-                "Optional photo upload",
+               Text(
+                "optional_photo_upload".tr,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8.0),
@@ -127,7 +128,7 @@ class _BookingScreenState extends State<BookingScreen> {
           ),
           bottomNavigationBar:  CustomButton(onTap: ()=> controller.isLoading.value ?  null : controller.next(), widget: Center(
             child: controller.isLoading.value ? CircularProgressIndicator(strokeWidth: 3,color: AppColors.textColor,) :Text(
-              "Next",
+              "next".tr,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,

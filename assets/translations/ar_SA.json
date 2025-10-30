@@ -149,11 +149,16 @@
   "authorized_email": "ahmed@company.com",
 
 
-  "getReady": "استعد",
-  "moveOn": "انطلق!",
-  "bookNow": "احجز الآن!",
-  "min": "دقيقة",
-  "timerValue": "١٠",
+ "location_permission": "إذن الموقع",
+ "location_permission_description": "لعرض السائقين المتاحين بالقرب منك، يحتاج تطبيق PLEX إلى الوصول إلى موقعك الحالي.",
+ "allow_permission": "السماح بالإذن",
+ "not_now": "ليس الآن",
+ "please_grant_location_permission": "يرجى منح إذن الموقع.",
+ "location_determined": "تم تحديد الموقع، جارٍ إرسال التحديث...",
+ "location_not_available": "الموقع غير متوفر",
+ "could_not_get_location": "تعذر الحصول على الموقع",
+ "error_loading_location": "حدث خطأ أثناء تحميل الموقع",
+ "could_not_find_address": "تعذر العثور على العنوان",
 
 
   "sendAnything": "أرسل أي شيء،",
@@ -165,6 +170,180 @@
   "deliveries": "التسليمات",
   "myOrder": "طلباتي",
   "support": "الدعم",
-  "setting": "الإعدادات"
+  "setting": "الإعدادات",
+  "local_delivery_title": "توصيل محلي",
+  "city_to_city_title": "توصيل بين المدن",
+  "book_now_subtitle": "احجز الآن!",
+  "delivery_time_badge": "15 دقيقة",
+  "pick_up_from": "مكان الاستلام",
+  "loading_location": "جاري تحميل الموقع...",
+
+  "nav_home": "الرئيسية",
+  "nav_orders": "طلباتي",
+  "nav_notification": "الإشعارات",
+  "nav_profile": "ملفي",
+  "profile_screen_title": "صفحة الملف الشخصي",
+
+
+
+  "booking_screen_title": "شاشة الحجز",
+  "select_location": "اختر الموقع",
+  "collect_from": "استلام من",
+  "tap_to_select_location": "اضغط لاختيار الموقع",
+  "delivery_to": "التسليم إلى",
+  "recipient_name": "اسم المستلم",
+  "phone_number_placeholder": "+٩١ XXXXXXXXXX",
+  "take_around": "تستغرق حوالي ٢٠ دقيقة",
+  "collect_time": "وقت الاستلام",
+  "vehicle_type": "نوع المركبة",
+  "weight": "الوزن",
+  "description": "الوصف",
+  "optional_photo_upload": "رفع صورة (اختياري)",
+  "immediate": "فوري",
+  "collect_time_range": "وقت الاستلام ١٠–٢٠ دقيقة",
+  "delivery_to_receiver": "التسليم للمستلم\n١–٢ ساعة",
+  "schedule": "جدولة",
+  "choose_available_time": "اختر وقت متاح",
+  "plan_2_day_ahead": "خطط قبل يومين",
+  "map_view": "عرض الخريطة",
+
+  "select_image_source": "اختر مصدر الصورة",
+  "camera": "الكاميرا",
+  "gallery": "المعرض",
+  "cancel": "إلغاء",
+  "photo_upload": "رفع الصورة",
+  "optional": "(اختياري)",
+  "add_more_photos": "إضافة المزيد من الصور",
+
+  "required_field": "حقل مطلوب",
+  "enter_valid_phone": "أدخل رقم هاتف صالح",
+  "country_code_mismatch": "رمز الدولة لا يتطابق مع الدولة المحددة",
+  "enter_valid_country_phone": "أدخل رقم هاتف صالح لـ @country",
+
+  "enter_description": "أدخل الوصف هنا...",
+
+  "permission_required": "مطلوب إذن",
+  "permission_denied": "تم رفض الإذن",
+  "please_enable_permissions": "يرجى تمكين الأذونات من إعدادات التطبيق للمتابعة.",
+  "permission_required_to_select": "مطلوب إذن لاختيار الصور. حاول مرة أخرى.",
+  "error": "خطأ",
+  "fill_all_fields": "يرجى ملء جميع الحقول المطلوبة.",
+  "estimate_failed": "فشل التقدير",
+  "unable_to_get_estimate": "غير قادر على الحصول على التقدير",
+  "failed_fetch_estimate": "فشل في جلب التقدير",
+  "coupon_removed": "تمت إزالة القسيمة",
+  "coupon_removed_message": "تمت إزالة القسيمة.",
+  "order_placed": "تم تقديم الطلب!",
+  "placing_order": "جارٍ تقديم طلبك بمبلغ ₹@amount...",
+  "enter_dropoff_details": "أدخل تفاصيل التسليم",
+ "enter_pickup_details": "أدخل تفاصيل موقع الاستلام",
+  "tap_select_location": "اضغط لاختيار الموقع",
+  "mobile_number": "رقم الجوال",
+  "house_building": "رقم المنزل / الشقة / اسم المبنى",
+  "pincode": "الرمز البريدي",
+  "save_address_as": "احفظ العنوان كـ:",
+ "change": "تغيير",
+  "home": "المنزل",
+  "shop": "المتجر",
+  "other": "أخرى",
+  "confirm": "تأكيد",
+
+  "confirm_details": "تأكيد التفاصيل",
+  "order_now": "اطلب الآن",
+  "pickup_location": "موقع الاستلام",
+  "delivery_location": "موقع التسليم",
+  "contact_number": "رقم الاتصال",
+  "distance": "المسافة",
+  "eta": "الوقت المتوقع للوصول",
+  "discount_offers": "عروض الخصم",
+  "coupon_applied": "لقد قمت بتطبيق 20 باستخدام @coupon_code",
+  "remove": "إزالة",
+  "no_coupon_applied": "لم يتم تطبيق أي قسيمة.",
+  "estimated_price": "السعر المقدر",
+  "trip_fare": "أجرة الرحلة",
+  "coupon_discount": "خصم القسيمة",
+  "gst_charges": "رسوم ضريبة السلع والخدمات (مشمولة في الأجرة)",
+  "total_fare": "الأجرة الإجمالية",
+  "amount_payable": "المبلغ المستحق",
+  "booking_confirmed": "تم تأكيد الحجز",
+  "congratulations_shipment": "تهانينا! تم تقديم شحنتك",
+
+
+ "payment_title": "الدفع",
+ "saved_cards": "البطاقات المحفوظة",
+ "add_more_card": "إضافة بطاقة جديدة",
+ "add_new_card": "إضافة بطاقة جديدة",
+ "name_on_card": "الاسم على البطاقة",
+ "card_number": "رقم البطاقة",
+ "expiry_date": "تاريخ الانتهاء",
+ "cvv": "رمز التحقق (CVV)",
+ "add_card_button": "إضافة البطاقة",
+ "other_payment_options": "خيارات الدفع الأخرى",
+ "pay_now": "ادفع الآن @amount",
+ "processing_payment": "جارٍ معالجة الدفع",
+ "please_wait": "يرجى الانتظار...",
+ "success_card_added": "تمت إضافة البطاقة الجديدة بنجاح!",
+ "enter_valid_card_number": "يرجى إدخال رقم بطاقة صالح مكون من 16 رقماً",
+ "enter_name_on_card": "يرجى إدخال الاسم على البطاقة",
+ "enter_expiry_date": "أدخل الشهر/السنة (MM/YY)",
+ "enter_cvv": "أدخل رمز التحقق المكون من 3 أرقام",
+
+ "select_pickup_location": "اختر موقع الاستلام",
+ "select_dropoff_location": "اختر موقع التسليم",
+ "search_location_hint": "ابحث عن موقع...",
+ "location_error_enable_service": "يرجى تفعيل خدمة الموقع.",
+ "location_permission_denied": "تم رفض أذونات الموقع",
+ "location_permission_denied_forever": "تم رفض إذن الموقع بشكل دائم.",
+ "unknown_location": "موقع غير معروف",
+ "confirm_location": "تأكيد الموقع",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ "partner": "شريك",
+ "driver": "السائق",
+ "driverId": "هوية السائق: ",
+ "vehicleNo": "رقم المركبة: ",
+ "myEarnings": "أرباحي",
+ "status": "الحالة",
+ "online": "متصل",
+ "offline": "غير متصل",
+ "openToAnyDelivery": "متاح لأي توصيل",
+ "deliveryOrdersFound": "تم العثور على طلبات توصيل!",
+ "viewDetails": "عرض التفاصيل!",
+ "newOrder": "طلب جديد",
+ "earnings": "الأرباح",
+ "alreadyPaid": "مدفوع مسبقاً",
+ "pickup": "الاستلام",
+ "delivery": "التوصيل",
+ "rejectOrder": "رفض الطلب",
+ "acceptOrder": "قبول الطلب",
+ "recentHistory": "السجل الأخير",
+
+ "paid": "مدفوع",
+ "unpaid": "غير مدفوع",
+ "orderNo": "رقم الطلب"
+
 
 }

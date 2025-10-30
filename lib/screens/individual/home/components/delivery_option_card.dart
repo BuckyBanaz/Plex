@@ -31,11 +31,13 @@ class DeliveryOptionCard extends StatelessWidget {
         ),
         child: Row(
           children: [
+
             // --- Icon/Image ---
             Image.asset(
               imagePath,
               height: 100,
               width: 100,
+              matchTextDirection: true,
             ),
             const SizedBox(width: 50),
 
@@ -46,7 +48,8 @@ class DeliveryOptionCard extends StatelessWidget {
                 children: [
                   if (badgeText != null)
                     Align(
-                      alignment: Alignment.topRight,
+                      // YEH HAI SAHI FIX:
+                      alignment: AlignmentDirectional.topEnd,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(

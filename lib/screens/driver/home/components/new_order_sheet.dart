@@ -33,8 +33,8 @@ class NewOrderSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              const Text(
-                'New Order',
+               Text(
+                'newOrder'.tr,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -49,7 +49,7 @@ class NewOrderSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Earnings',
+                        'earnings'.tr,
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 14,
@@ -69,7 +69,7 @@ class NewOrderSheet extends StatelessWidget {
                   Chip(
                     backgroundColor: AppColors.primarySwatch.shade50,
                     label: Text(
-                      'Already Paid',
+                      'alreadyPaid'.tr,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w600,
@@ -82,7 +82,7 @@ class NewOrderSheet extends StatelessWidget {
 
 
               _buildAddressRow(
-                title: 'Pickup',
+                title: 'pickup'.tr,
                 address: orderData['pickupAddress'],
                 distance: orderData['pickupDistance'],
               ),
@@ -99,7 +99,7 @@ class NewOrderSheet extends StatelessWidget {
 
 
               _buildAddressRow(
-                title: 'Delivery',
+                title: 'delivery'.tr,
                 address: orderData['deliveryAddress'],
                 distance: orderData['deliveryDistance'],
               ),
@@ -129,14 +129,14 @@ class NewOrderSheet extends StatelessWidget {
                       onPressed: controller.rejectOrder,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFEF3E0),
-                        foregroundColor: const Color(0xFFF39C12),
+                        foregroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Reject Order',
+                      child:  Text(
+                        'rejectOrder'.tr,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -149,15 +149,15 @@ class NewOrderSheet extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: controller.acceptOrder,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFF39C12),
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Accept Order',
+                      child:  Text(
+                        'acceptOrder'.tr,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

@@ -1,29 +1,29 @@
 part of 'package:plex_user/services/domain/repository/repository_imports.dart';
 
 class UserRepository {
-  final UserApi authApi = Get.find<UserApi>();
+  final UserApi userApi = Get.find<UserApi>();
   final DatabaseService databaseService = Get.find<DatabaseService>();
   final LocaleController localeController = Get.find<LocaleController>();
 
-  int get langKey {
-    // Map locale to langKey required by API
-    switch (localeController.current.value.toString()) {
-      case 'en_US':
-        return 1; // English
-      case 'ar_SA':
-        return 2; // Arabic/Saudi
-      default:
-        return 1;
-    }
-  }
-
+  // int get langKey {
+  //   // Map locale to langKey required by API
+  //   switch (localeController.current.value.toString()) {
+  //     case 'en_US':
+  //       return 1; // English
+  //     case 'ar_SA':
+  //       return 2; // Arabic/Saudi
+  //     default:
+  //       return 1;
+  //   }
+  // }
+  int langKey = 1;
 
   Future<void> updateUserLocation(Position position) async {
     try {
 
       final apiKey = databaseService.apiKey.toString();
 
-      await authApi.updateLocation(
+      await userApi.updateLocation(
         latitude: position.latitude,
         longitude: position.longitude,
         accuracy: position.accuracy,
@@ -44,4 +44,12 @@ class UserRepository {
     }
   }
 
+
+
+  /// amount is in smallest currency unit (e.g., paise for INR, cents for USD)
+  Future<String> createPaymentIntent({ required int amount, String currency = 'inr', String? orderId }) async {
+    final data = await userApi.createPaymentIntent(amount: amount, currency: currency, orderId: orderId);
+    // expect { clientSecret: "...", paymentIntentId: "pi_..." }
+    return data['clientSecret'] as String;
+  }
 }

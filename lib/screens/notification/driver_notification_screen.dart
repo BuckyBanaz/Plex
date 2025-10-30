@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -20,11 +21,11 @@ class DriverNotificationScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios,color: Colors.white,),
+          icon:  Icon(CupertinoIcons.back,color: Colors.white,),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'Notifications',
+        title:  Text(
+          'nav_notification'.tr,
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,

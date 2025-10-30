@@ -16,8 +16,8 @@ class RecentHistoryList extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Recent History',
+           Text(
+            'recentHistory'.tr,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,

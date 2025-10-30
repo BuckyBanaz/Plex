@@ -32,18 +32,18 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                  children: [
 
                    DeliveryOptionCard(
-                     title: 'Local Delivery',
-                     subtitle: 'Book now!',
+                     title: 'local_delivery_title'.tr,
+                     subtitle: 'book_now_subtitle'.tr,
                      imagePath: AppAssets.locale,
-                     badgeText: '15 mins',
+                     badgeText: 'delivery_time_badge'.tr,
                      onTap: () {
                        Get.toNamed(AppRoutes.booking);
                        print('Local delivery tapped');
                      },
                    ),
                    DeliveryOptionCard(
-                     title: 'City to city',
-                     subtitle: 'Book now!',
+                     title: 'city_to_city_title'.tr,
+                     subtitle: 'book_now_subtitle'.tr,
                      imagePath: AppAssets.intraCity,
                      onTap: () async {
                        await AuthRepository().refreshToken();

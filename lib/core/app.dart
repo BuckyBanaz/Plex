@@ -1,5 +1,3 @@
-// lib/core/app.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
@@ -52,7 +50,7 @@ class Plex extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        initialRoute: AppRoutes.login,
+        initialRoute: AppRoutes.splash,
         getPages: AppRoutes.routes,
         defaultTransition: Transition.cupertino,
       );

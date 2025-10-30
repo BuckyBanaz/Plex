@@ -21,7 +21,7 @@ class FooterBanner extends StatelessWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                   ),
                   SizedBox(width: 40),
-                  Image.asset(AppAssets.truck),
+                  Image.asset(AppAssets.truck,matchTextDirection: true,),
                 ],
               ),
               Text(

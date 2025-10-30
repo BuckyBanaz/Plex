@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -24,10 +25,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final UserPaymentController c = Get.put(UserPaymentController());
     return Scaffold(
       appBar: AppBar(
-        title: Text("Payment"),
+        title: Text("payment_title".tr),
         leading: IconButton(onPressed: (){
           Get.back();
-        }, icon: Icon(IconlyLight.arrow_left_2)),
+        }, icon: Icon(CupertinoIcons.back)),
       ),
       body: ListView(
         children: [
@@ -53,7 +54,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
         // Get.offAllNamed(AppRoutes.bookingConfirm);
       },widget: Center(
         child: Text(
-          "Pay Now ${c.bookingController.amountPayable.toStringAsFixed(2)}",
+          "pay_now".trParams({
+            "amount": c.bookingController.amountPayable.toStringAsFixed(2)
+          }),
           style: TextStyle(
             color: Colors.white,
             fontSize: 18.0,

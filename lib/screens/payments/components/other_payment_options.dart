@@ -16,9 +16,9 @@ class OtherPaymentOptions extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. टाइटल
-          const Text(
-            'Other Payment options',
+
+           Text(
+            'other_payment_options'.tr,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,

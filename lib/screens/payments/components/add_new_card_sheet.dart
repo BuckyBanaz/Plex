@@ -35,8 +35,8 @@ class AddNewCardSheet extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Add New Card',
+                     Text(
+                      'add_new_card'.tr,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -52,11 +52,11 @@ class AddNewCardSheet extends StatelessWidget {
 
                 _buildTextField(
                   controller: c.nameOnCardController,
-                  labelText: 'Name on card',
+                  labelText: 'name_on_card'.tr,
                   hintText: 'Roronoa Zoro',
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter name on card';
+                      return 'enter_name_on_card'.tr;
                     }
                     return null;
                   },
@@ -65,7 +65,7 @@ class AddNewCardSheet extends StatelessWidget {
 
                 _buildTextField(
                   controller: c.cardNumberController,
-                  labelText: 'Card number',
+                  labelText: 'card_number'.tr,
                   hintText: '1234 4567 7890 1234',
                   keyboardType: TextInputType.number,
                   formatters: [
@@ -75,7 +75,7 @@ class AddNewCardSheet extends StatelessWidget {
                   ],
                   validator: (value) {
                     if (value == null || value.length < 19) {
-                      return 'Please enter a valid 16-digit card number';
+                      return 'enter_valid_card_number'.tr;
                     }
                     return null;
                   },
@@ -87,7 +87,7 @@ class AddNewCardSheet extends StatelessWidget {
                     Expanded(
                       child: _buildTextField(
                         controller: c.expiryDateController,
-                        labelText: 'Expiry date',
+                        labelText: 'expiry_date'.tr,
                         hintText: '02/26',
                         keyboardType: TextInputType.number,
                         formatters: [
@@ -97,7 +97,7 @@ class AddNewCardSheet extends StatelessWidget {
                         ],
                         validator: (value) {
                           if (value == null || value.length < 5) {
-                            return 'Enter MM/YY';
+                            return 'enter_expiry_date'.tr;
                           }
                           return null;
                         },
@@ -107,7 +107,7 @@ class AddNewCardSheet extends StatelessWidget {
                     Expanded(
                       child: _buildTextField(
                         controller: c.cvvController,
-                        labelText: 'CVV',
+                        labelText: 'cvv'.tr,
                         hintText: '•••',
                         keyboardType: TextInputType.number,
                         obscureText: true,
@@ -117,7 +117,7 @@ class AddNewCardSheet extends StatelessWidget {
                         ],
                         validator: (value) {
                           if (value == null || value.length < 3) {
-                            return 'Enter 3-digit CVV';
+                            return 'enter_cvv'.tr;
                           }
                           return null;
                         },
@@ -129,7 +129,7 @@ class AddNewCardSheet extends StatelessWidget {
 
                 CustomButton(onTap: c.addCard, widget:Center(
                   child: Text(
-                    "Add Card",
+                    "add_card_button".tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18.0,

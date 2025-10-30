@@ -77,11 +77,13 @@ class _CustomTextFieldState extends State<CustomTextField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '* ${widget.label}',
+          '* ${widget.label}'.tr,
           style: Get.textTheme.bodyMedium!.copyWith(
             color: AppColors.textColor.withOpacity(0.8),
             fontSize: 14,
+
           ),
+          textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -110,7 +112,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 : null,
           ),
           validator: widget.validator ??
-                  (value) => (value == null || value.isEmpty) ? 'Required field'.tr : null,
+                  (value) => (value == null || value.isEmpty) ? 'required_field'.tr : null,
           onFieldSubmitted: _handleSubmitted,
         ),
       ],
@@ -124,6 +126,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
 
 typedef CountryChangedCallback = void Function(String countryCode, String countryIso);
+
+
 
 class PhoneTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -200,7 +204,6 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
     }
   }
 
-
   /// Returns full E.164 number: +<countrycode><number>
   String getFullNumber() {
     final raw = widget.controller.text.trim();
@@ -212,7 +215,7 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
   String? _validatePhone(String? value) {
     final input = value?.trim() ?? '';
 
-    if (input.isEmpty) return 'Required field'.tr;
+    if (input.isEmpty) return 'required_field'.tr;
 
     final selectedCode = _selectedCountry['code'] ?? '';
     final selectedIso = _selectedCountry['iso'] ?? '';
@@ -221,28 +224,28 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
 
     if (input.startsWith('+')) {
       final match = RegExp(r'^\+(\d{1,3})(\d+)$').firstMatch(input);
-      if (match == null) return 'Enter a valid phone number with country code'.tr;
+      if (match == null) return 'enter_valid_phone'.tr;
 
       final enteredCode = match.group(1)!;
       final subscriber = match.group(2)!;
 
       if (enteredCode != numericCountryCode(selectedCode)) {
-        return 'Country code does not match selected country'.tr;
+        return 'country_code_mismatch'.tr;
       }
 
       final expectedLen = _subscriberLength[selectedIso];
       if (expectedLen != null && subscriber.length != expectedLen) {
-        return 'Enter a valid phone number for ${_selectedCountry['name']}'.tr;
+        return 'enter_valid_country_phone'.trParams({'country': _selectedCountry['name']!});
       }
       return null;
     }
 
     final cleaned = input.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^0+'), '');
-    if (cleaned.isEmpty) return 'Enter a valid phone number'.tr;
+    if (cleaned.isEmpty) return 'enter_valid_phone'.tr;
 
     final expectedLenLocal = _subscriberLength[selectedIso];
     if (expectedLenLocal != null && cleaned.length != expectedLenLocal) {
-      return 'Enter a valid ${_selectedCountry['name']} phone number'.tr;
+      return 'enter_valid_country_phone'.trParams({'country': _selectedCountry['name']!});
     }
 
     return null;
@@ -258,11 +261,12 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '* ${widget.label}',
+              '* ${widget.label}'.tr,
               style: Get.textTheme.bodyMedium!.copyWith(
                 color: AppColors.textColor.withOpacity(0.8),
                 fontSize: 14,
               ),
+              textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
             ),
             const SizedBox(height: 8),
             Row(
@@ -310,8 +314,9 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
                     textInputAction: widget.textInputAction,
                     autofocus: widget.autofocus,
                     style: const TextStyle(color: Colors.black),
+                    textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
                     decoration: InputDecoration(
-                      hintText: widget.hint ?? '512345678',
+                      hintText: widget.hint ?? '512345678'.tr,
                       fillColor: Colors.white,
                       filled: true,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -327,6 +332,7 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
               Text(
                 state.errorText!,
                 style: const TextStyle(color: Colors.red, fontSize: 12),
+                textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
               ),
             ],
           ],
@@ -335,7 +341,6 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
     );
   }
 }
-
 
 
 class WeightInput extends StatelessWidget {
@@ -359,8 +364,8 @@ class WeightInput extends StatelessWidget {
               child: TextField(
                 keyboardType:
                 const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                    hintText: '0',
+                decoration:  InputDecoration(
+                    hintText: '0'.tr,
                     border: InputBorder.none,
                     focusedBorder:InputBorder.none
                 ),
@@ -417,8 +422,8 @@ class DescriptionInput extends StatelessWidget {
       ),
       child: TextField(
         maxLines: 5,
-        decoration: const InputDecoration(
-          hintText: 'Enter description here...',
+        decoration:  InputDecoration(
+          hintText: 'enter_description'.tr,
           border: InputBorder.none,
           focusedBorder:InputBorder.none,
 
@@ -452,7 +457,7 @@ class SimpleTextField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       decoration: InputDecoration(
-        hintText: labelText,
+        hintText: labelText.tr,
         hintStyle: const TextStyle(color: Colors.grey),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),

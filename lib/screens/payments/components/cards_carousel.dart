@@ -23,8 +23,8 @@ class CardsCarousel extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Saved Cards",
+               Text(
+                "saved_cards".tr,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               
@@ -33,7 +33,7 @@ class CardsCarousel extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(Icons.add,color: AppColors.primary,),
-                    Text("Add More Card",style: TextStyle(color: AppColors.primary),)
+                    Text("add_more_card".tr,style: TextStyle(color: AppColors.primary),)
                   ],
                 ),
               )

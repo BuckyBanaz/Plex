@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:plex_user/constant/app_colors.dart'; // SVG के लिए इम्पोर्ट करें
 
 class DeliveryNotificationCard extends StatelessWidget {
@@ -30,7 +31,7 @@ class DeliveryNotificationCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '$deliveryCount Delivery order found!',
+                  '$deliveryCount ${'deliveryOrdersFound'.tr}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -41,7 +42,7 @@ class DeliveryNotificationCard extends StatelessWidget {
                 GestureDetector(
                   onTap: onViewDetails,
                   child:  Text(
-                    'View details!',
+                    'viewDetails'.tr,
                     style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 13,

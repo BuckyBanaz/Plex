@@ -6,18 +6,18 @@ class AuthRepository {
   final DeviceInfoService deviceInfoService = Get.find<DeviceInfoService>();
   final LocaleController localeController = Get.find<LocaleController>();
 
-  int get langKey {
-    // Map locale to langKey required by API
-    switch (localeController.current.value.toString()) {
-      case 'en_US':
-        return 1; // English
-      case 'ar_SA':
-        return 2; // Arabic/Saudi
-      default:
-        return 1;
-    }
-  }
-
+  // int get langKey {
+  //   // Map locale to langKey required by API
+  //   switch (localeController.current.value.toString()) {
+  //     case 'en_US':
+  //       return 1; // English
+  //     case 'ar_SA':
+  //       return 2; // Arabic/Saudi
+  //     default:
+  //       return 1;
+  //   }
+  // }
+int langKey = 1;
   Future<dynamic> login({
     required String email,
     required String password,
@@ -114,10 +114,10 @@ class AuthRepository {
         throw Exception(error.toString());
       }
 
-      // store api_key if available
-      if (response.containsKey('api_key')) {
-        await databaseService.putApiKey(response['api_key']);
-      }
+      // // store api_key if available
+      // if (response.containsKey('api_key')) {
+      //   await databaseService.putApiKey(response['api_key']);
+      // }
 
       // return success message
       return response['message']?.toString() ?? 'Registered successfully';

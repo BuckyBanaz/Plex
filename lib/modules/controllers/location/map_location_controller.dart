@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:plex_user/common/Toast/toast.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
 
 class MapLocationController extends GetxController {
@@ -16,6 +17,7 @@ class MapLocationController extends GetxController {
   var fullAddress = ''.obs;
   var pincode = ''.obs;
   var isLoading = true.obs;
+  var isConfirming = false.obs;
 
   final TextEditingController searchController = TextEditingController();
   final RxList<Map<String, dynamic>> suggestions = <Map<String, dynamic>>[].obs;
@@ -45,7 +47,8 @@ class MapLocationController extends GetxController {
   Future<void> _determinePosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      Get.snackbar("Location Error", "Please enable location service.");
+      showToast(message: "location_error_enable_service".tr);
+
       isLoading.value = false;
       return;
     }
@@ -54,14 +57,16 @@ class MapLocationController extends GetxController {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        Get.snackbar("Error", "Location permissions are denied");
+        showToast(message: "location_permission_denied".tr);
+        // Get.snackbar("Error", "Location permissions are denied");
         isLoading.value = false;
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      Get.snackbar("Error", "Location permission permanently denied.");
+      showToast(message: "location_permission_denied_forever".tr);
+      // Get.snackbar("Error", "Location permission permanently denied.");
       isLoading.value = false;
       return;
     }
@@ -75,6 +80,7 @@ class MapLocationController extends GetxController {
   /// ✅ Update address from coordinates
   Future<void> _updateAddress(double lat, double lng) async {
     try {
+      isConfirming.value = true; // ⬅️ Start loading
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
       Placemark place = placemarks.first;
       address.value = "${place.locality ?? ''}, ${place.subAdministrativeArea ?? ''}";
@@ -82,9 +88,12 @@ class MapLocationController extends GetxController {
       "${place.name ?? ''}, ${place.subLocality ?? ''}, ${place.locality ?? ''}, ${place.administrativeArea ?? ''}, ${place.country ?? ''}";
       pincode.value = place.postalCode ?? '';
     } catch (e) {
-      address.value = "Unknown location";
+      address.value = "unknown_location".tr;
+    } finally {
+      isConfirming.value = false; // ⬅️ Stop loading
     }
   }
+
 
   /// ✅ Camera move handler
   void onCameraMove(CameraPosition position) {
