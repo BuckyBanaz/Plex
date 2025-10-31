@@ -25,7 +25,7 @@ class LocationPickerScreen extends StatelessWidget {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return  Center(child: CircularProgressIndicator(strokeWidth: 3,color: AppColors.primary,));
         }
         return Stack(
           alignment: Alignment.center,

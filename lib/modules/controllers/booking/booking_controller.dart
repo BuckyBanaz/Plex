@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -7,9 +8,13 @@ import 'package:plex_user/services/domain/repository/repository_imports.dart';
 import '../../../routes/appRoutes.dart';
 import '../payment/stripe_payment_controller.dart';
 
+
+
 class BookingController extends GetxController {
   final ShipmentRepository repo = ShipmentRepository();
+  GoogleMapController? mapController; // <-- FIX 1: Map controller add karein
 
+  
   // Booking fields
   var selectedTime = 0.obs;
   var selectedVehicleIndex = 0.obs;
@@ -32,7 +37,9 @@ class BookingController extends GetxController {
     } else {
       if (GetPlatform.isAndroid) {
         final androidInfo = await DeviceInfoPlugin().androidInfo;
-        permission = androidInfo.version.sdkInt >= 33 ? Permission.photos : Permission.storage;
+        permission = androidInfo.version.sdkInt >= 33
+            ? Permission.photos
+            : Permission.storage;
       } else {
         permission = Permission.photos;
       }
@@ -43,8 +50,11 @@ class BookingController extends GetxController {
     if (status.isGranted) return true;
 
     if (status.isPermanentlyDenied) {
-      Get.snackbar("permission_required".tr, "please_enable_permissions".tr,
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        "permission_required".tr,
+        "please_enable_permissions".tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
       await openAppSettings();
       return false;
     }
@@ -72,19 +82,28 @@ class BookingController extends GetxController {
   }
 
   Future<void> next() async {
-    if (dnameController.text.isEmpty ||
-        dmobileController.text.isEmpty ||
-        dlankmarkController.text.isEmpty ||
-        dpincodeController.text.isEmpty ||
-        pNameController.text.isEmpty ||
-        pMobileController.text.isEmpty ||
-        pLandMarkController.text.isEmpty ||
-        pPincodeController.text.isEmpty ||
-        weight.value == 0 ||
-        description.value == '') {
+    // Validate Pickup
+    if (pNameController.text.trim().isEmpty ||
+        pMobileController.text.trim().isEmpty ||
+        pLandMarkController.text.trim().isEmpty ||
+        pPincodeController.text.trim().isEmpty) {
       Get.snackbar(
         "error".tr,
-        "fill_all_fields".tr,
+        "fill_pickup_fields".tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    // Validate Drop-off
+    if (dnameController.text.trim().isEmpty ||
+        dmobileController.text.trim().isEmpty ||
+        dlankmarkController.text.trim().isEmpty ||
+        dpincodeController.text.trim().isEmpty) {
+      Get.snackbar(
+        "error".tr,
+        "fill_dropoff_fields".tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -92,6 +111,29 @@ class BookingController extends GetxController {
       return;
     }
 
+    // Weight and description
+    if (weight.value == 0) {
+      Get.snackbar(
+        "error".tr,
+        "weight_required".tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    if (description.value.trim().isEmpty) {
+      Get.snackbar(
+        "error".tr,
+        "description_required".tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    // If all valid
     try {
       isLoading.value = true;
       await fetchShipmentEstimate(
@@ -116,22 +158,31 @@ class BookingController extends GetxController {
   }) async {
     try {
       final res = await repo.estimateShipment(
-          originLat: originLat,
-          originLng: originLng,
-          destinationLat: destinationLat,
-          destinationLng: destinationLng,
-          weight: weight);
+        originLat: originLat,
+        originLng: originLng,
+        destinationLat: destinationLat,
+        destinationLng: destinationLng,
+        weight: weight,
+      );
 
       if (res['success'] == true && res['data'] != null) {
         final data = res['data'] as Map<String, dynamic>;
-        distance.value = (data['distanceKm'] as num?)?.toDouble() ?? distance.value;
+        distance.value =
+            (data['distanceKm'] as num?)?.toDouble() ?? distance.value;
         durationText.value = (data['durationText'] ?? '').toString();
-        estimatedCostINR.value = (data['estimatedCostINR'] as num?)?.toDouble() ?? estimatedCostINR.value;
-        estimatedCostUSD.value = (data['estimatedCostUSD'] as num?)?.toDouble() ?? estimatedCostUSD.value;
+        estimatedCostINR.value =
+            (data['estimatedCostINR'] as num?)?.toDouble() ??
+                estimatedCostINR.value;
+        estimatedCostUSD.value =
+            (data['estimatedCostUSD'] as num?)?.toDouble() ??
+                estimatedCostUSD.value;
         currency.value = (data['currency'] ?? '').toString();
         if (estimatedCostINR.value > 0) tripFare.value = estimatedCostINR.value;
       } else {
-        Get.snackbar('estimate_failed'.tr, res['message']?.toString() ?? 'unable_to_get_estimate'.tr);
+        Get.snackbar(
+          'estimate_failed'.tr,
+          res['message']?.toString() ?? 'unable_to_get_estimate'.tr,
+        );
       }
     } catch (e) {
       Get.snackbar('error'.tr, 'failed_fetch_estimate'.tr);
@@ -139,7 +190,8 @@ class BookingController extends GetxController {
   }
 
   void removeImage(int index) {
-    if (index >= 0 && index < selectedImages.length) selectedImages.removeAt(index);
+    if (index >= 0 && index < selectedImages.length)
+      selectedImages.removeAt(index);
   }
 
   // Pickup controllers
@@ -155,7 +207,8 @@ class BookingController extends GetxController {
   var pLng = 0.0.obs;
 
   void updatePickUpReactive() {
-    pAddress.value = "${pLocality},${pLandMarkController.text}, ${pPincodeController.text}";
+    pAddress.value =
+    "${pLocality},${pLandMarkController.text}, ${pPincodeController.text}";
     validatePickupForm();
   }
 
@@ -165,15 +218,24 @@ class BookingController extends GetxController {
     isPickUpFormValid.value = pNameController.text.isNotEmpty &&
         pMobileController.text.isNotEmpty &&
         pLandMarkController.text.isNotEmpty &&
-        pPincodeController.text.isNotEmpty;
+        pPincodeController.text.isNotEmpty &&
+        pLat.value != 0.0 &&
+        pLng.value != 0.0;
   }
 
   void confirmPickupDetails() {
     if (!isPickUpFormValid.value) {
-      Get.snackbar("error".tr, "fill_all_fields".tr, snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        "error".tr,
+        "fill_all_fields".tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
     updatePickUpReactive();
+    fetchRoute(); // <-- FIX 2: Yahan fetchRoute() call karein
     Get.back();
   }
 
@@ -194,7 +256,8 @@ class BookingController extends GetxController {
   void updateDropOffReactive() {
     dName.value = dnameController.text;
     dPhone.value = dmobileController.text;
-    dAddress.value = "${dLocality},${dlankmarkController.text}, ${dpincodeController.text}";
+    dAddress.value =
+    "${dLocality},${dlankmarkController.text}, ${dpincodeController.text}";
     validateDropOffForm();
   }
 
@@ -204,16 +267,71 @@ class BookingController extends GetxController {
     isDropOffFormValid.value = dnameController.text.isNotEmpty &&
         dmobileController.text.isNotEmpty &&
         dlankmarkController.text.isNotEmpty &&
-        dpincodeController.text.isNotEmpty;
+        dpincodeController.text.isNotEmpty &&
+        dLat.value != 0.0 &&
+        dLng.value != 0.0;
   }
 
   void confirmDropOffDetails() {
     if (!isDropOffFormValid.value) {
-      Get.snackbar("error".tr, "fill_all_fields".tr, snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        "error".tr,
+        "fill_all_fields".tr,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
     updateDropOffReactive();
+    fetchRoute(); // <-- FIX 2: Yahan bhi fetchRoute() call karein
     Get.back();
+  }
+
+  // Location Details
+
+  var routePoints = <LatLng>[].obs;
+  final MapRepository mapRepo = MapRepository();
+
+  Future<void> fetchRoute() async {
+    if (pLat.value == 0.0 || dLat.value == 0.0) return;
+    final points = await mapRepo.getRoute(
+      originLat: pLat.value,
+      originLng: pLng.value,
+      destLat: dLat.value,
+      destLng: dLng.value,
+    );
+
+    routePoints.value = points.map((e) => LatLng(e['lat']!, e['lng']!)).toList();
+
+    // <-- FIX 3: Camera zoom logic add karein -->
+    if (mapController != null && routePoints.isNotEmpty) {
+      LatLngBounds bounds;
+
+      if (routePoints.length == 1) {
+        // Sirf ek point hai toh uspe center karo
+        bounds = LatLngBounds(
+            southwest: routePoints.first, northeast: routePoints.first);
+      } else {
+        // Multiple points hain toh bounds calculate karo
+        bounds = LatLngBounds(
+          southwest: LatLng(
+            routePoints.map((p) => p.latitude).reduce((a, b) => a < b ? a : b),
+            routePoints.map((p) => p.longitude).reduce((a, b) => a < b ? a : b),
+          ),
+          northeast: LatLng(
+            routePoints.map((p) => p.latitude).reduce((a, b) => a > b ? a : b),
+            routePoints.map((p) => p.longitude).reduce((a, b) => a > b ? a : b),
+          ),
+        );
+      }
+
+      // Camera ko new bounds par animate karo
+      mapController!.animateCamera(
+        CameraUpdate.newLatLngBounds(bounds, 50.0), // 50.0 padding hai
+      );
+    }
+    // <-- FIX 3 END -->
   }
 
   // Booking Confirmation
@@ -229,16 +347,19 @@ class BookingController extends GetxController {
   var currency = ''.obs;
   var shipmentClientSecret = ''.obs;
   double get totalFare =>
-      tripFare.value - (isCouponApplied.value ? couponDiscount.value : 0) + gstCharges.value;
+      tripFare.value -
+          (isCouponApplied.value ? couponDiscount.value : 0) +
+          gstCharges.value;
   double get amountPayable => totalFare;
 
   void removeCoupon() {
     isCouponApplied.value = false;
-    Get.snackbar("coupon_removed".tr, "coupon_removed_message".tr, snackPosition: SnackPosition.BOTTOM);
+    Get.snackbar(
+      "coupon_removed".tr,
+      "coupon_removed_message".tr,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
-
-
-
 
   void orderNow() {
     Get.dialog(
@@ -278,21 +399,6 @@ class BookingController extends GetxController {
       ),
     );
   }
-  // void orderNow() {
-  //   Get.dialog(
-  //     AlertDialog(
-  //       title: Text("order_placed".tr),
-  //       content: Text("placing_order".trParams({'amount': amountPayable.toStringAsFixed(2)})),
-  //     ),
-  //   );
-  //
-  //   Future.delayed(const Duration(seconds: 2), () {
-  //     paypalApproveLink.value = "your_approve_link_here";
-  //     paypalOrderId.value = "your_order_id_here";
-  //     Get.back();
-  //     Get.toNamed(AppRoutes.payment);
-  //   });
-  // }
 
   @override
   void onInit() {
@@ -320,6 +426,7 @@ class BookingController extends GetxController {
     dmobileController.dispose();
     dlankmarkController.dispose();
     dpincodeController.dispose();
+    mapController?.dispose(); // <-- FIX 4: Controller ko dispose karein
     super.onClose();
   }
 }

@@ -50,4 +50,45 @@ class MapApi {
     }
     return null;
   }
+
+  /// 🔹 Fetch route (Directions API) between origin & destination
+  Future<List<Map<String, double>>> fetchRoute({
+    required double originLat,
+    required double originLng,
+    required double destLat,
+    required double destLng,
+  }) async {
+    const endpoint = "https://maps.googleapis.com/maps/api/directions/json";
+    final params = {
+      'origin': '$originLat,$originLng',
+      'destination': '$destLat,$destLng',
+      'key': _apiKey,
+      'mode': 'driving',
+    };
+
+    final resp = await _dio.get(endpoint, queryParameters: params);
+
+    if (resp.statusCode == 200 && resp.data['status'] == 'OK') {
+      final steps = resp.data['routes'][0]['legs'][0]['steps'] as List;
+      List<Map<String, double>> polyPoints = [];
+
+      for (var step in steps) {
+        final start = step['start_location'];
+        polyPoints.add({
+          'lat': (start['lat'] as num).toDouble(),
+          'lng': (start['lng'] as num).toDouble(),
+        });
+
+        final end = step['end_location'];
+        polyPoints.add({
+          'lat': (end['lat'] as num).toDouble(),
+          'lng': (end['lng'] as num).toDouble(),
+        });
+      }
+      return polyPoints;
+    }
+    return [];
+  }
+
+
 }

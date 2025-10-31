@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' show Colors;
 import 'package:get/get.dart';
 import 'package:plex_user/routes/appRoutes.dart';
+import 'package:plex_user/services/domain/service/api/api_import.dart';
 import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 
 import '../../../models/driver_order_model.dart';
@@ -153,6 +154,7 @@ class DriverHomeController extends GetxController {
 
   void acceptOrder() {
     Get.back();
+    logout();
     // db.clearPreference();
     // Get.offAllNamed(AppRoutes.splash);
   }

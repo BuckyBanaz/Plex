@@ -6,6 +6,8 @@
   "login_subtitle": "Sign in to your account",
   "login_btn": "Login",
   "no_account": "Don’t have an account? Sign up now",
+  "invalid_credentials": "Invalid email or password",
+  "login_success": "Login successful",
   "footer_note": "Demo app - create any account to get started",
   "signup_title": "Create an Individual Account",
   "driver_signup_title": "Create a Shipping Company Account",
@@ -233,11 +235,18 @@
   "house_building": "House No/Flat No/Building Name",
   "pincode": "Pincode",
   "save_address_as": "Save address as:",
+
   "home": "Home",
   "shop": "Shop",
   "other": "Other",
   "confirm": "Confirm",
   "change": "Change",
+  "fill_dropoff_fields": "Please fill all drop-off fields",
+  "fill_pickup_fields": "Please fill all pickup fields",
+  "weight_required": "Please enter shipment weight",
+  "description_required": "Please enter description",
+
+
 
   "confirm_details": "Confirm Details",
   "order_now": "Order Now",

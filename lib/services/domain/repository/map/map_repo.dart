@@ -22,4 +22,23 @@ class MapRepository {
       return null;
     }
   }
+
+  Future<List<Map<String, double>>> getRoute({
+    required double originLat,
+    required double originLng,
+    required double destLat,
+    required double destLng,
+  }) async {
+    try {
+      return await _mapApi.fetchRoute(
+        originLat: originLat,
+        originLng: originLng,
+        destLat: destLat,
+        destLng: destLng,
+      );
+    } catch (e) {
+      debugPrint("❌ Error fetching route: $e");
+      return [];
+    }
+  }
 }

@@ -103,7 +103,7 @@ class LoginScreen extends StatelessWidget {
                           label: "password_label".tr,
                           hint: "password_hint".tr,
                           isPassword: true,
-
+                          validator: passwordValidator,
                           textInputAction: TextInputAction.done,
                           focusNode: c.passwordFocus,
                           onSubmitted: () {

@@ -43,7 +43,7 @@ class AuthApi {
     required String phone,
     required String password,
     required String deviceId,
-    required String otpType , // default to email
+    required String otpType ,
     required int langKey,
   }) async {
     try {
@@ -137,6 +137,24 @@ class AuthApi {
     );
   }
 
+  Future<Response> resendOtp({
+    required String keyType,
+    required String keyValue,
+    required int langKey,
+  }) {
+    return dio.post(
+      '$basePath${ApiEndpoint.resendOtp}',
+      options: Options(
+        headers: {
+          'lang_id': langKey,
+        },
+      ),
+      data: {
+        'keyType': keyType,
+        'keyValue': keyValue,
+      },
+    );
+  }
 
   Future<Response> refreshToken(String currentToken) {
     final options = Options(

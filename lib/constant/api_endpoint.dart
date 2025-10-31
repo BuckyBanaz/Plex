@@ -6,7 +6,7 @@ class ApiEndpoint {
   static const corporateSignup = "/corporate";
   static const guestSignup = "/guest";
   static const verifyOtp = "/verify-otp";
-  static const resendOtp = "/sms/send-otp";
+  static const resendOtp = '/resend-otp';
   static const resendSms = "/verify-otp";
   static const refreshToken = "/refresh-token";
   static const location = "/location";

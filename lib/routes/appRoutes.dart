@@ -21,6 +21,7 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/driver/dashboard/driver_dashboard_screen.dart';
 import '../screens/driver/home/driver_home_screen.dart';
+import '../screens/individual/Booking/location_details_screens.dart';
 
 class AppRoutes {
   static const splash = '/splash';
@@ -39,6 +40,7 @@ class AppRoutes {
   static const booking = '/booking';
   static const pickup = '/pickup';
   static const dropOff = '/dropOff';
+  static const locationDetails = '/locationDetails';
   static const confirm = '/confirm';
   static const payment = '/payment';
   static const bookingConfirm = '/bookingConfirm';
@@ -61,6 +63,7 @@ class AppRoutes {
     GetPage(name: booking, page: () => BookingScreen()),
     GetPage(name: pickup, page: () => PickupDetailsScreen()),
     GetPage(name: dropOff, page: () => DropOffDetailsScreen()),
+    GetPage(name: locationDetails, page: () => DetailLocationScreen()),
     GetPage(name: confirm, page: () => ConfirmDetailsScreen()),
     GetPage(name: payment, page: () => PaymentScreen()),
     GetPage(name: bookingConfirm, page: () => BookingConfirmScreen()),

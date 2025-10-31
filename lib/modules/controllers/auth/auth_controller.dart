@@ -102,37 +102,18 @@ class AuthController extends GetxController {
 
        await _authRepo.login(email: email, password: password);
 
-      showToast(message: "Login successful");
+      showToast(message: "login_success".tr);
       clearControllers();
 
       Get.offAllNamed(AppRoutes.location);
-      // String userType;
-      //
-      // if (userObject is DriverUserModel) {
-      //   currentDriver.value = userObject;
-      //   currentUser.value = null;
-      //   userType = (userObject.userType).toLowerCase();
-      // } else if (userObject is UserModel) {
-      //   currentUser.value = userObject;
-      //   currentDriver.value = null;
-      //   userType = (userObject.userType).toLowerCase();
-      // } else {
-      //   throw Exception("Unknown user type received");
-      // }
-      //
-      // if (userType == 'individual') {
-      //   Get.offAllNamed(AppRoutes.userDashBoard);
-      // } else if (userType == 'driver') {
-      //   Get.offAllNamed(AppRoutes.driverHome);
-      // } else {
-      //   Get.offAllNamed(AppRoutes.userDashBoard);
-      // }
-
     } on DioError catch (dioErr) {
       // ... (error handling waise hi)
     } catch (e) {
+      showToast(message: "invalid_credentials".tr);
       print(e);
     } finally {
+
+
       isLoading.value = false;
     }
   }
@@ -212,7 +193,7 @@ class AuthController extends GetxController {
           dioErr.message ??
           'Driver registration failed';
       // Get.snackbar("Error", msg);
-      showToast(message: ' Server is busy! Please try after sometimes');
+      showToast(message: msg);
     } catch (e) {
       print("❌ Error: $e");
       // Get.snackbar("Error", e.toString());

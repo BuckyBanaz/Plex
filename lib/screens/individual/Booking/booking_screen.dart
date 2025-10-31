@@ -79,6 +79,7 @@ class _BookingScreenState extends State<BookingScreen> {
                 },
                 durationText: "take_around".tr,
                 onMapViewTap: () {
+                  Get.toNamed(AppRoutes.locationDetails);
                   print("Map opened");
                 },
               ),

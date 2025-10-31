@@ -16,7 +16,10 @@ class DropOffDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final BookingController controller = Get.put(BookingController());
-
+    final nameFocus = FocusNode();
+    final mobile = FocusNode();
+    final address = FocusNode();
+    final pincode = FocusNode();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -56,27 +59,42 @@ class DropOffDetailsScreen extends StatelessWidget {
           const SizedBox(height: 24.0),
           SimpleTextField(
             controller: controller.dnameController,
-            labelText: "full_name".tr,
+            labelText: "name_label".tr,
+            hint: "name_label".tr,
+            focusNode: nameFocus,
+            nextFocusNode: mobile,
+            textInputAction: TextInputAction.next,
 
           ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.dmobileController,
             labelText: "mobile_number".tr,
+            hint:"mobile_number".tr ,
+            focusNode: mobile,
+            nextFocusNode: address,
             keyboardType: TextInputType.phone,
+            textInputAction: TextInputAction.next,
 
           ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.dlankmarkController,
             labelText: "house_building".tr,
+            hint: "house_building".tr,
+            focusNode: address,
+            nextFocusNode: pincode,
+            textInputAction: TextInputAction.next,
 
           ),
           const SizedBox(height: 16.0),
           SimpleTextField(
             controller: controller.dpincodeController,
             labelText: "pincode".tr,
+            hint:"pincode".tr ,
+            focusNode: pincode,
             keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
 
           ),
           const SizedBox(height: 24.0),

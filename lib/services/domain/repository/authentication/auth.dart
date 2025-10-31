@@ -237,9 +237,39 @@ int langKey = 1;
     }
   }
 
+
+
+  Future<bool> resendOtp({
+    required String keyType,
+    required String keyValue,
+  }) async {
+    try {
+      // final apiKey = databaseService.apiKey.toString();
+      final response = await authApi.resendOtp(
+        keyType: keyType,
+        keyValue: keyValue,
+
+        langKey: langKey,
+      );
+
+      if (response.statusCode == 200) return true;
+      if (response.statusCode == 400 || response.statusCode == 401) return false;
+
+      final msg = (response.data is Map)
+          ? (response.data['message'] ?? response.data['error'])
+          : null;
+
+      throw Exception(msg?.toString() ?? 'Resend OTP failed');
+    } catch (e, stackTrace) {
+      debugPrint('resendOtp() failed: $e');
+      debugPrint(stackTrace.toString());
+      throw Exception('Failed to resend OTP. Please try again.');
+    }
+  }
+
   Future<RefreshStatus> refreshToken() async {
     try {
-      // Yahaan apna 'refresh token' get karein (Aap abhi 'accessToken' use kar rahe hain)
+
       final currentRefreshToken = databaseService.accessToken;
 
       if (currentRefreshToken == null || currentRefreshToken.isEmpty) {
@@ -250,7 +280,7 @@ int langKey = 1;
       debugPrint(
           'Attempting token refresh using refreshToken: ${currentRefreshToken.substring(0, min(8, currentRefreshToken.length))}...');
 
-      // authApi.refreshToken call karein
+      // authApi.refreshToken call
       final response = await authApi.refreshToken(currentRefreshToken);
 
       // --- Token parsing logic ---
@@ -260,38 +290,35 @@ int langKey = 1;
         if (data['token'] is Map) {
           newAccessToken = (data['token'] as Map)['accessToken'] as String?;
         }
-        // ... (aapki baaki parsing logic) ...
       }
       // --- End parsing ---
 
       if (newAccessToken != null && newAccessToken.isNotEmpty) {
-        // Naye Access Token ko save karein
         await databaseService.putAccessToken(newAccessToken);
         debugPrint('Token refreshed and stored.');
         return RefreshStatus.success; // Success
       } else {
         debugPrint('Refresh response did not contain an access token.');
-        return RefreshStatus.failedOther; // Server ne token nahi diya
+        return RefreshStatus.failedOther;
       }
 
     } catch (e) {
-      // YEH HAI AAPKA MAIN LOGIC
-      // Jab authApi.refreshToken fail hoga (401, 404, etc.), error yahaan aayega.
+      // when authApi.refreshToken fail  (401, 404, etc.), error comes.
       debugPrint('refreshToken() caught an error: $e');
 
       if (e is DioException) {
         final errorData = e.response?.data;
 
-        // AAPKI SPECIFIC LOGOUT CONDITION
+        // SPECIFIC LOGOUT CONDITION
         if (errorData is Map && errorData['error'] == 'Invalid or expired refresh token') {
           debugPrint('Refresh token is confirmed invalid or expired. Returning failedInvalidToken.');
-          return RefreshStatus.failedInvalidToken; // Yahi logout trigger karega
+          return RefreshStatus.failedInvalidToken;
         }
       }
 
-      // Koi bhi aur error (500, network error, etc.)
+      // new error (500, network error, etc.)
       debugPrint('Refresh token failed due to other error (e.g., network). Returning failedOther.');
-      return RefreshStatus.failedOther; // Is par logout nahi hoga
+      return RefreshStatus.failedOther;
     }
   }
 

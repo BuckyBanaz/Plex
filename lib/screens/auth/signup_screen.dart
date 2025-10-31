@@ -106,7 +106,7 @@ class SignupScreen extends StatelessWidget {
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           focusNode: c.emailFocus,
-                          nextFocusNode: c.passwordFocus,
+                          nextFocusNode: c.phoneFocus,
                           validator: emailValidator,
                         ),
                         SizedBox(height: 16),
@@ -114,6 +114,8 @@ class SignupScreen extends StatelessWidget {
                           controller: c.phoneController,
                           label: 'phone_label'.tr,
                           hint: '512345678',
+                            focusNode: c.phoneFocus,
+                            nextFocusNode: c.passwordFocus,
                           onCountryChanged: (code, iso) {
                             c.countryCode = code; // save country code to controller
                           },
@@ -125,8 +127,9 @@ class SignupScreen extends StatelessWidget {
                           label: "password_label".tr,
                           hint: "password_hint".tr,
                           isPassword: true,
-                          textInputAction: TextInputAction.done,
+                          textInputAction: TextInputAction.next,
                           focusNode: c.passwordFocus,
+                          nextFocusNode: c.conPasswordFocus,
                           validator: passwordValidator,
                           onSubmitted: () {
                             // signup action
@@ -140,6 +143,9 @@ class SignupScreen extends StatelessWidget {
                           controller: c.conPasswordController,
                           label: 'confirm_password_label'.tr, // New translation key
                           hint: 're_enter_password'.tr, // New translation key
+                          focusNode: c.conPasswordFocus,
+                          textInputAction: TextInputAction.done,
+                          onPrevious: c.signup,
                           isPassword: true,
                           validator: (value) {
                             if (value!.isEmpty) return 'Required field'.tr;

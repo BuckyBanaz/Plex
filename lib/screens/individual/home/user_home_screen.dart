@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:plex_user/routes/appRoutes.dart';
+import 'package:plex_user/services/domain/service/api/api_import.dart';
 
 import '../../../constant/app_assets.dart';
 
@@ -46,7 +47,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                      subtitle: 'book_now_subtitle'.tr,
                      imagePath: AppAssets.intraCity,
                      onTap: () async {
-                       await AuthRepository().refreshToken();
+                       logout();
+                       // await AuthRepository().refreshToken();
                        // Get.toNamed(AppRoutes.booking);
                        print('City to city tapped');
                      },

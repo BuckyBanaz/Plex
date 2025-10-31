@@ -110,7 +110,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                       ),
                                       children:  [
                                         TextSpan(
-                                          text: 'PLEX1080',
+                                          text: controller.currentDriver.value?.name ?? 'PLEX1080'.tr,
                                           style: TextStyle(
                                             color: AppColors.textColor,
                                             fontSize: 14,
@@ -129,9 +129,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                       ),
-                                      children: const [
+                                      children:  [
                                         TextSpan(
-                                          text: 'RJ14 2025',
+                                          text: controller.currentDriver.value?.vehicle?.licenseNo ?? 'RJ14 2025'.tr,
                                           style: TextStyle(
                                             color: AppColors.textColor,
                                             fontSize: 14,
@@ -158,7 +158,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                           ),
                           const SizedBox(height: 6),
                           const Text(
-                            '\$ 130.00',
+                            '\$ 0.00',
                             style: TextStyle(
                               color: AppColors.textColor,
                               fontSize: 28,

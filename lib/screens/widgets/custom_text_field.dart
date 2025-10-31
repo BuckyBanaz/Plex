@@ -204,6 +204,7 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
     }
   }
 
+
   /// Returns full E.164 number: +<countrycode><number>
   String getFullNumber() {
     final raw = widget.controller.text.trim();
@@ -321,10 +322,11 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
                       filled: true,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    onFieldSubmitted: _handleSubmitted,
+                    onFieldSubmitted: _handleSubmitted, // ✅ important
                     onChanged: (_) => state.didChange(widget.controller.text),
                   ),
                 ),
+
               ],
             ),
             if (state.hasError) ...[
@@ -439,25 +441,67 @@ class DescriptionInput extends StatelessWidget {
 
 
 
-class SimpleTextField extends StatelessWidget {
+class SimpleTextField extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;
   final TextInputType keyboardType;
+  final String? hint;
+  final String? Function(String?)? validator;
+  final FocusNode? focusNode;
+  final TextInputAction textInputAction;
+  final FocusNode? nextFocusNode;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onSubmitted; // called for done action or custom handling
 
   const SimpleTextField({
     super.key,
     required this.controller,
     required this.labelText,
-    this.keyboardType = TextInputType.text,
+    this.keyboardType = TextInputType.text, this.hint, this.focusNode, this.nextFocusNode, this.onPrevious, this.onSubmitted, required this.textInputAction, this.validator,
   });
 
   @override
+  State<SimpleTextField> createState() => _SimpleTextFieldState();
+}
+
+class _SimpleTextFieldState extends State<SimpleTextField> {
+
+
+  void _handleSubmitted(String value) {
+    if (widget.textInputAction == TextInputAction.next) {
+      if (widget.nextFocusNode != null) {
+        widget.nextFocusNode!.requestFocus();
+      } else {
+        FocusScope.of(context).nextFocus();
+      }
+    } else if (widget.textInputAction == TextInputAction.previous) {
+      if (widget.onPrevious != null) {
+        widget.onPrevious!();
+      } else {
+        FocusScope.of(context).previousFocus();
+      }
+    } else if (widget.textInputAction == TextInputAction.done ||
+        widget.textInputAction == TextInputAction.go ||
+        widget.textInputAction == TextInputAction.send ||
+        widget.textInputAction == TextInputAction.search) {
+      if (widget.onSubmitted != null) widget.onSubmitted!();
+      FocusScope.of(context).unfocus();
+    } else {
+      // fallback: call onSubmitted if provided
+      if (widget.onSubmitted != null) widget.onSubmitted!();
+    }
+  }
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
+      controller: widget.controller,
+      keyboardType: widget.keyboardType,
+      focusNode: widget.focusNode,
+      validator: widget.validator ??
+              (value) => (value == null || value.isEmpty) ? 'required_field'.tr : null,
+      onFieldSubmitted: _handleSubmitted,
       decoration: InputDecoration(
-        hintText: labelText.tr,
+        hintText: widget.hint,
         hintStyle: const TextStyle(color: Colors.grey),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
@@ -472,3 +516,4 @@ class SimpleTextField extends StatelessWidget {
     );
   }
 }
+
