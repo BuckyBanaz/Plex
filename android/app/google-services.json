@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1089328963003",
+    "project_id": "plex-42cc3",
+    "storage_bucket": "plex-42cc3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1089328963003:android:bb75010c2418531843b89e",
+        "android_client_info": {
+          "package_name": "com.example.plex_user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIifynW4RehyxeuAMHkz63eWYfa7KqFlg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
