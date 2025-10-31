@@ -14,7 +14,6 @@ import 'package:plex_user/screens/location/location_permission_screen.dart';
 import 'package:plex_user/screens/notification/driver_notification_screen.dart';
 import 'package:plex_user/screens/order/driver_delivery_order_screen.dart';
 import 'package:plex_user/screens/payments/user_payment_screen.dart';
-import 'package:plex_user/screens/widgets/splash/splash_screen.dart';
 
 import '../screens/auth/choose_account_screen.dart';
 import '../screens/auth/login_screen.dart';
@@ -22,6 +21,7 @@ import '../screens/auth/otp_screen.dart';
 import '../screens/driver/dashboard/driver_dashboard_screen.dart';
 import '../screens/driver/home/driver_home_screen.dart';
 import '../screens/individual/Booking/location_details_screens.dart';
+import '../screens/splash/splash_screen.dart';
 
 class AppRoutes {
   static const splash = '/splash';

@@ -6,6 +6,8 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/driver/home/driver_home_screen.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../individual/profile/user_profile_screen.dart';
+
 
 class DriverMainScreenController extends GetxController {
   var selectedIndex = 0;
@@ -24,7 +26,7 @@ class DriverMainNavController extends GetxController {
     const DriverHomeScreen(),
     const Center(child: Text("Order Screen")),
     const Center(child: Text("History Screen")),
-    const Center(child: Text("Profile Screen")),
+    UserProfileScreen(),
   ];
 
   final List<IconData> icons = const [

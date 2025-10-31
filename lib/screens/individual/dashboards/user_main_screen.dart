@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/individual/home/user_home_screen.dart';
+import 'package:plex_user/screens/individual/profile/user_profile_screen.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../notification/user_notification_screen.dart';
@@ -25,7 +26,7 @@ class UserMainNavController extends GetxController {
     const UserHomeScreen(),
     UserOrderScreen(),
     UserNotification(),
-    Center(child: Text('profile_screen_title'.tr)),
+    UserProfileScreen()
   ];
 
   final List<IconData> icons = const [
