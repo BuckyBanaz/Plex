@@ -18,7 +18,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await Get.putAsync(() => AppService().init());
-  await TranslationService.init();
+  // await TranslationService.init();
   // final localeCtrl = Get.put(LocaleController());
   // await localeCtrl.init();
 

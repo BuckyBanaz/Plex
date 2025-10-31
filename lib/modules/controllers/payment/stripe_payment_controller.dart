@@ -14,6 +14,14 @@ class StripePaymentController extends GetxController {
   }) async {
     print("=== Stripe Payment Started ===");
     print("Amount in paise: $amountInPaise");
+
+    // Safety check: Agar client secret khali hai toh aage mat badho
+    if (clientSecret.value.isEmpty) {
+      print("❌❌❌ PAYMENT STATUS: FAILED (Client Secret is empty)");
+      Get.snackbar('Error', 'Payment details are missing. Please try again.');
+      return;
+    }
+
     print("ClientSecret: ${clientSecret.value}");
 
     try {
@@ -26,47 +34,48 @@ class StripePaymentController extends GetxController {
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: clientSecret.value,
           merchantDisplayName: 'Plex',
-          // optionally you can add customerId / ApplePay / GooglePay params here
         ),
       );
       print("PaymentSheet initialized successfully");
 
       // 2) Present PaymentSheet
-      print("Presenting PaymentSheet...");
+      print("Presenting PaymentSheet... (Waiting for user action)");
       await Stripe.instance.presentPaymentSheet();
-      print("PaymentSheet presented successfully");
+      print("PaymentSheet presented successfully (No error thrown)");
 
       // 3) On success
-      print("Payment successful!");
-      if (context != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment successful')),
-        );
-      } else {
-        Get.snackbar('Success', 'Payment successful');
-      }
+      // Agar code yahaan tak pahuncha hai, iska matlab payment SUCCESSFUL hai
+      print("✅✅✅ PAYMENT STATUS: SUCCESS ✅✅✅");
 
-      // Navigate to booking confirmation
+      // Snackbar dikhao
+      Get.snackbar('Success', 'Payment successful');
+
+      // Ab booking confirmation par navigate karo
+      print("Navigating to booking confirmation...");
       Get.offAllNamed(AppRoutes.bookingConfirm);
-      print("Navigated to booking confirmation");
 
     } on StripeException catch (e) {
-      final msg = e.error.localizedMessage ?? 'Payment failed';
-      print("StripeException caught: $msg");
-      if (context != null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+      // 4) On Stripe Error (Fail / Cancel)
+      if (e.error.code == FailureCode.Canceled) {
+        // Agar user ne payment sheet ko band kar diya
+        print("🔶🔶🔶 PAYMENT STATUS: CANCELED BY USER 🔶🔶🔶");
+        Get.snackbar('Cancelled', 'Payment was cancelled');
       } else {
+        // Agar payment fail hua (e.g., card declined)
+        final msg = e.error.localizedMessage ?? 'Payment failed';
+        print("❌❌❌ PAYMENT STATUS: FAILED (StripeException) ❌❌❌");
+        print("Error Details: $msg");
         Get.snackbar('Error', msg);
       }
+
     } catch (e) {
-      print("Unexpected error in Stripe Payment: $e");
-      if (context != null) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
-      } else {
-        Get.snackbar('Error', e.toString());
-      }
+      // 5) On Unexpected Error
+      print("❌❌❌ PAYMENT STATUS: FAILED (Unexpected Error) ❌❌❌");
+      print("Error Details: $e");
+      Get.snackbar('Error', e.toString());
+
     } finally {
+      // Ye hamesha chalega (success ya fail)
       isLoading.value = false;
       print("isLoading set to false");
       print("=== Stripe Payment Ended ===");

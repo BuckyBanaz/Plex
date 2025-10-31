@@ -15,6 +15,7 @@ import '../../../../common/Toast/toast.dart';
 import '../../../../constant/error_string.dart';
 import '../../../../core/app.dart';
 import '../../../../main.dart';
+import '../../../translations/locale_controller.dart';
 import '../../repository/repository_imports.dart';
 
 

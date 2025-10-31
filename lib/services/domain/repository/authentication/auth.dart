@@ -114,10 +114,10 @@ int langKey = 1;
         throw Exception(error.toString());
       }
 
-      // // store api_key if available
-      // if (response.containsKey('api_key')) {
-      //   await databaseService.putApiKey(response['api_key']);
-      // }
+      // store api_key if available
+      if (response.containsKey('api_key')) {
+        await databaseService.putApiKey(response['api_key']);
+      }
 
       // return success message
       return response['message']?.toString() ?? 'Registered successfully';

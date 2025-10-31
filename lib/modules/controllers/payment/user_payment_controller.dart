@@ -144,6 +144,7 @@ showToast(message: "success_card_added".tr);
       print("Amount in paise: $amountInPaise");
 
       await stripeController.payWithStripe(
+
         amountInPaise: amountInPaise,
         context: Get.context,
       );
