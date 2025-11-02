@@ -335,7 +335,28 @@
 
   "paid": "Paid",
   "unpaid": "Unpaid",
-  "orderNo": "Order No."
+  "orderNo": "Order No.",
 
+
+  "profile_page_title": "Profile",
+    "my_account": "My Account",
+    "change_language": "Change Language",
+    "reset_password": "Reset Password",
+    "people_and_sharing": "People and Sharing",
+    "terms_of_use": "Terms of Use",
+    "privacy_policy": "Privacy Policy",
+    "help_and_support": "Help & Support",
+    "contact_us": "Contact us",
+  "dob": "Date of Birth",
+  "gender": "Gender",
+  "delete_account": "Delete Account",
+  "subtitle_reset_password": "Create a new password for your account",
+  "new_password_label": "New Password",
+  "forgot_password_button": "Forgot password?",
+  "reset_button": "Reset Password",
+  "instructions": "Your password should be at least 8 characters long and include a mix of letters and numbers.",
+  "enter_password": "Please enter password",
+  "confirm_password": "Please confirm password",
+  "password_length": "Password must be at least 8 characters"
 
 }

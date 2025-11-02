@@ -19,8 +19,8 @@ class UserResetPasswordScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        title: const Text(
-          'Reset Password',
+        title:  Text(
+          'reset_password'.tr,
           style: TextStyle(color: AppColors.textPrimary),
         ),
         leading: IconButton(
@@ -35,8 +35,8 @@ class UserResetPasswordScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               const SizedBox(height: 6),
-              const Text(
-                'Create a new password for your account',
+               Text(
+                'subtitle_reset_password'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.textGrey, fontSize: 14),
               ),
@@ -45,7 +45,7 @@ class UserResetPasswordScreen extends StatelessWidget {
               // New Password
               CustomTextField(
                 controller: controller.newPass,
-                label: 'New Password',
+                label: 'new_password_label'.tr,
                 labelColor: AppColors.textPrimary,
                 isPassword: true,
                 focusNode: controller.newPassFocus,
@@ -60,9 +60,9 @@ class UserResetPasswordScreen extends StatelessWidget {
                   borderSide: const BorderSide(color: AppColors.primary, width: 2.0),
                 ),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'Please enter password';
+                  if (v == null || v.isEmpty) return 'enter_password'.tr;
                   if (v.trim().length < 8)
-                    return 'Password must be at least 8 characters';
+                    return 'password_length'.tr;
                   return null;
                 },
               ),
@@ -71,7 +71,7 @@ class UserResetPasswordScreen extends StatelessWidget {
               // Confirm Password
               CustomTextField(
                 controller: controller.confirmPass,
-                label: 'Confirm Password',
+                label: 'confirm_password_label'.tr,
                 labelColor: AppColors.textPrimary,
                 isPassword: true,
                 focusNode: controller.confirmPassFocus,
@@ -86,9 +86,9 @@ class UserResetPasswordScreen extends StatelessWidget {
                 ),
                 onSubmitted: () => controller.resetPassword(context),
                 validator: (v) {
-                  if (v == null || v.isEmpty) return 'Please confirm password';
+                  if (v == null || v.isEmpty) return 'confirm_password';
                   if (v.trim().length < 8)
-                    return 'Password must be at least 8 characters';
+                    return 'password_length'.tr;
                   return null;
                 },
               ),
@@ -99,8 +99,8 @@ class UserResetPasswordScreen extends StatelessWidget {
                   onPressed: () =>
                       controller.showForgotPasswordDialog(context),
                   style: TextButton.styleFrom(padding: EdgeInsets.only(top: 8)),
-                  child: const Text(
-                    'Forgot password?',
+                  child:  Text(
+                    'forgot_password_button'.tr,
                     style: TextStyle(color: AppColors.primary),
                   ),
                 ),
@@ -111,9 +111,9 @@ class UserResetPasswordScreen extends StatelessWidget {
                   ? const Center(child: CircularProgressIndicator())
                   : CustomButton(
                 onTap: () => controller.resetPassword(context),
-                widget: const Center(
+                widget:  Center(
                   child: Text(
-                    'Reset Password',
+                    'reset_button'.tr,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -123,8 +123,8 @@ class UserResetPasswordScreen extends StatelessWidget {
               )),
               const SizedBox(height: 6),
 
-              const Text(
-                'Your password should be at least 8 characters long and include a mix of letters and numbers.',
+               Text(
+                'instructions'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColors.textGrey, fontSize: 12),
               ),

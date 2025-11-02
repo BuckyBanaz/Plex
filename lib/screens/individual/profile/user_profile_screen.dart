@@ -195,35 +195,35 @@ class ProfileOptionRow extends StatelessWidget {
 List<ProfileOption> _sampleOptions() {
   return [
     ProfileOption(
-      title: 'My Account',
+      title: 'my_account'.tr,
       icon: Icons.account_circle,
       onTap: () {
         Get.to(UserAccountScreen());
       },
     ),
     ProfileOption(
-      title: 'Change Language',
+      title: 'change_language'.tr,
       icon: Icons.translate,
       onTap: () => Get.to(UserChangeLanguageScreen()),
     ),
     ProfileOption(
-      title: 'Reset Password',
+      title: 'reset_password'.tr,
       icon: Icons.lock_reset,
       onTap: () => Get.to(UserResetPasswordScreen()),
     ),
-    ProfileOption(title: 'People and Sharing', icon: Icons.share, onTap: () {}),
-    ProfileOption(title: 'Terms of Use', icon: Icons.description, onTap: () {}),
+    ProfileOption(title: 'people_and_sharing'.tr, icon: Icons.share, onTap: () {}),
+    ProfileOption( title: 'terms_of_use'.tr, icon: Icons.description, onTap: () {}),
     ProfileOption(
-      title: 'Privacy Policy',
+      title: 'privacy_policy'.tr,
       icon: Icons.privacy_tip,
       onTap: () {},
     ),
     ProfileOption(
-      title: 'Help & Support',
+      title: 'help_and_support'.tr,
       icon: Icons.help_outline,
       onTap: () {},
     ),
-    ProfileOption(title: 'Contact us', icon: Icons.phone_in_talk, onTap: () {}),
+    ProfileOption(title: 'contact_us'.tr, icon: Icons.phone_in_talk, onTap: () {}),
   ];
 }
 

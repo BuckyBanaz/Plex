@@ -73,8 +73,8 @@ class _UserChangeLanguageScreenState extends State<UserChangeLanguageScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'Change Language',
+        title:  Text(
+          'change_language'.tr,
           style: TextStyle(
             fontWeight: FontWeight.bold,
           ),

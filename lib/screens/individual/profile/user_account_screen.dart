@@ -19,7 +19,7 @@ class UserAccountScreen extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          'My Account',
+          'my_account'.tr,
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         leading: IconButton(
@@ -38,35 +38,35 @@ class UserAccountScreen extends StatelessWidget {
           const SizedBox(height: 18),
 
           InfoColumnItem(
-              "Full Name",
+              "full_name_label".tr,
               titleSize: 14,
             c.currentUser.value!.name,
             subtitleSize: 20,
           ),
           const SizedBox(height: 20),
           InfoColumnItem(
-            "DOB",
+            "dob".tr,
             titleSize: 14,
             "12/04/1990",
             subtitleSize: 20,
           ),
           const SizedBox(height: 20),
           InfoColumnItem(
-            "Mobile Phone",
+            "mobile_number".tr,
             titleSize: 14,
             "(629) 7896758465",
             subtitleSize: 20,
           ),
           const SizedBox(height: 20),
           InfoColumnItem(
-            "Email",
+            "email_label".tr,
             titleSize: 14,
             c.currentUser.value!.email,
             subtitleSize: 20,
           ),
           const SizedBox(height: 20),
           InfoColumnItem(
-            "Gender",
+            "gender".tr,
             titleSize: 14,
             "Male",
             subtitleSize: 20,
@@ -94,7 +94,7 @@ class UserAccountScreen extends StatelessWidget {
             color: AppColors.primarySwatch.shade100,
             widget: Center(
               child: Text(
-                "Delete Account".tr,
+                "delete_account".tr,
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 18.0,

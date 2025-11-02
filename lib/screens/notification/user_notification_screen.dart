@@ -16,7 +16,7 @@ class UserNotification extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
 
-        title: const Text('Notifications'),
+        title:  Text("nav_notification".tr),
 
         actions: [
           IconButton(

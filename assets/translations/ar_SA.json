@@ -351,7 +351,32 @@
 
  "paid": "مدفوع",
  "unpaid": "غير مدفوع",
- "orderNo": "رقم الطلب"
+ "orderNo": "رقم الطلب",
+
+
+
+
+ "profile_page_title": "الملف الشخصي",
+  "my_account": "حسابي",
+  "change_language": "تغيير اللغة",
+  "reset_password": "إعادة تعيين كلمة المرور",
+  "people_and_sharing": "الأشخاص والمشاركة",
+  "terms_of_use": "شروط الاستخدام",
+  "privacy_policy": "سياسة الخصوصية",
+  "help_and_support": "المساعدة والدعم",
+  "contact_us": "اتصل بنا",
+ "dob": "تاريخ الميلاد",
+ "gender": "الجنس",
+ "delete_account": "حذف الحساب",
+ "subtitle_reset_password": "قم بإنشاء كلمة مرور جديدة لحسابك",
+ "new_password_label": "كلمة المرور الجديدة",
+ "forgot_password_button": "هل نسيت كلمة المرور؟",
+ "reset_button": "إعادة تعيين كلمة المرور",
+ "instructions": "يجب أن تتكون كلمة المرور الخاصة بك من 8 أحرف على الأقل وأن تشتمل على مزيج من الأحرف والأرقام.",
+ "enter_password": "الرجاء إدخال كلمة المرور",
+ "confirm_password": "الرجاء تأكيد كلمة المرور",
+ "password_length": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل"
+
 
 
 }
