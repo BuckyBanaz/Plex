@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/modules/controllers/profile/user_profile_controller.dart';
 import 'package:plex_user/screens/individual/profile/user_account_screen.dart';
@@ -76,11 +77,21 @@ class ProfileOption {
   ProfileOption({required this.title, required this.icon, this.onTap});
 }
 
-/// Header widget showing avatar and name
 class ProfileHeader extends StatelessWidget {
   final String name;
-  const ProfileHeader({super.key, required this.name});
+  final ImageProvider? profileImage;
+  final bool isEdit;
+  final VoidCallback? onEditPressed;
 
+  const ProfileHeader({
+    super.key,
+    required this.name,
+    this.profileImage,
+    this.isEdit = false, // Default 'isEdit' ko false rakha hai
+    this.onEditPressed,
+  });
+
+  // Initials nikalne ka function
   String getInitials(String name) {
     final parts = name.trim().split(' ');
     if (parts.isEmpty) return '';
@@ -92,18 +103,49 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Grey circular avatar with initials
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: Colors.grey[300],
-          child: Text(
-            getInitials(name),
-            style: const TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.w700,
-              color: Colors.black54,
+
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            // Avatar
+            CircleAvatar(
+              radius: 60,
+              backgroundColor: Colors.grey[300],
+              backgroundImage: profileImage,
+              child: profileImage == null
+                  ? Text(
+                getInitials(name),
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black54,
+                ),
+              )
+                  : null,
             ),
-          ),
+
+
+            if (isEdit)
+              GestureDetector(
+                onTap: onEditPressed,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary, // Primary background color
+                    shape: BoxShape.circle, // Circular shape
+                    border: Border.all(
+                      color: Colors.white, // White border
+                      width: 2,
+                    ),
+                  ),
+                  child:  Icon(
+                    IconlyLight.edit,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 12),
         Text(
@@ -184,3 +226,81 @@ List<ProfileOption> _sampleOptions() {
     ProfileOption(title: 'Contact us', icon: Icons.phone_in_talk, onTap: () {}),
   ];
 }
+
+
+// // Ek stateful widget jo 'isEdit' state aur 'profileImage' ko manage karega
+// class ProfilePageDemo extends StatefulWidget {
+//   const ProfilePageDemo({super.key});
+//
+//   @override
+//   State<ProfilePageDemo> createState() => _ProfilePageDemoState();
+// }
+//
+// class _ProfilePageDemoState extends State<ProfilePageDemo> {
+//   // State variables
+//   bool _isEditing = false;
+//   ImageProvider? _profileImage;
+//
+//   // Edit button press karne par ye function call hoga
+//   Future<void> _onEditProfilePressed() async {
+//     // Yahaan par aap image picker ka logic likh sakte hain
+//     // Niche diye gaye code ko uncomment karein aur 'image_picker' package add karein
+//     /*
+//     try {
+//       final picker = ImagePicker();
+//       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+//
+//       if (image != null) {
+//         setState(() {
+//           _profileImage = FileImage(File(image.path));
+//         });
+//       }
+//     } catch (e) {
+//       print("Image picker error: $e");
+//     }
+//     */
+//
+//     // --- Demo ke liye Placeholder Image ---
+//     // Upar wala code comment karke, demo ke liye hum ek network image set kar rahe hain
+//     // Taki aap functionality test kar sakein.
+//     print("Edit button pressed! Simulating image pick.");
+//     setState(() {
+//       // Ek placeholder image load kar rahe hain
+//       _profileImage = const NetworkImage(
+//           'https://placehold.co/120x120/E0E0E0/363636?text=New\nImage');
+//     });
+//     // --- Demo code end ---
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Profile Demo'),
+//       ),
+//       body: Center(
+//         child: Padding(
+//           padding: const EdgeInsets.all(20.0),
+//           child: ProfileHeader(
+//             name: "Parikshit Verma",
+//             isEdit: _isEditing, // State se 'isEdit' pass kiya
+//             profileImage: _profileImage, // State se 'profileImage' pass kiya
+//             onEditPressed:
+//             _onEditProfilePressed, // Edit press ka function pass kiya
+//           ),
+//         ),
+//       ),
+//       // Ye button 'isEdit' state ko toggle karega
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () {
+//           setState(() {
+//             _isEditing = !_isEditing; // Toggle editing mode
+//           });
+//         },
+//         child: Icon(
+//           _isEditing ? Icons.check : Icons.edit_note,
+//         ),
+//       ),
+//     );
+//   }
+// }

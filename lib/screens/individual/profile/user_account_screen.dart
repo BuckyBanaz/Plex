@@ -32,7 +32,7 @@ class UserAccountScreen extends StatelessWidget {
         children: [
           const SizedBox(height: 18),
 
-          ProfileHeader(name: c.currentUser.value!.name),
+          ProfileHeader(name: c.currentUser.value!.name,isEdit: true,),
           const SizedBox(height: 18),
           Divider(),
           const SizedBox(height: 18),
