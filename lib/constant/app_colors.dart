@@ -39,5 +39,5 @@ class AppColors {
   static const Color darkOrangeIcon = Color(0xFFF39C12);
   static const Color greenPaid = Color(0xFF2ECC71);
   static const Color redUnpaid = Color(0xFFE74C3C);
-
+// backgroundColor: const Color(0xFFF6F6F6),
 }

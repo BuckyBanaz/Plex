@@ -14,8 +14,18 @@ class CustomTextField extends StatefulWidget {
   final FocusNode? focusNode;
   final FocusNode? nextFocusNode;
   final VoidCallback? onPrevious;
-  final VoidCallback? onSubmitted; // called for done action or custom handling
+  final VoidCallback? onSubmitted;
   final bool autofocus;
+
+  // NEW: customization / overrides
+  final Color? labelColor;       // override label color
+  final Color? hintColor;        // override hint color
+  final Color? textColor;        // override input text color
+  final Color? fillColor;        // override filled color
+  final InputBorder? border;     // override base border
+  final InputBorder? enabledBorder;
+  final InputBorder? focusedBorder;
+  final double? focusedBorderWidth;
 
   const CustomTextField({
     Key? key,
@@ -31,6 +41,15 @@ class CustomTextField extends StatefulWidget {
     this.onPrevious,
     this.onSubmitted,
     this.autofocus = false,
+    // new optional overrides
+    this.labelColor,
+    this.hintColor,
+    this.textColor,
+    this.fillColor,
+    this.border,
+    this.enabledBorder,
+    this.focusedBorder,
+    this.focusedBorderWidth,
   }) : super(key: key);
 
   @override
@@ -66,22 +85,52 @@ class _CustomTextFieldState extends State<CustomTextField> {
       if (widget.onSubmitted != null) widget.onSubmitted!();
       FocusScope.of(context).unfocus();
     } else {
-      // fallback: call onSubmitted if provided
       if (widget.onSubmitted != null) widget.onSubmitted!();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final inputTheme = theme.inputDecorationTheme;
+
+    // derive border values: prefer widget override, then theme, then sensible default
+    final InputBorder baseBorder = widget.border ??
+        inputTheme.border ??
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        );
+
+    final InputBorder enabledBorder =
+        widget.enabledBorder ?? inputTheme.enabledBorder ?? baseBorder;
+
+    // For focused border, allow width override combined with AppColors.primary
+    final double focusedWidth = widget.focusedBorderWidth ?? 3.5;
+    final InputBorder focusedBorder = widget.focusedBorder ??
+        inputTheme.focusedBorder ??
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.primary, width: focusedWidth),
+        );
+
+    // colors: prefer widget overrides, else fall back to theme text styles or defaults
+    final Color labelColor = widget.labelColor ??
+        (inputTheme.labelStyle?.color ?? AppColors.textColor.withOpacity(0.8));
+    final Color hintColor = widget.hintColor ??
+        (inputTheme.hintStyle?.color ?? Colors.grey);
+    final Color textColor = widget.textColor ??
+        (theme.textTheme.bodyMedium?.color ?? Colors.black);
+    final Color fillColor = widget.fillColor ?? (inputTheme.fillColor ?? Colors.white);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '* ${widget.label}'.tr,
           style: Get.textTheme.bodyMedium!.copyWith(
-            color: AppColors.textColor.withOpacity(0.8),
+            color: labelColor,
             fontSize: 14,
-
           ),
           textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
         ),
@@ -93,21 +142,21 @@ class _CustomTextFieldState extends State<CustomTextField> {
           textInputAction: widget.textInputAction,
           autofocus: widget.autofocus,
           obscureText: _obscure,
-          style: TextStyle(color: Colors.black),
-
+          style: TextStyle(color: textColor),
           decoration: InputDecoration(
             hintText: widget.hint,
-            fillColor: Colors.white,
+            hintStyle: TextStyle(color: hintColor),
+            fillColor: fillColor,
             filled: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            contentPadding: inputTheme.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            border: baseBorder,
+            enabledBorder: enabledBorder,
+            focusedBorder: focusedBorder,
+            // show password toggle only when isPassword
             suffixIcon: widget.isPassword
                 ? IconButton(
               onPressed: () => setState(() => _obscure = !_obscure),
-              icon: Icon(
-                _obscure ? Icons.visibility_off : Icons.visibility,
-              ),
+              icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
             )
                 : null,
           ),

@@ -313,8 +313,16 @@ class InfoSection extends StatelessWidget {
 class InfoColumnItem extends StatelessWidget {
   final String title;
   final String subtitle;
+  final double? titleSize;
+  final double? subtitleSize;
 
-  const InfoColumnItem(this.title, this.subtitle, {super.key});
+  const InfoColumnItem(
+      this.title,
+      this.subtitle, {
+        super.key,
+        this.titleSize,
+        this.subtitleSize,
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -323,13 +331,16 @@ class InfoColumnItem extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(color: AppColors.textGrey, fontSize: 13),
+          style: TextStyle(
+            color: AppColors.textGrey,
+            fontSize: titleSize ?? 13, // default 13 if not provided
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           subtitle,
-          style: const TextStyle(
-            fontSize: 15,
+          style: TextStyle(
+            fontSize: subtitleSize ?? 15, // default 15 if not provided
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
@@ -338,6 +349,7 @@ class InfoColumnItem extends StatelessWidget {
     );
   }
 }
+
 
 /// Section 3: Discount Offers
 class DiscountSection extends StatelessWidget {

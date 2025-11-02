@@ -10,6 +10,7 @@ import 'package:plex_user/screens/individual/Booking/dropoff_details_screen.dart
 import 'package:plex_user/screens/individual/Booking/pickup_details_screen.dart';
 import 'package:plex_user/screens/individual/dashboards/user_main_screen.dart';
 import 'package:plex_user/screens/individual/home/user_home_screen.dart';
+import 'package:plex_user/screens/individual/profile/user_profile_screen.dart';
 import 'package:plex_user/screens/location/location_permission_screen.dart';
 import 'package:plex_user/screens/notification/driver_notification_screen.dart';
 import 'package:plex_user/screens/order/driver_delivery_order_screen.dart';
@@ -34,6 +35,7 @@ class AppRoutes {
   static const otp = '/otp';
   static const userDashBoard = '/userDashBoard';
   static const userHome = '/userHome';
+  static const userProfile = '/userProfile';
   static const driverDashBoard = '/driverDashBoard';
   static const driverHome = '/driverHome';
   static const location = '/location';
@@ -69,5 +71,6 @@ class AppRoutes {
     GetPage(name: bookingConfirm, page: () => BookingConfirmScreen()),
     GetPage(name: driverNotification, page: () => DriverNotificationScreen()),
     GetPage(name: driverDeliveryOrder, page: () => DriverDeliveryOrderScreen()),
+    GetPage(name: userProfile, page: () => UserProfileScreen()),
   ];
 }

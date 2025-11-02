@@ -5,13 +5,21 @@ import 'package:plex_user/constant/app_colors.dart';
 class CustomButton extends StatelessWidget {
   final VoidCallback onTap;
   final Widget widget;
-  const CustomButton({super.key, required this.onTap, required this.widget});
+  final EdgeInsetsGeometry? padding; // optional custom padding
+  final Color? color; // <-- new optional color parameter
+
+  const CustomButton({
+    super.key,
+    required this.onTap,
+    required this.widget,
+    this.padding,
+    this.color, // <-- add to constructor
+  });
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
-      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 24.0),
+      padding: padding ?? const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 24.0),
       color: Colors.white,
       child: GestureDetector(
         onTap: onTap,
@@ -19,7 +27,7 @@ class CustomButton extends StatelessWidget {
           height: 55.0,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: AppColors.primary, // Orange color
+            color: color ?? AppColors.primary, // <-- dynamic with default fallback
             borderRadius: BorderRadius.circular(12.0),
           ),
           child: widget,
