@@ -20,7 +20,9 @@
   "password_hint": "Enter your password",
   "signup_btn": "Create Account",
   "have_account": "Already have an account? Login",
-
+  "service_unavailable": "This Service currently Unavailable!!",
+  "logout": "Logout",
+  "profile_work_ongoing": "Profile screen work ongoing...",
 
   "contact_info_title": "Contact Information",
   "contact_info_subtitle": "Account and Contact Details",

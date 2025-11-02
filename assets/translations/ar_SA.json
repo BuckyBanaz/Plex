@@ -21,7 +21,9 @@
   "signup_btn": "إنشاء حساب فردي",
   "have_account": "لديك حساب بالفعل؟ سجل دخولك",
 
-
+ "service_unavailable": "هذه الخدمة غير متوفرة حالياً!!",
+ "logout": "تسجيل الخروج",
+ "profile_work_ongoing": "شاشة الملف الشخصي قيد التنفيذ...",
 
 
   "registration_title": "تسجيل شركة جديدة",

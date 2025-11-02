@@ -47,9 +47,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                      subtitle: 'book_now_subtitle'.tr,
                      imagePath: AppAssets.intraCity,
                      onTap: () async {
-                       logout();
+                       // logout();
                        // await AuthRepository().refreshToken();
-                       // Get.toNamed(AppRoutes.booking);
+                       Get.toNamed(AppRoutes.booking);
                        print('City to city tapped');
                      },
                    ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:plex_user/services/domain/service/api/api_import.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profile"),
+        title:  Text("nav_profile".tr),
         centerTitle: true,
       ),
       body: Center(
@@ -30,8 +31,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                "Profile screen work ongoing...",
+               Text(
+                "profile_work_ongoing".tr,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
@@ -49,8 +50,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  "Logout",
+                child:  Text(
+                  "logout".tr,
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),

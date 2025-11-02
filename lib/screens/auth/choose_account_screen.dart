@@ -113,7 +113,7 @@ class ChooseAccountScreen extends StatelessWidget {
                       icon: Icons.store_outlined,
                       text: "account_vendor".tr,
                       onTap: () {
-                        showToast(message: "This Service currently Unavailable!!");
+                        showToast(message: "service_unavailable".tr);
                         // Get.toNamed(AppRoutes.view);
                       },
                     ),

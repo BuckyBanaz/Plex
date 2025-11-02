@@ -110,7 +110,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                       ),
                                       children:  [
                                         TextSpan(
-                                          text: controller.currentDriver.value?.name ?? 'PLEX1080'.tr,
+                                          text: controller.currentDriver.value?.id.toString() ?? 'PLEX1080'.tr,
                                           style: TextStyle(
                                             color: AppColors.textColor,
                                             fontSize: 14,
