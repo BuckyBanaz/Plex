@@ -34,7 +34,7 @@ class SignupScreen extends StatelessWidget {
                 ),
 
                 Text(
-                  "welcome_title".tr, // مرحباً بك في PLEX
+                  "welcome_title".tr,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppColors.textColor,
@@ -53,7 +53,6 @@ class SignupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // Signup Card
                 Form(
                   key: c.signupKey,
                   child: Container(
@@ -94,21 +93,26 @@ class SignupScreen extends StatelessWidget {
                           textInputAction: TextInputAction.next,
                           focusNode: c.nameFocus,
                           nextFocusNode: c.emailFocus,
-                          // validator: emailValidator,
                         ),
 
                         // Email
                         SizedBox(height: 16),
-                        CustomTextField(
-                          controller: c.emailController,
-                          label: "email_label".tr,
-                          hint: "email_hint".tr,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          focusNode: c.emailFocus,
-                          nextFocusNode: c.phoneFocus,
-                          validator: emailValidator,
-                        ),
+                        Obx(() {
+                          return CustomTextField(
+                            controller: c.emailController,
+                            label: "email_label".tr,
+                            hint: "email_hint".tr,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            focusNode: c.emailFocus,
+                            nextFocusNode: c.phoneFocus,
+                            validator: emailValidator,
+                            errorText: c.emailError.value,
+                            // onChanged: (_) {
+                            //   if (c.emailError.value != null) c.emailError.value = null;
+                            // },
+                          );
+                        }),
                         SizedBox(height: 16),
                         PhoneTextField(
                           controller: c.phoneController,
@@ -117,25 +121,27 @@ class SignupScreen extends StatelessWidget {
                             focusNode: c.phoneFocus,
                             nextFocusNode: c.passwordFocus,
                           onCountryChanged: (code, iso) {
-                            c.countryCode = code; // save country code to controller
+                            c.countryCode = code;
                           },
                         ),
 
                         SizedBox(height: 16),
-                        CustomTextField(
-                          controller: c.passwordController,
-                          label: "password_label".tr,
-                          hint: "password_hint".tr,
-                          isPassword: true,
-                          textInputAction: TextInputAction.next,
-                          focusNode: c.passwordFocus,
-                          nextFocusNode: c.conPasswordFocus,
-                          validator: passwordValidator,
-                          onSubmitted: () {
-                            // signup action
-                            // _performSignup(nameController.text, emailController.text, passwordController.text);
-                          },
-                        ),
+                        Obx(() {
+                          return CustomTextField(
+                            controller: c.passwordController,
+                            label: "password_label".tr,
+                            hint: "password_hint".tr,
+                            isPassword: true,
+                            textInputAction: TextInputAction.next,
+                            focusNode: c.passwordFocus,
+                            nextFocusNode: c.conPasswordFocus,
+                            validator: passwordValidator,
+                            errorText: c.passwordError.value,
+                            // onChanged: (_) {
+                            //   if (c.passwordError.value != null) c.passwordError.value = null;
+                            // },
+                          );
+                        }),
                         const SizedBox(height: 16),
 
                         // Confirm Password

@@ -22,6 +22,8 @@ import '../screens/auth/otp_screen.dart';
 import '../screens/driver/dashboard/driver_dashboard_screen.dart';
 import '../screens/driver/home/driver_home_screen.dart';
 import '../screens/individual/Booking/location_details_screens.dart';
+import '../screens/individual/order/order_complete_screen.dart';
+import '../screens/payments/payment_failed_screen.dart';
 import '../screens/splash/splash_screen.dart';
 
 class AppRoutes {
@@ -46,6 +48,8 @@ class AppRoutes {
   static const confirm = '/confirm';
   static const payment = '/payment';
   static const bookingConfirm = '/bookingConfirm';
+  static const orderComplete = '/orderComplete';
+  static const paymentFailed = '/paymentFailed';
   static const driverNotification = '/driverNotification';
   static const driverDeliveryOrder = '/driverDeliveryOrder';
 
@@ -69,6 +73,8 @@ class AppRoutes {
     GetPage(name: confirm, page: () => ConfirmDetailsScreen()),
     GetPage(name: payment, page: () => PaymentScreen()),
     GetPage(name: bookingConfirm, page: () => BookingConfirmScreen()),
+    GetPage(name: orderComplete, page: () => OrderCompleteScreen()),
+    GetPage(name: paymentFailed, page: () => PaymentFailedScreen()),
     GetPage(name: driverNotification, page: () => DriverNotificationScreen()),
     GetPage(name: driverDeliveryOrder, page: () => DriverDeliveryOrderScreen()),
     GetPage(name: userProfile, page: () => UserProfileScreen()),

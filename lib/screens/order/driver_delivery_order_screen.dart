@@ -32,7 +32,7 @@ class _DriverDeliveryOrderScreenState extends State<DriverDeliveryOrderScreen> {
                 final order = controller.orders[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: OrderCard(order: order),
+                  child: DriverOrderCard(order: order),
                 );
               },
             ),

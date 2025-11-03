@@ -67,38 +67,38 @@ class TopBar extends StatelessWidget {
             ),
           ),
 
-          if (showLanguageButton) ...[
-            const SizedBox(width: 6),
-            InkWell(
-              onTap: () {
-                // Yahaan language change ka logic daalein
-                // Example:
-                if (isArabic) {
-                  Get.updateLocale(const Locale('en', 'US'));
-                } else {
-                  Get.updateLocale(const Locale('ar', 'SA'));
-                }
-              },
-              child: Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    languageButtonText,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          // if (showLanguageButton) ...[
+          //   const SizedBox(width: 6),
+          //   InkWell(
+          //     onTap: () {
+          //       // Yahaan language change ka logic daalein
+          //       // Example:
+          //       if (isArabic) {
+          //         Get.updateLocale(const Locale('en', 'US'));
+          //       } else {
+          //         Get.updateLocale(const Locale('ar', 'SA'));
+          //       }
+          //     },
+          //     child: Container(
+          //       width: 36,
+          //       height: 36,
+          //       decoration: BoxDecoration(
+          //         color: Colors.black,
+          //         shape: BoxShape.circle,
+          //       ),
+          //       child: Center(
+          //         child: Text(
+          //           languageButtonText,
+          //           style: const TextStyle(
+          //             color: Colors.white,
+          //             fontSize: 12,
+          //             fontWeight: FontWeight.bold,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ],
 
           if (showIcon) ...[
             const SizedBox(width: 6),

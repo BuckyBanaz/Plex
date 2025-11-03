@@ -8,7 +8,7 @@ import 'package:plex_user/screens/individual/profile/user_profile_screen.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../notification/user_notification_screen.dart';
-import '../../order/user_order_screen.dart';
+import '../order/user_order_screen.dart';
 
 class UserMainScreenController extends GetxController {
   var selectedIndex = 0;

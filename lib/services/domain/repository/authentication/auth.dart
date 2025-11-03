@@ -39,14 +39,14 @@ int langKey = 1;
       }
 
 
-      final apiKeyFromResp = (data['api_key'] ?? data['apiKey'] ?? data['apikey']) as String?;
+      final apiKeyFromResp = (data['key'] ?? data['key'] ?? data['key']) as String?;
       if (apiKeyFromResp != null && apiKeyFromResp.isNotEmpty) {
         await databaseService.putApiKey(apiKeyFromResp);
         print("API key saved: ${apiKeyFromResp.substring(0, 6)}...");
       } else {
         print("API key not present in top-level response. Checking user object...");
         final userMap = data['user'] as Map<String, dynamic>?;
-        final apiKeyFromUser = (userMap?['api_key'] ?? userMap?['apiKey']) as String?;
+        final apiKeyFromUser = (userMap?['key'] ?? userMap?['key']) as String?;
         if (apiKeyFromUser != null && apiKeyFromUser.isNotEmpty) {
           await databaseService.putApiKey(apiKeyFromUser);
           print("API key saved from user object");

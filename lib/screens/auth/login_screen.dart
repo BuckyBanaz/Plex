@@ -87,29 +87,34 @@ class LoginScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        CustomTextField(
-                          controller: c.emailController,
-                          label: "email_label".tr,
-                          hint: "email_hint".tr,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          focusNode: c.emailFocus,
-                          validator: emailValidator,
-                          nextFocusNode: c.passwordFocus,
-                        ),
+                        Obx(() {
+                          return CustomTextField(
+                            controller: c.emailController,
+                            label: "email_label".tr,
+                            hint: "email_hint".tr,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            focusNode: c.emailFocus,
+                            nextFocusNode: c.passwordFocus,
+                            validator: emailValidator,
+                            errorText: c.emailError.value, // ✅ bind error text
+                          );
+                        }),
                         const SizedBox(height: 16),
-                        CustomTextField(
-                          controller: c.passwordController,
-                          label: "password_label".tr,
-                          hint: "password_hint".tr,
-                          isPassword: true,
-                          validator: passwordValidator,
-                          textInputAction: TextInputAction.done,
-                          focusNode: c.passwordFocus,
-                          onSubmitted: () {
-                            c.login();
-                          },
-                        ),
+                        Obx(() {
+                          return CustomTextField(
+                            controller: c.passwordController,
+                            label: "password_label".tr,
+                            hint: "password_hint".tr,
+                            isPassword: true,
+                            validator: passwordValidator,
+                            textInputAction: TextInputAction.done,
+                            focusNode: c.passwordFocus,
+                            errorText: c.passwordError.value, // ✅ bind error text
+                            onSubmitted: () => c.login(),
+                          );
+                        }),
+
                         const SizedBox(height: 24),
 
                         Obx(() {

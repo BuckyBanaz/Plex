@@ -54,7 +54,7 @@ class UserNotification extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primarySwatch.shade100,
+        color: AppColors.primarySwatch.shade50,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

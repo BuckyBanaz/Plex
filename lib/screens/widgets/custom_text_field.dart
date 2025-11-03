@@ -17,12 +17,13 @@ class CustomTextField extends StatefulWidget {
   final VoidCallback? onSubmitted;
   final bool autofocus;
 
-  // NEW: customization / overrides
-  final Color? labelColor;       // override label color
-  final Color? hintColor;        // override hint color
-  final Color? textColor;        // override input text color
-  final Color? fillColor;        // override filled color
-  final InputBorder? border;     // override base border
+  final String? errorText; // ✅ Added
+
+  final Color? labelColor;
+  final Color? hintColor;
+  final Color? textColor;
+  final Color? fillColor;
+  final InputBorder? border;
   final InputBorder? enabledBorder;
   final InputBorder? focusedBorder;
   final double? focusedBorderWidth;
@@ -41,7 +42,7 @@ class CustomTextField extends StatefulWidget {
     this.onPrevious,
     this.onSubmitted,
     this.autofocus = false,
-    // new optional overrides
+    this.errorText, // ✅ Added
     this.labelColor,
     this.hintColor,
     this.textColor,
@@ -67,25 +68,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   void _handleSubmitted(String value) {
     if (widget.textInputAction == TextInputAction.next) {
-      if (widget.nextFocusNode != null) {
-        widget.nextFocusNode!.requestFocus();
-      } else {
-        FocusScope.of(context).nextFocus();
-      }
-    } else if (widget.textInputAction == TextInputAction.previous) {
-      if (widget.onPrevious != null) {
-        widget.onPrevious!();
-      } else {
-        FocusScope.of(context).previousFocus();
-      }
-    } else if (widget.textInputAction == TextInputAction.done ||
-        widget.textInputAction == TextInputAction.go ||
-        widget.textInputAction == TextInputAction.send ||
-        widget.textInputAction == TextInputAction.search) {
-      if (widget.onSubmitted != null) widget.onSubmitted!();
+      widget.nextFocusNode?.requestFocus();
+    } else if (widget.textInputAction == TextInputAction.done) {
+      widget.onSubmitted?.call();
       FocusScope.of(context).unfocus();
-    } else {
-      if (widget.onSubmitted != null) widget.onSubmitted!();
     }
   }
 
@@ -94,45 +80,28 @@ class _CustomTextFieldState extends State<CustomTextField> {
     final theme = Theme.of(context);
     final inputTheme = theme.inputDecorationTheme;
 
-    // derive border values: prefer widget override, then theme, then sensible default
     final InputBorder baseBorder = widget.border ??
-        inputTheme.border ??
         OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         );
 
-    final InputBorder enabledBorder =
-        widget.enabledBorder ?? inputTheme.enabledBorder ?? baseBorder;
-
-    // For focused border, allow width override combined with AppColors.primary
-    final double focusedWidth = widget.focusedBorderWidth ?? 3.5;
     final InputBorder focusedBorder = widget.focusedBorder ??
-        inputTheme.focusedBorder ??
         OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: focusedWidth),
+          borderSide: BorderSide(
+              color: AppColors.primary, width: widget.focusedBorderWidth ?? 3.5),
         );
-
-    // colors: prefer widget overrides, else fall back to theme text styles or defaults
-    final Color labelColor = widget.labelColor ??
-        (inputTheme.labelStyle?.color ?? AppColors.textColor.withOpacity(0.8));
-    final Color hintColor = widget.hintColor ??
-        (inputTheme.hintStyle?.color ?? Colors.grey);
-    final Color textColor = widget.textColor ??
-        (theme.textTheme.bodyMedium?.color ?? Colors.black);
-    final Color fillColor = widget.fillColor ?? (inputTheme.fillColor ?? Colors.white);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           '* ${widget.label}'.tr,
-          style: Get.textTheme.bodyMedium!.copyWith(
-            color: labelColor,
+          style: TextStyle(
+            color: widget.labelColor ?? AppColors.textColor.withOpacity(0.8),
             fontSize: 14,
           ),
-          textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -142,26 +111,28 @@ class _CustomTextFieldState extends State<CustomTextField> {
           textInputAction: widget.textInputAction,
           autofocus: widget.autofocus,
           obscureText: _obscure,
-          style: TextStyle(color: textColor),
+          style: TextStyle(color: widget.textColor ?? Colors.black),
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: TextStyle(color: hintColor),
-            fillColor: fillColor,
+            errorText: widget.errorText, // ✅ Server error will show here
+            hintStyle: TextStyle(color: widget.hintColor ?? Colors.grey),
+            fillColor: widget.fillColor ?? Colors.white,
             filled: true,
-            contentPadding: inputTheme.contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             border: baseBorder,
-            enabledBorder: enabledBorder,
+            enabledBorder: baseBorder,
             focusedBorder: focusedBorder,
-            // show password toggle only when isPassword
             suffixIcon: widget.isPassword
                 ? IconButton(
               onPressed: () => setState(() => _obscure = !_obscure),
-              icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+              icon: Icon(
+                _obscure ? Icons.visibility_off : Icons.visibility,
+              ),
             )
                 : null,
           ),
-          validator: widget.validator ??
-                  (value) => (value == null || value.isEmpty) ? 'required_field'.tr : null,
+          validator: widget.validator,
           onFieldSubmitted: _handleSubmitted,
         ),
       ],
@@ -169,14 +140,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
   }
 }
 
-
-
-
-
-
-typedef CountryChangedCallback = void Function(String countryCode, String countryIso);
-
-
+typedef CountryChangedCallback =
+    void Function(String countryCode, String countryIso);
 
 class PhoneTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -188,7 +153,7 @@ class PhoneTextField extends StatefulWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onSubmitted;
   final bool autofocus;
-  final String initialCountryIso; // 'IN' or 'SA'
+  final String initialCountryIso;
   final CountryChangedCallback? onCountryChanged;
   final String? Function(String?)? validator;
 
@@ -218,10 +183,7 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
     {"name": "Saudi Arabia", "iso": "SA", "code": "+966", "flag": "🇸🇦"},
   ];
 
-  final Map<String, int> _subscriberLength = {
-    'IN': 10,
-    'SA': 9,
-  };
+  final Map<String, int> _subscriberLength = {'IN': 10, 'SA': 9};
 
   late Map<String, String> _selectedCountry;
 
@@ -229,7 +191,7 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
   void initState() {
     super.initState();
     _selectedCountry = _countries.firstWhere(
-          (c) => c["iso"] == widget.initialCountryIso,
+      (c) => c["iso"] == widget.initialCountryIso,
       orElse: () => _countries.first,
     );
   }
@@ -252,7 +214,6 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
       FocusScope.of(context).unfocus();
     }
   }
-
 
   /// Returns full E.164 number: +<countrycode><number>
   String getFullNumber() {
@@ -285,17 +246,23 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
 
       final expectedLen = _subscriberLength[selectedIso];
       if (expectedLen != null && subscriber.length != expectedLen) {
-        return 'enter_valid_country_phone'.trParams({'country': _selectedCountry['name']!});
+        return 'enter_valid_country_phone'.trParams({
+          'country': _selectedCountry['name']!,
+        });
       }
       return null;
     }
 
-    final cleaned = input.replaceAll(RegExp(r'\D'), '').replaceFirst(RegExp(r'^0+'), '');
+    final cleaned = input
+        .replaceAll(RegExp(r'\D'), '')
+        .replaceFirst(RegExp(r'^0+'), '');
     if (cleaned.isEmpty) return 'enter_valid_phone'.tr;
 
     final expectedLenLocal = _subscriberLength[selectedIso];
     if (expectedLenLocal != null && cleaned.length != expectedLenLocal) {
-      return 'enter_valid_country_phone'.trParams({'country': _selectedCountry['name']!});
+      return 'enter_valid_country_phone'.trParams({
+        'country': _selectedCountry['name']!,
+      });
     }
 
     return null;
@@ -304,7 +271,9 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
   @override
   Widget build(BuildContext context) {
     return FormField<String>(
-      validator: (val) => widget.validator?.call(widget.controller.text) ?? _validatePhone(widget.controller.text),
+      validator: (val) =>
+          widget.validator?.call(widget.controller.text) ??
+          _validatePhone(widget.controller.text),
       autovalidateMode: AutovalidateMode.disabled,
       builder: (state) {
         return Column(
@@ -316,12 +285,13 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
                 color: AppColors.textColor.withOpacity(0.8),
                 fontSize: 14,
               ),
-              textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+              textDirection: Get.locale?.languageCode == 'ar'
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                // Country picker
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -339,9 +309,15 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
                           value: country,
                           child: Row(
                             children: [
-                              Text(country['flag'] ?? '', style: const TextStyle(fontSize: 18)),
+                              Text(
+                                country['flag'] ?? '',
+                                style: const TextStyle(fontSize: 18),
+                              ),
                               const SizedBox(width: 6),
-                              Text('${country['code']}', style: const TextStyle(color: Colors.black)),
+                              Text(
+                                '${country['code']}',
+                                style: const TextStyle(color: Colors.black),
+                              ),
                             ],
                           ),
                         );
@@ -349,7 +325,10 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
                       onChanged: (value) {
                         if (value == null) return;
                         setState(() => _selectedCountry = value);
-                        widget.onCountryChanged?.call(value['code'] ?? '', value['iso'] ?? '');
+                        widget.onCountryChanged?.call(
+                          value['code'] ?? '',
+                          value['iso'] ?? '',
+                        );
                         state.validate();
                       },
                     ),
@@ -364,18 +343,21 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
                     textInputAction: widget.textInputAction,
                     autofocus: widget.autofocus,
                     style: const TextStyle(color: Colors.black),
-                    textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+                    textDirection: Get.locale?.languageCode == 'ar'
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
                     decoration: InputDecoration(
                       hintText: widget.hint ?? '512345678'.tr,
                       fillColor: Colors.white,
                       filled: true,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     onFieldSubmitted: _handleSubmitted, // ✅ important
                     onChanged: (_) => state.didChange(widget.controller.text),
                   ),
                 ),
-
               ],
             ),
             if (state.hasError) ...[
@@ -383,7 +365,9 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
               Text(
                 state.errorText!,
                 style: const TextStyle(color: Colors.red, fontSize: 12),
-                textDirection: Get.locale?.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+                textDirection: Get.locale?.languageCode == 'ar'
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
               ),
             ],
           ],
@@ -393,7 +377,6 @@ class _PhoneTextFieldState extends State<PhoneTextField> {
   }
 }
 
-
 class WeightInput extends StatelessWidget {
   const WeightInput({super.key});
 
@@ -402,7 +385,7 @@ class WeightInput extends StatelessWidget {
     final BookingController controller = Get.find();
 
     return Obx(
-          () => Container(
+      () => Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -413,12 +396,13 @@ class WeightInput extends StatelessWidget {
           children: [
             Expanded(
               child: TextField(
-                keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
-                decoration:  InputDecoration(
-                    hintText: '0'.tr,
-                    border: InputBorder.none,
-                    focusedBorder:InputBorder.none
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  hintText: '0'.tr,
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
                 ),
                 onChanged: (value) {
                   controller.setWeight(double.tryParse(value) ?? 0.0);
@@ -435,8 +419,9 @@ class WeightInput extends StatelessWidget {
               child: DropdownButton<String>(
                 value: controller.selectedWeightUnit.value,
                 icon: const Icon(Icons.keyboard_arrow_down),
-                items: <String>['Kg', 'Lb', 'g']
-                    .map<DropdownMenuItem<String>>((String value) {
+                items: <String>['Kg', 'Lb', 'g'].map<DropdownMenuItem<String>>((
+                  String value,
+                ) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -456,8 +441,6 @@ class WeightInput extends StatelessWidget {
   }
 }
 
-
-
 class DescriptionInput extends StatelessWidget {
   const DescriptionInput({super.key});
 
@@ -466,17 +449,16 @@ class DescriptionInput extends StatelessWidget {
     final BookingController controller = Get.find();
 
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: AppColors.primary),
-      ),
+      decoration: BoxDecoration(color: Colors.white),
       child: TextField(
         maxLines: 5,
-        decoration:  InputDecoration(
+        decoration: InputDecoration(
           hintText: 'enter_description'.tr,
           border: InputBorder.none,
-          focusedBorder:InputBorder.none,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+            borderSide: const BorderSide(color: AppColors.primary),
+          ),
 
           contentPadding: EdgeInsets.all(16.0),
         ),
@@ -488,8 +470,6 @@ class DescriptionInput extends StatelessWidget {
   }
 }
 
-
-
 class SimpleTextField extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;
@@ -500,13 +480,20 @@ class SimpleTextField extends StatefulWidget {
   final TextInputAction textInputAction;
   final FocusNode? nextFocusNode;
   final VoidCallback? onPrevious;
-  final VoidCallback? onSubmitted; // called for done action or custom handling
+  final VoidCallback? onSubmitted;
 
   const SimpleTextField({
     super.key,
     required this.controller,
     required this.labelText,
-    this.keyboardType = TextInputType.text, this.hint, this.focusNode, this.nextFocusNode, this.onPrevious, this.onSubmitted, required this.textInputAction, this.validator,
+    this.keyboardType = TextInputType.text,
+    this.hint,
+    this.focusNode,
+    this.nextFocusNode,
+    this.onPrevious,
+    this.onSubmitted,
+    required this.textInputAction,
+    this.validator,
   });
 
   @override
@@ -514,8 +501,6 @@ class SimpleTextField extends StatefulWidget {
 }
 
 class _SimpleTextFieldState extends State<SimpleTextField> {
-
-
   void _handleSubmitted(String value) {
     if (widget.textInputAction == TextInputAction.next) {
       if (widget.nextFocusNode != null) {
@@ -540,14 +525,17 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
       if (widget.onSubmitted != null) widget.onSubmitted!();
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
       keyboardType: widget.keyboardType,
       focusNode: widget.focusNode,
-      validator: widget.validator ??
-              (value) => (value == null || value.isEmpty) ? 'required_field'.tr : null,
+      validator:
+          widget.validator ??
+          (value) =>
+              (value == null || value.isEmpty) ? 'required_field'.tr : null,
       onFieldSubmitted: _handleSubmitted,
       decoration: InputDecoration(
         hintText: widget.hint,
@@ -560,9 +548,11 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
           borderRadius: BorderRadius.circular(12.0),
           borderSide: const BorderSide(color: AppColors.primary, width: 2.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
     );
   }
 }
-

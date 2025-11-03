@@ -8,6 +8,7 @@ import 'package:plex_user/screens/individual/profile/user_profile_screen.dart';
 
 import '../../../modules/controllers/profile/user_profile_controller.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/helpers.dart';
 
 class UserAccountScreen extends StatelessWidget {
   const UserAccountScreen({super.key});
@@ -54,7 +55,7 @@ class UserAccountScreen extends StatelessWidget {
           InfoColumnItem(
             "mobile_number".tr,
             titleSize: 14,
-            "(629) 7896758465",
+            c.currentUser.value!.mobile,
             subtitleSize: 20,
           ),
           const SizedBox(height: 20),

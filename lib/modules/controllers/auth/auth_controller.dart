@@ -43,7 +43,13 @@ class AuthController extends GetxController {
   Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   Rx<DriverUserModel?> currentDriver = Rx<DriverUserModel?>(null);
   final selectedVehicle = Rx<String?>(null);
+  final emailError = RxnString();
+  final passwordError = RxnString();
 
+  void clearFieldErrors() {
+    emailError.value = null;
+    passwordError.value = null;
+  }
   final vehicles = [
     'Bike',
     'Car',
@@ -93,30 +99,41 @@ class AuthController extends GetxController {
       return;
     }
 
-    final email = emailController.text.trim();
-    final password = passwordController.text;
+    clearFieldErrors();
+    isLoading.value = true;
 
     try {
-      isLoading.value = true;
+      await _authRepo.login(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
-
-       await _authRepo.login(email: email, password: password);
-
-      showToast(message: "login_success".tr);
-      clearControllers();
-
+      showToast(message: "Login successful");
       Get.offAllNamed(AppRoutes.location);
-    } on DioError catch (dioErr) {
-      // ... (error handling waise hi)
+    } on DioError catch (e) {
+      final msg = e.response?.data['message'] ?? e.message ?? '';
+      if (msg.toLowerCase().contains('user not found')) {
+        emailError.value = "User not found";
+      } else if (msg.toLowerCase().contains('incorrect password')) {
+        passwordError.value = "Incorrect password";
+      } else {
+        showToast(message: msg);
+      }
     } catch (e) {
-      showToast(message: "invalid_credentials".tr);
-      print(e);
+      // 👇 Handle generic errors too (like the one thrown by AuthRepository)
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('incorrect password')) {
+        passwordError.value = "Incorrect password";
+      } else if (msg.contains('user not found')) {
+        emailError.value = "User not found";
+      } else {
+        showToast(message: 'Login failed. Please try again.');
+      }
     } finally {
-
-
       isLoading.value = false;
     }
   }
+
 
   Future<void> signup() async {
     // Validate signup form
@@ -127,8 +144,8 @@ class AuthController extends GetxController {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
-    final phone = "${countryCode ?? '+91'}${phoneController.text}";
-
+    // final phone = "${countryCode ?? '+91'}${phoneController.text}";
+    final phone = "${phoneController.text}";
 
     try {
       isSignupLoading.value = true;
@@ -154,7 +171,7 @@ class AuthController extends GetxController {
       // Get.snackbar('Error', msg);
       showToast(message: '$msg');
     } catch (e) {
-      showToast(message: ' Server is busy! Please try after sometimes');
+      showToast(message: '$e');
       // Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''));
     } finally {
       isSignupLoading.value = false;
