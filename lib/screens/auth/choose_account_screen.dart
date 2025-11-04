@@ -108,15 +108,15 @@ class ChooseAccountScreen extends StatelessWidget {
 
                       },
                     ),
-                    const SizedBox(height: 14),
-                    _accountTypeButton(
-                      icon: Icons.store_outlined,
-                      text: "account_vendor".tr,
-                      onTap: () {
-                        showToast(message: "service_unavailable".tr);
-                        // Get.toNamed(AppRoutes.view);
-                      },
-                    ),
+                    // const SizedBox(height: 14),
+                    // _accountTypeButton(
+                    //   icon: Icons.store_outlined,
+                    //   text: "account_vendor".tr,
+                    //   onTap: () {
+                    //     showToast(message: "service_unavailable".tr);
+                    //     // Get.toNamed(AppRoutes.view);
+                    //   },
+                    // ),
 
                     const SizedBox(height: 18),
                     GestureDetector(
@@ -136,14 +136,6 @@ class ChooseAccountScreen extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 20),
-              Text(
-                "footer_text".tr,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textSecondary,
-                ),
-              )
             ],
           ),
         ),

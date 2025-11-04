@@ -41,4 +41,14 @@ class MapRepository {
       return [];
     }
   }
+  
+  /// [NEW] Get address from coordinates
+  Future<Map<String, dynamic>?> getAddressFromCoordinates(double lat, double lng) async {
+    try {
+      return await _mapApi.fetchAddressFromCoordinates(lat, lng);
+    } catch (e) {
+      debugPrint("❌ Error fetching address from coords: $e");
+      return null;
+    }
+  }
 }

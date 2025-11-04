@@ -155,7 +155,22 @@ class AuthApi {
       },
     );
   }
-
+  Future<Response> forgotPassword({
+    required String email,
+    required int langKey,
+  }) {
+    return dio.post(
+      '$basePath${ApiEndpoint.forgotPassword}',
+      options: Options(
+        headers: {
+          'lang_id': langKey,
+        },
+      ),
+      data: {
+        "email":email
+      }
+    );
+  }
   Future<Response> refreshToken(String currentToken) {
     final options = Options(
       headers: {

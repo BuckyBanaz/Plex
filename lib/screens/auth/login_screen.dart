@@ -93,11 +93,8 @@ class LoginScreen extends StatelessWidget {
                             label: "email_label".tr,
                             hint: "email_hint".tr,
                             keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.next,
-                            focusNode: c.emailFocus,
-                            nextFocusNode: c.passwordFocus,
                             validator: emailValidator,
-                            errorText: c.emailError.value, // ✅ bind error text
+                            errorText: c.emailError.value, // bind here
                           );
                         }),
                         const SizedBox(height: 16),
@@ -114,8 +111,18 @@ class LoginScreen extends StatelessWidget {
                             onSubmitted: () => c.login(),
                           );
                         }),
-
-                        const SizedBox(height: 24),
+                        SizedBox(height: 8),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: TextButton(
+                            onPressed: ()=>Get.toNamed(AppRoutes.forgotPassword) ,
+                            child:  Text(
+                              'forgot_password_button'.tr,
+                              style: TextStyle(color: AppColors.primary),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 8,),
 
                         Obx(() {
                           return ElevatedButton(
@@ -144,15 +151,6 @@ class LoginScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "footer_note".tr, // تطبيق تجريبي - قم بإنشاء أي حساب للبدء
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                  textAlign: TextAlign.center,
                 ),
               ],
             ),

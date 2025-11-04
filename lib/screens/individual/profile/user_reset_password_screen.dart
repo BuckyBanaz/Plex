@@ -5,7 +5,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
 
 import '../../../constant/app_colors.dart' show AppColors;
-import '../../../modules/controllers/profile/user_profile_controller.dart';
+import '../../../modules/controllers/settings/user_profile_controller.dart';
 import '../../widgets/custom_text_field.dart';
 
 class UserResetPasswordScreen extends StatelessWidget {
@@ -51,6 +51,11 @@ class UserResetPasswordScreen extends StatelessWidget {
                 focusNode: controller.newPassFocus,
                 nextFocusNode: controller.confirmPassFocus,
                 textInputAction: TextInputAction.next,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.grey, width: 1),
+                ),
+
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(color: Colors.grey[400]!),
@@ -76,6 +81,11 @@ class UserResetPasswordScreen extends StatelessWidget {
                 isPassword: true,
                 focusNode: controller.confirmPassFocus,
                 textInputAction: TextInputAction.done,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.grey, width: 1),
+                ),
+
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.0),
                   borderSide: BorderSide(color: Colors.grey[400]!),

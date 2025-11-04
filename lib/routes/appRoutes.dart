@@ -17,12 +17,16 @@ import 'package:plex_user/screens/order/driver_delivery_order_screen.dart';
 import 'package:plex_user/screens/payments/user_payment_screen.dart';
 
 import '../screens/auth/choose_account_screen.dart';
+import '../screens/auth/forgot_password.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/otp_screen.dart';
 import '../screens/driver/dashboard/driver_dashboard_screen.dart';
 import '../screens/driver/home/driver_home_screen.dart';
 import '../screens/individual/Booking/location_details_screens.dart';
 import '../screens/individual/order/order_complete_screen.dart';
+import '../screens/individual/profile/user_help_support_screen.dart';
+import '../screens/location/add_new_user_address_screen.dart';
+import '../screens/location/user_address_screen.dart';
 import '../screens/payments/payment_failed_screen.dart';
 import '../screens/splash/splash_screen.dart';
 
@@ -30,6 +34,7 @@ class AppRoutes {
   static const splash = '/splash';
   static const welcome = '/welcome';
   static const login = '/login';
+  static const forgotPassword = '/forgotPassword';
   static const signup = '/signup';
   static const driverSignup = '/driverSignup';
   static const choose = '/choose';
@@ -37,6 +42,9 @@ class AppRoutes {
   static const otp = '/otp';
   static const userDashBoard = '/userDashBoard';
   static const userHome = '/userHome';
+  static const userAddress = '/userAddress';
+  static const addUserAddress = '/addUserAddress';
+  static const userHelp = '/userHelp';
   static const userProfile = '/userProfile';
   static const driverDashBoard = '/driverDashBoard';
   static const driverHome = '/driverHome';
@@ -56,6 +64,7 @@ class AppRoutes {
   static get routes => [
     GetPage(name: splash, page: () => SplashScreen()),
     GetPage(name: login, page: () => LoginScreen(),middlewares: [EnsureAuthMiddleware()]),
+    GetPage(name: forgotPassword, page: () => ForgotPasswordScreen()),
     GetPage(name: signup, page: () => SignupScreen()),
     GetPage(name: driverSignup, page: () => DriverSignupScreen()),
     GetPage(name: choose, page: () => ChooseAccountScreen()),
@@ -63,6 +72,9 @@ class AppRoutes {
     GetPage(name: otp, page: () => OtpScreen()),
     GetPage(name: userDashBoard, page: () => UserMainScreen()),
     GetPage(name: userHome, page: () => UserHomeScreen()),
+    GetPage(name: userAddress, page: () => UserAddressScreen()),
+    GetPage(name: addUserAddress, page: () => AddNewUserAddressScreen()),
+    GetPage(name: userHelp, page: () => UserHelpSupportScreen()),
     GetPage(name: driverDashBoard, page: () => DriverMainScreen()),
     GetPage(name: driverHome, page: () => DriverHomeScreen()),
     GetPage(name: location, page: () => LocationPermissionScreen()),

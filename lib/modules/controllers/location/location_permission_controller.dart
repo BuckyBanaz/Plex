@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart' hide ServiceStatus;
 
 import '../../../common/Toast/toast.dart';
@@ -16,7 +17,7 @@ class LocationController extends GetxController {
   final AuthRepository authrepo = AuthRepository();
   StreamSubscription<ServiceStatus>? serviceListener;
   StreamSubscription<Position>? positionStreamSub;
-
+  final Rx<LatLng?> currentPosition = Rx<LatLng?>(null);
   var permissionGranted = false;
   var loadingLocation = false;
   var isButtonLoading = false;
@@ -166,6 +167,7 @@ class LocationController extends GetxController {
 
   Future<void> _fetchAndUpdateAddress(Position position) async {
     try {
+      currentPosition.value = LatLng(position.latitude, position.longitude);
       String address = await gl.getAddressFromPosition(position);
       currentAddress.value = address;
     } catch (e) {
@@ -254,6 +256,7 @@ class LocationController extends GetxController {
   // -------------------------
   Future<void> _sendLocationAndPersist(Position position) async {
     try {
+      currentPosition.value = LatLng(position.latitude, position.longitude);
       // Ensure apiKey exists
       final apiKey = db.apiKey;
       if (apiKey == null || apiKey.isEmpty) {
@@ -282,4 +285,8 @@ class LocationController extends GetxController {
       debugPrint('Failed to send location: $e');
     }
   }
+
+
+
+
 }

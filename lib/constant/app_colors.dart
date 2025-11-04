@@ -25,6 +25,7 @@ class AppColors {
   );
 
   static const Color secondary = Color(0xFF1E2A47); // Dark navy bg
+  static const Color scaffoldBg = Color(0xFFF5F6FB);
   static const Color textColor = Colors.white;
   static const Color textGrey = Color(0XFF77869E);
   static const Color textPrimary = Colors.black;

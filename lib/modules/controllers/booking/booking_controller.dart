@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -5,16 +6,22 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
+import '../../../models/user_models.dart';
 import '../../../routes/appRoutes.dart';
+import '../../../services/domain/service/app/app_service_imports.dart';
+import '../location/location_permission_controller.dart';
 import '../payment/stripe_payment_controller.dart';
-
-
 
 class BookingController extends GetxController {
   final ShipmentRepository repo = ShipmentRepository();
-  GoogleMapController? mapController; // <-- FIX 1: Map controller add karein
+  GoogleMapController? mapController;
+  final DatabaseService db = Get.find<DatabaseService>();
 
-  
+  final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
+
+  // Location controller (must be already put into Get before this controller is used)
+  final LocationController locationController = Get.find<LocationController>();
+
   // Booking fields
   var selectedTime = 0.obs;
   var selectedVehicleIndex = 0.obs;
@@ -190,8 +197,7 @@ class BookingController extends GetxController {
   }
 
   void removeImage(int index) {
-    if (index >= 0 && index < selectedImages.length)
-      selectedImages.removeAt(index);
+    if (index >= 0 && index < selectedImages.length) selectedImages.removeAt(index);
   }
 
   // Pickup controllers
@@ -208,7 +214,7 @@ class BookingController extends GetxController {
 
   void updatePickUpReactive() {
     pAddress.value =
-    "${pLocality},${pLandMarkController.text}, ${pPincodeController.text}";
+    "${pLocality.value},${pLandMarkController.text}, ${pPincodeController.text}";
     validatePickupForm();
   }
 
@@ -235,8 +241,28 @@ class BookingController extends GetxController {
       return;
     }
     updatePickUpReactive();
-    fetchRoute(); // <-- FIX 2: Yahan fetchRoute() call karein
+    fetchRoute();
     Get.back();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      isLoading.value = true;
+
+      final UserData = db.user;
+      if (UserData != null) {
+        currentUser.value = UserData;
+        pNameController.text = UserData!.name;
+        pMobileController.text = UserData!.mobile;
+        print("User:${currentUser.value?.name}");
+      } else {
+        print("No User data found in local DB.");
+      }
+    } catch (e) {
+      print("Failed to load User data: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // Drop-off controllers
@@ -257,7 +283,7 @@ class BookingController extends GetxController {
     dName.value = dnameController.text;
     dPhone.value = dmobileController.text;
     dAddress.value =
-    "${dLocality},${dlankmarkController.text}, ${dpincodeController.text}";
+    "${dLocality.value},${dlankmarkController.text}, ${dpincodeController.text}";
     validateDropOffForm();
   }
 
@@ -284,12 +310,11 @@ class BookingController extends GetxController {
       return;
     }
     updateDropOffReactive();
-    fetchRoute(); // <-- FIX 2: Yahan bhi fetchRoute() call karein
+    fetchRoute();
     Get.back();
   }
 
   // Location Details
-
   var routePoints = <LatLng>[].obs;
   final MapRepository mapRepo = MapRepository();
 
@@ -304,16 +329,14 @@ class BookingController extends GetxController {
 
     routePoints.value = points.map((e) => LatLng(e['lat']!, e['lng']!)).toList();
 
-    // <-- FIX 3: Camera zoom logic add karein -->
+    // Camera zoom logic
     if (mapController != null && routePoints.isNotEmpty) {
       LatLngBounds bounds;
 
       if (routePoints.length == 1) {
-        // Sirf ek point hai toh uspe center karo
         bounds = LatLngBounds(
             southwest: routePoints.first, northeast: routePoints.first);
       } else {
-        // Multiple points hain toh bounds calculate karo
         bounds = LatLngBounds(
           southwest: LatLng(
             routePoints.map((p) => p.latitude).reduce((a, b) => a < b ? a : b),
@@ -326,12 +349,10 @@ class BookingController extends GetxController {
         );
       }
 
-      // Camera ko new bounds par animate karo
       mapController!.animateCamera(
-        CameraUpdate.newLatLngBounds(bounds, 50.0), // 50.0 padding hai
+        CameraUpdate.newLatLngBounds(bounds, 50.0),
       );
     }
-    // <-- FIX 3 END -->
   }
 
   // Booking Confirmation
@@ -400,20 +421,99 @@ class BookingController extends GetxController {
     );
   }
 
+  // ---- NEW: Apply LocationController data into pickup fields ----
+  void _applyPickupFromLocation() {
+    final LatLng? pos = locationController.currentPosition.value;
+    final String address = locationController.currentAddress.value ?? '';
+
+    // If neither address nor pos available, do nothing
+    if ((address.isEmpty || address == 'loading_location'.tr) && pos == null) return;
+
+    // Fill reactive pickup address and coords
+    if (address.isNotEmpty && address != 'loading_location'.tr) {
+      // Best-effort parsing
+      pAddress.value = address;
+      try {
+        final parts = address.split(',');
+        if (parts.isNotEmpty) {
+          pLocality.value = parts.first.trim();
+        }
+        if (parts.length > 1 && pLandMarkController.text.isEmpty) {
+          pLandMarkController.text = parts[1].trim();
+        }
+        // try to find pincode in the address parts (simple regex)
+        final pincodeRegex = RegExp(r'\b\d{6}\b');
+        final match = pincodeRegex.firstMatch(address);
+        if (match != null && pPincodeController.text.isEmpty) {
+          pPincodeController.text = match.group(0) ?? '';
+        }
+      } catch (_) {
+        // ignore parsing errors
+      }
+    }
+
+    if (pos != null) {
+      pLat.value = pos.latitude;
+      pLng.value = pos.longitude;
+    }
+
+    // If we have current user info, prefill name & mobile (if empty)
+    if (currentUser.value != null) {
+      if (pNameController.text.trim().isEmpty && (currentUser.value!.name?.isNotEmpty ?? false)) {
+        pNameController.text = currentUser.value!.name!;
+      }
+      if (pMobileController.text.trim().isEmpty && (currentUser.value!.mobile?.isNotEmpty ?? false)) {
+        pMobileController.text = currentUser.value!.mobile!;
+      }
+    }
+
+    // Recompute derived pickup address string & validate form
+    updatePickUpReactive();
+    validatePickupForm();
+    update(); // update UI listeners
+  }
+
+  Future<void> useCurrentLocationAsPickup() async {
+    // If location is still loading, show message
+    if (locationController.currentAddress.value == 'loading_location'.tr) {
+      Get.snackbar("info".tr, "please_wait_getting_location".tr, snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    _applyPickupFromLocation();
+    Get.snackbar("success".tr, "pickup_set_to_current_location".tr, snackPosition: SnackPosition.BOTTOM);
+  }
+
   @override
   void onInit() {
     super.onInit();
+    _loadUserData();
+
+    // Drop-off listeners
     dnameController.addListener(validateDropOffForm);
     dmobileController.addListener(validateDropOffForm);
     dlankmarkController.addListener(validateDropOffForm);
     dpincodeController.addListener(validateDropOffForm);
     ever(dselectedAddressType, (_) => validateDropOffForm());
 
+    // Pickup listeners
     pNameController.addListener(validatePickupForm);
     pMobileController.addListener(validatePickupForm);
     pLandMarkController.addListener(validatePickupForm);
     pPincodeController.addListener(validatePickupForm);
     ever(pselectedAddressType, (_) => validatePickupForm());
+
+    // --- NEW: react to LocationController updates ---
+    ever(locationController.currentAddress, (_) {
+      _applyPickupFromLocation();
+    });
+
+    ever(locationController.currentPosition, (_) {
+      _applyPickupFromLocation();
+    });
+
+    // apply immediately if available
+    _applyPickupFromLocation();
   }
 
   @override
@@ -426,7 +526,7 @@ class BookingController extends GetxController {
     dmobileController.dispose();
     dlankmarkController.dispose();
     dpincodeController.dispose();
-    mapController?.dispose(); // <-- FIX 4: Controller ko dispose karein
+    mapController?.dispose();
     super.onClose();
   }
 }

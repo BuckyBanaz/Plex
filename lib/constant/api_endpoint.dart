@@ -1,6 +1,7 @@
 class ApiEndpoint {
   static const baseUrl = "http://35.154.158.173:3000/";
   static const login = "/login";
+  static const forgotPassword = "/forgot-password";
   static const individualSignup = "/individual";
   static const driverSignup = "/driver";
   static const corporateSignup = "/corporate";
@@ -10,6 +11,7 @@ class ApiEndpoint {
   static const resendSms = "/verify-otp";
   static const refreshToken = "/refresh-token";
   static const location = "/location";
+  static const userAddress = "/address";
 
   //
   static const shipment = "/shipments";

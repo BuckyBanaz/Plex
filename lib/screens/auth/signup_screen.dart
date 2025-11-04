@@ -5,15 +5,17 @@ import '../../constant/app_colors.dart';
 import '../../modules/controllers/auth/auth_controller.dart';
 import '../widgets/custom_text_field.dart';
 
-
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     final c = Get.put(AuthController());
-
+    final nameFocus = FocusNode();
+    final phoneFocus = FocusNode();
+    final emailFocus = FocusNode();
+    final passwordFocus = FocusNode();
+    final conPasswordFocus = FocusNode();
     return Scaffold(
       backgroundColor: AppColors.secondary,
       body: SafeArea(
@@ -27,10 +29,7 @@ class SignupScreen extends StatelessWidget {
                 Align(
                   alignment: AlignmentGeometry.topLeft,
 
-                  child: Image.asset(
-                    "assets/images/logo.png",
-                    width: 120,
-                  ),
+                  child: Image.asset("assets/images/logo.png", width: 120),
                 ),
 
                 Text(
@@ -91,8 +90,8 @@ class SignupScreen extends StatelessWidget {
                           label: "name_label".tr,
                           hint: "name_hint".tr,
                           textInputAction: TextInputAction.next,
-                          focusNode: c.nameFocus,
-                          nextFocusNode: c.emailFocus,
+                          focusNode: nameFocus,
+                          nextFocusNode: emailFocus,
                         ),
 
                         // Email
@@ -104,8 +103,8 @@ class SignupScreen extends StatelessWidget {
                             hint: "email_hint".tr,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
-                            focusNode: c.emailFocus,
-                            nextFocusNode: c.phoneFocus,
+                            focusNode: emailFocus,
+                            nextFocusNode: phoneFocus,
                             validator: emailValidator,
                             errorText: c.emailError.value,
                             // onChanged: (_) {
@@ -118,28 +117,28 @@ class SignupScreen extends StatelessWidget {
                           controller: c.phoneController,
                           label: 'phone_label'.tr,
                           hint: '512345678',
-                            focusNode: c.phoneFocus,
-                            nextFocusNode: c.passwordFocus,
+                          focusNode: phoneFocus,
+                          nextFocusNode: passwordFocus,
                           onCountryChanged: (code, iso) {
                             c.countryCode = code;
                           },
                         ),
 
                         SizedBox(height: 16),
-                        Obx(() {
+                          Obx(() {
                           return CustomTextField(
-                            controller: c.passwordController,
-                            label: "password_label".tr,
-                            hint: "password_hint".tr,
-                            isPassword: true,
-                            textInputAction: TextInputAction.next,
-                            focusNode: c.passwordFocus,
-                            nextFocusNode: c.conPasswordFocus,
-                            validator: passwordValidator,
-                            errorText: c.passwordError.value,
-                            // onChanged: (_) {
-                            //   if (c.passwordError.value != null) c.passwordError.value = null;
-                            // },
+                          controller: c.passwordController,
+                          label: "password_label".tr,
+                          hint: "password_hint".tr,
+                          isPassword: true,
+                          textInputAction: TextInputAction.next,
+                          validator: passwordValidator,
+                          focusNode: passwordFocus,
+                          nextFocusNode: conPasswordFocus,
+                          errorText: c.passwordError.value,
+                          // onChanged: (_) {
+                          //   if (c.passwordError.value != null) c.passwordError.value = null;
+                          // },
                           );
                         }),
                         const SizedBox(height: 16),
@@ -147,11 +146,12 @@ class SignupScreen extends StatelessWidget {
                         // Confirm Password
                         CustomTextField(
                           controller: c.conPasswordController,
-                          label: 'confirm_password_label'.tr, // New translation key
+                          label: 'confirm_password_label'
+                              .tr, // New translation key
                           hint: 're_enter_password'.tr, // New translation key
-                          focusNode: c.conPasswordFocus,
+                          focusNode: conPasswordFocus,
                           textInputAction: TextInputAction.done,
-                          onPrevious: c.signup,
+                          onSubmitted: c.signup,
                           isPassword: true,
                           validator: (value) {
                             if (value!.isEmpty) return 'Required field'.tr;
@@ -165,9 +165,18 @@ class SignupScreen extends StatelessWidget {
 
                         Obx(() {
                           return ElevatedButton(
-                            onPressed: c.isSignupLoading.value ? null : () => c.signup(),
+                            onPressed: c.isSignupLoading.value
+                                ? null
+                                : () => c.signup(),
                             child: c.isSignupLoading.value
-                                ?  SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2,color: AppColors.primary,))
+                                ? SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
                                 : Text("signup_btn".tr),
                           );
                         }),
@@ -192,15 +201,15 @@ class SignupScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  "footer_note".tr,
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                // const SizedBox(height: 20),
+                // Text(
+                //   "footer_note".tr,
+                //   style: TextStyle(
+                //     color: AppColors.textSecondary,
+                //     fontSize: 12,
+                //   ),
+                //   textAlign: TextAlign.center,
+                // ),
               ],
             ),
           ),

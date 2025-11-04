@@ -24,6 +24,19 @@
   "logout": "Logout",
   "profile_work_ongoing": "Profile screen work ongoing...",
 
+
+  "forgot_password": "Forgot password",
+  "enter_email_instructions": "Enter the email associated with your account and we'll send a reset link.",
+  "email_required": "Please enter your email",
+  "invalid_email": "Please enter a valid email",
+  "send_reset_link": "Send reset link",
+  "check_email": "Check your email",
+  "reset_email_sent": "We've sent password reset instructions to {email}. Please check your inbox (or spam).",
+  "ok": "OK",
+  "oops": "Oops",
+  "could_not_send_reset": "Could not send reset link. Try again later.",
+  "something_went_wrong": "Something went wrong. Try again.",
+  "reset_info_blurb": "If you don't receive the email in a few minutes, check spam or contact support.",
   "contact_info_title": "Contact Information",
   "contact_info_subtitle": "Account and Contact Details",
 
@@ -357,6 +370,36 @@
   "instructions": "Your password should be at least 8 characters long and include a mix of letters and numbers.",
   "enter_password": "Please enter password",
   "confirm_password": "Please confirm password",
-  "password_length": "Password must be at least 8 characters"
+  "password_length": "Password must be at least 8 characters",
+
+  "help_title": "Help & Support",
+  "contact_call": "Call Us",
+  "contact_call_desc": "Talk to our support team 24/7",
+  "contact_email": "Email Us",
+  "contact_email_desc": "Get support via email",
+  "contact_chat": "Live Chat",
+  "contact_chat_desc": "Chat with a support agent",
+  "faq_title": "Frequently Asked Questions",
+  "faq_q1": "Where is my package?",
+  "faq_a1": "You can track your package in real-time from the \"My Orders\" section.",
+  "faq_q2": "How do I change my delivery address?",
+  "faq_a2": "You can change the delivery address before the item is out for delivery. Go to Order Details > Change Address.",
+  "faq_q3": "What is the refund policy?",
+  "faq_a3": "If your item is damaged or not delivered, you can request a refund within 3 days of the expected delivery date.",
+  "submit_ticket": "Submit a New Ticket",
+  "error_title": "Error",
+  "error_cannot_launch": "Could not launch",
+  "chat_coming_soon": "Live chat is coming soon",
+  "search_area": "Search for area, street name...",
+  "use_current_location": "Use current location",
+  "fetching_location": "Fetching location...",
+  "add_address": "Add Address",
+  "saved_addresses": "SAVED ADDRESSES",
+  "work": "Work",
+  "phone_number": "Phone number",
+  "address_selected": "Address Selected",
+  "Edit": "Edit",
+  "Delete": "Delete"
+
 
 }

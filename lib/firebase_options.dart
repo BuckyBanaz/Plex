@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDIifynW4RehyxeuAMHkz63eWYfa7KqFlg',
-    appId: '1:1089328963003:android:bb75010c2418531843b89e',
-    messagingSenderId: '1089328963003',
-    projectId: 'plex-42cc3',
-    storageBucket: 'plex-42cc3.firebasestorage.app',
+    apiKey: 'AIzaSyCINe80aAK-x2_TtXXcjBa_Bby_MafR_J4',
+    appId: '1:364510672983:android:7c736faeb2318d4c31cb12',
+    messagingSenderId: '364510672983',
+    projectId: 'plex-2ff47',
+    storageBucket: 'plex-2ff47.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA19pn75TDH4War_hA9EBPRu8Rp6hEcaFA',
-    appId: '1:1089328963003:ios:b35ad06a03c9f58b43b89e',
-    messagingSenderId: '1089328963003',
-    projectId: 'plex-42cc3',
-    storageBucket: 'plex-42cc3.firebasestorage.app',
+    apiKey: 'AIzaSyCDz69Z4fMA8nxR8BTcR0czyDtk2B2_aGA',
+    appId: '1:364510672983:ios:6d84bc67d96d155d31cb12',
+    messagingSenderId: '364510672983',
+    projectId: 'plex-2ff47',
+    storageBucket: 'plex-2ff47.firebasestorage.app',
     iosBundleId: 'com.example.plexUser',
   );
+
 }

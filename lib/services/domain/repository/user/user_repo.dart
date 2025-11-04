@@ -52,4 +52,39 @@ class UserRepository {
     // expect { clientSecret: "...", paymentIntentId: "pi_..." }
     return data['clientSecret'] as String;
   }
+
+
+
+  Future<void> addUserAddress({
+    required String address,
+    required String addressAs,
+    required String landmark,
+    required String locality,
+    required double latitude,
+    required double longitude,
+    required bool isDefault,
+    required int langKey,
+  }) async {
+    try {
+      final apiKey = databaseService.apiKey.toString();
+
+      await userApi.addAddress(
+        address: address,
+        addressAs: addressAs,
+        landmark: landmark,
+        locality: locality,
+        latitude: latitude,
+        longitude: longitude,
+        isDefault: isDefault,
+        langKey: langKey,
+      );
+
+      debugPrint("User address added successfully via repository.");
+      showToast(message: "Address added successfully");
+    } catch (e) {
+      debugPrint("Error user Address: $e");
+      showToast(message: "Failed to add Address");
+    }
+  }
+
 }

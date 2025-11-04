@@ -30,7 +30,7 @@ class Plex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final localeCtrl = Get.find<LocaleController>();
+    final localeCtrl = Get.put(LocaleController());
     WidgetsBinding.instance.addObserver(lifecycleObserver);
     TempContext.context = context;
 

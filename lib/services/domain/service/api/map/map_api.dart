@@ -90,5 +90,46 @@ class MapApi {
     return [];
   }
 
+  /// 🔹 [NEW] Fetch address from coordinates (Reverse Geocoding)
+  Future<Map<String, dynamic>?> fetchAddressFromCoordinates(double lat, double lng) async {
+    const endpoint = "https://maps.googleapis.com/maps/api/geocode/json";
+    final params = {
+      'latlng': '$lat,$lng',
+      'key': _apiKey,
+      'language': 'en',
+    };
+
+    try {
+      final resp = await _dio.get(endpoint, queryParameters: params);
+      if (resp.statusCode == 200 && resp.data['status'] == 'OK') {
+        if (resp.data['results'] != null && resp.data['results'].isNotEmpty) {
+          // Pehla result sabse accurate hota hai
+          final result = resp.data['results'][0];
+          final formattedAddress = result['formatted_address'];
+
+          // Locality (suburb/area) extract karna
+          String locality = '';
+          for (var component in result['address_components']) {
+            if (component['types'].contains('locality') ||
+                component['types'].contains('sublocality_level_1')) {
+              locality = component['long_name'];
+              break;
+            }
+          }
+          if (locality.isEmpty && result['address_components'].length > 1) {
+            locality = result['address_components'][1]['long_name']; // Fallback
+          }
+
+          return {
+            'formatted_address': formattedAddress,
+            'locality': locality,
+          };
+        }
+      }
+    } catch (e) {
+      debugPrint("❌ Error in Reverse Geocoding: $e");
+    }
+    return null;
+  }
 
 }

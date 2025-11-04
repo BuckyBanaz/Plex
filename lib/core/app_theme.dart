@@ -70,6 +70,9 @@ class AppTheme {
           ),
         ),
       ),
+      cardTheme: CardThemeData(
+        color: Colors.white
+      ),
 
       // AppBar
       appBarTheme: AppBarTheme(

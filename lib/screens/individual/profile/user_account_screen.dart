@@ -6,7 +6,7 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/individual/Booking/confirm_details_screen.dart';
 import 'package:plex_user/screens/individual/profile/user_profile_screen.dart';
 
-import '../../../modules/controllers/profile/user_profile_controller.dart';
+import '../../../modules/controllers/settings/user_profile_controller.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/helpers.dart';
 

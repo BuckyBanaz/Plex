@@ -7,6 +7,7 @@ import 'package:plex_user/services/domain/service/api/api_import.dart';
 import '../../../constant/app_assets.dart';
 
 import '../../../services/domain/repository/repository_imports.dart';
+import '../../location/user_address_screen.dart';
 import 'components/footer_banner.dart';
 import 'components/delivery_option_card.dart';
 import 'components/menu_list.dart';
@@ -26,7 +27,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       body: SafeArea(
         child: Column(
            children: [
-             const TopBar(),
+              TopBar(onTap: ()=> Get.toNamed(AppRoutes.userAddress)),
              // SearchAndFilterComponent(onTap: (){},isFilter: true,),
              Expanded(
                child: ListView(

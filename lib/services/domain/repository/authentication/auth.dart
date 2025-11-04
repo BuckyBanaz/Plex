@@ -86,6 +86,8 @@ int langKey = 1;
     }
   }
 
+
+
   Future<String> register({
     required String name,
     required String email,
@@ -237,6 +239,41 @@ int langKey = 1;
     }
   }
 
+  /// Forgot Password Logic
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async {
+    try {
+      // 🔹 API call
+      final  response = await authApi.forgotPassword(
+        email: email,
+        langKey: langKey,
+      );
+
+      // 🔹 Success handling
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return {
+          "success": true,
+          "message": data["message"] ?? "Password reset link sent successfully.",
+          "data": data,
+        };
+      } else {
+        // 🔹 API returned non-200
+        return {
+          "success": false,
+          "message": response.data["message"] ?? "Something went wrong.",
+        };
+      }
+    } catch (e) {
+      // 🔹 Exception handling
+      return {
+        "success": false,
+        "message": "Failed to send reset link. Please try again later.",
+        "error": e.toString(),
+      };
+    }
+  }
 
 
   Future<bool> resendOtp({

@@ -84,10 +84,45 @@ class UserApi {
     });
     return resp.data as Map<String, dynamic>;
   }
+  //
+  // /// (Optional) endpoint to confirm payment/update order after webhook
+  // Future<Map<String, dynamic>> confirmPaymentOnServer(String paymentIntentId) async {
+  //   final resp = await dio.post('/payments/confirm', data: {'paymentIntentId': paymentIntentId});
+  //   return resp.data as Map<String, dynamic>;
+  // }
 
-  /// (Optional) endpoint to confirm payment/update order after webhook
-  Future<Map<String, dynamic>> confirmPaymentOnServer(String paymentIntentId) async {
-    final resp = await dio.post('/payments/confirm', data: {'paymentIntentId': paymentIntentId});
-    return resp.data as Map<String, dynamic>;
+  Future<Map<String, dynamic>> addAddress({
+    required String address,
+    required String addressAs,
+    required String landmark,
+    required String locality,
+    required double latitude,
+    required double longitude,
+    required bool isDefault,
+    required int langKey,
+  }) async {
+
+    final response = await dio.post(
+      '$basePath${ApiEndpoint.userAddress}',
+      data: {
+        "address": address,
+        "addressAs": addressAs,
+        "landmark": landmark,
+        "locality": locality,
+        "latitude": latitude,
+        "longitude": longitude,
+        "isDefault": isDefault,
+      },
+      options: Options(
+        headers: {
+          'lang_id': langKey,
+        },
+      ),
+    );
+
+    return (response.data is Map<String, dynamic>)
+        ? Map<String, dynamic>.from(response.data)
+        : {'message': response.data?.toString()};
   }
+
 }

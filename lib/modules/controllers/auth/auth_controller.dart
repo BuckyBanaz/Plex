@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart'; // Import Dio for proper error handling
 import 'package:plex_user/common/Toast/toast.dart';
@@ -23,6 +24,7 @@ class AuthController extends GetxController {
   final loginKey = GlobalKey<FormState>();
   final signupKey = GlobalKey<FormState>();
   final signupDriverKey = GlobalKey<FormState>();
+  final forgotPasswordKey = GlobalKey<FormState>();
 
   // Focus nodes
   final nameFocus = FocusNode();
@@ -95,6 +97,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> login() async {
+    showToast(message: 'Login call.');
     if (loginKey.currentState == null || !loginKey.currentState!.validate()) {
       return;
     }
@@ -158,22 +161,25 @@ class AuthController extends GetxController {
       );
 
       showToast(message: message);
-      // do not immediately clear if you want to show email on OTP screen;
-      // but if you want them cleared here:
       clearControllers();
 
-      // Navigate to OTP screen passing email
       Get.offAllNamed(AppRoutes.otp, arguments: email);
     } on DioError catch (dioErr) {
       final msg = dioErr.response?.data?['message'] ??
           dioErr.message ??
           'Registration failed';
-      // Get.snackbar('Error', msg);
       showToast(message: '$msg');
     } catch (e) {
-      showToast(message: '$e');
-      // Get.snackbar('Error', e.toString().replaceAll('Exception: ', ''));
-    } finally {
+      final msg = e.toString().replaceFirst('Exception: ', '');
+      if (msg.toLowerCase().contains('email already registered')) {
+        emailError.value = "Email already registered";
+        // ✅ re-run validation for UI update
+        signupKey.currentState?.validate();
+      } else {
+        showToast(message: 'Signup failed. Please try again.');
+      }
+    }
+    finally {
       isSignupLoading.value = false;
     }
   }
@@ -217,6 +223,77 @@ class AuthController extends GetxController {
       showToast(message: ' Server is busy! Please try after sometimes');
     } finally {
       isDriverLoading.value = false;
+    }
+  }
+
+  // Main method called by UI
+  Future<void> submitForgotPassword() async {
+
+    if (forgotPasswordKey.currentState == null || !forgotPasswordKey.currentState!.validate()) {
+      return;
+    }
+    final email = emailController.text.trim();
+
+
+    isLoading.value = true;
+
+    try {
+      final res = await _authRepo.forgotPassword(
+        email: email,
+      );
+
+      isLoading.value = false;
+
+      final bool success = res['success'] == true;
+      final String message =
+      (res['message']?.toString().isNotEmpty ?? false) ? res['message'].toString() : '';
+
+      if (success) {
+        // Show success dialog
+        await Get.dialog(
+          AlertDialog(
+            title: Row(
+              children: const [
+                Icon(Icons.check_circle, color: Colors.green),
+                SizedBox(width: 8),
+                Text('Success'),
+              ],
+            ),
+            content: Text(message.isNotEmpty
+                ? message
+                : 'Password reset link sent successfully.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back(); // close dialog
+                  Get.back(); // go back to previous screen (login)
+                },
+                child: const Text('OK'),
+              )
+            ],
+          ),
+          barrierDismissible: false,
+        );
+      } else {
+        // API returned non-success
+        Get.snackbar(
+          'Something went wrong.',
+          message.isNotEmpty ? message : 'Something went wrong.',
+          backgroundColor: Colors.red.shade50,
+          colorText: Colors.red.shade900,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      isLoading.value = false;
+      // Network / unexpected error
+      Get.snackbar(
+        'Failed to send reset link.',
+        'Failed to send reset link. Please try again later.',
+        backgroundColor: Colors.red.shade50,
+        colorText: Colors.red.shade900,
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 }

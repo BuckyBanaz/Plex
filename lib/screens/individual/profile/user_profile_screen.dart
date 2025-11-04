@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import 'package:plex_user/modules/controllers/profile/user_profile_controller.dart';
+import 'package:plex_user/modules/controllers/settings/user_profile_controller.dart';
 import 'package:plex_user/screens/individual/profile/user_account_screen.dart';
 import 'package:plex_user/screens/individual/profile/user_change_language.dart';
+import 'package:plex_user/screens/individual/profile/user_help_support_screen.dart';
 import 'package:plex_user/screens/individual/profile/user_reset_password_screen.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
 import 'package:plex_user/services/domain/service/api/api_import.dart';
@@ -221,7 +222,7 @@ List<ProfileOption> _sampleOptions() {
     ProfileOption(
       title: 'help_and_support'.tr,
       icon: Icons.help_outline,
-      onTap: () {},
+      onTap: ()=> Get.to(UserHelpSupportScreen()),
     ),
     ProfileOption(title: 'contact_us'.tr, icon: Icons.phone_in_talk, onTap: () {}),
   ];

@@ -10,8 +10,9 @@ class AppService extends GetxService {
   Future<void> initiateServices() async {
     await Future.wait([
      Get.putAsync(() => DatabaseService().init()),
-      Get.putAsync(() => DeviceInfoService().init()),
       Get.putAsync(() => LocaleController().init()),
+      Get.putAsync(() => DeviceInfoService().init()),
+
 
     ]);
 
