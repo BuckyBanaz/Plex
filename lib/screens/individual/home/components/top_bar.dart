@@ -10,7 +10,6 @@ class TopBar extends StatelessWidget {
   final Color? iconColor;
   final Color? titleColor;
   final Color? subtitleColor;
-  final bool showLanguageButton;
   final bool showIcon;
   final IconButton? iconButton;
   final VoidCallback? onTap;
@@ -21,7 +20,6 @@ class TopBar extends StatelessWidget {
     this.iconColor,
     this.titleColor,
     this.subtitleColor,
-    this.showLanguageButton = true,
     this.showIcon = false,  this.iconButton, this.onTap,
   });
 
@@ -30,7 +28,6 @@ class TopBar extends StatelessWidget {
     final LocationController locationController = Get.put(LocationController());
 
     final bool isArabic = Get.locale?.languageCode == 'ar';
-    final String languageButtonText = isArabic ? 'Eng' : 'عرب';
 
     return Padding(
       padding:
@@ -60,21 +57,24 @@ class TopBar extends StatelessWidget {
                           titleColor ?? Colors.black,
                         ),
                       ),
-                      SizedBox(width: 3,),
+                if(showIcon != false)...[
+                  SizedBox(width: 3,),
 
-                      Icon(Icons.keyboard_arrow_down_outlined)
+                  Icon(Icons.keyboard_arrow_down_outlined,color: titleColor,)]
                     ],
                   ),
-                  const SizedBox(height: 2),
-                  Obx(() => Text(
-                    locationController.currentAddress.value,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: subtitleColor ?? Colors.grey.shade700,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  )),
-                ],
+
+                    const SizedBox(height: 2),
+                    Obx(() => Text(
+                      locationController.currentAddress.value,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: subtitleColor ?? Colors.grey.shade700,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    )),
+                  ],
+
               ),
             ),
 
