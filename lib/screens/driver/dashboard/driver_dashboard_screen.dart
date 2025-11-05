@@ -7,6 +7,7 @@ import 'package:plex_user/screens/driver/home/driver_home_screen.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../individual/profile/user_profile_screen.dart';
+import '../profile/driver_profile_screen.dart';
 
 
 class DriverMainScreenController extends GetxController {
@@ -26,7 +27,7 @@ class DriverMainNavController extends GetxController {
     const DriverHomeScreen(),
     const Center(child: Text("Order Screen")),
     const Center(child: Text("History Screen")),
-    UserProfileScreen(),
+    DriverProfileScreen(),
   ];
 
   final List<IconData> icons = const [

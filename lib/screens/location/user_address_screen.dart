@@ -175,7 +175,7 @@ class UserAddressScreen extends GetView<UserAddressController> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      address.address ?? '',
+                      "${address.address}, ${address.landmark}" ?? '',
                       style: TextStyle(color: Colors.grey[800]),
                     ),
                     // const SizedBox(height: 8),

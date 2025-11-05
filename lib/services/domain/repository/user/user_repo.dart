@@ -54,6 +54,23 @@ class UserRepository {
   }
 
 
+  Future<List<AddressModel>> getUserAddresses() async {
+    try {
+      final response = await userApi.getAddress(langKey: langKey);
+
+      debugPrint("User address get successfully via repository.");
+
+      if (response != null && response['data'] != null) {
+        final List<dynamic> data = response['data'];
+        return data.map((e) => AddressModel.fromJson(e)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      debugPrint("Error user Address: $e");
+      return [];
+    }
+  }
 
   Future<void> addUserAddress({
     required String address,
@@ -63,7 +80,6 @@ class UserRepository {
     required double latitude,
     required double longitude,
     required bool isDefault,
-    required int langKey,
   }) async {
     try {
       final apiKey = databaseService.apiKey.toString();
@@ -86,5 +102,27 @@ class UserRepository {
       showToast(message: "Failed to add Address");
     }
   }
+  /// Delete address by id. Returns true when deletion succeeded.
+  Future<bool> deleteUserAddress({ required int id }) async {
+    try {
+      final response = await userApi.deleteAddress(id: id, langKey: langKey);
+
+      debugPrint("User address delete response via repository: $response");
+
+      // Depending on your backend, you might get { success: true } or { message: '...' }
+      if (response['success'] == true || response['status'] == 'success' || (response['message'] != null)) {
+        showToast(message: "Address deleted successfully");
+        return true;
+      }
+
+      showToast(message: "Failed to delete address");
+      return false;
+    } catch (e) {
+      debugPrint("Error deleting user Address: $e");
+      showToast(message: "Failed to delete address");
+      return false;
+    }
+  }
+
 
 }

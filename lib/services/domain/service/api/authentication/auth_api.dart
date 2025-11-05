@@ -59,6 +59,7 @@ class AuthApi {
           'password': password,
           'deviceId': deviceId,
           'otpType': otpType,
+          'fcmToken': "string"
         },
       );
 
@@ -98,6 +99,7 @@ class AuthApi {
         "mobile": phone,
         "vehicleType": vehicleType,
         "licenseNo": licenseNo,
+        'fcmToken': "string"
       },
     );
   }

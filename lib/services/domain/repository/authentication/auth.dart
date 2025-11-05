@@ -117,8 +117,8 @@ int langKey = 1;
       }
 
       // store api_key if available
-      if (response.containsKey('api_key')) {
-        await databaseService.putApiKey(response['api_key']);
+      if (response.containsKey('key')) {
+        await databaseService.putApiKey(response['key']);
       }
 
       // return success message

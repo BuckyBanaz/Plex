@@ -17,7 +17,6 @@ class LocationPermissionScreen extends StatefulWidget {
 }
 
 class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
-  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +77,7 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                     onPressed: controller.skipPermissionAndNavigate,
                     child:  Text(
                       'not_now'.tr,
-                      style: TextStyle( fontSize: 16),
+                      style: TextStyle( fontSize: 16,color: AppColors.textPrimary),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -89,28 +88,5 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
         );
       },
     );
-  }
-
-  Future<void> _requestLocationPermission() async {
-    setState(() {
-      _isLoading = true;
-    });
-    PermissionStatus status = await Permission.location.request();
-
-    if (status.isGranted) {
-      NavigatorService.pushNamed(AppRoutes.userHome);
-    } else if (status.isDenied) {
-      Get.snackbar(
-        "Error",
-        "Please Grant Location Permission.",
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } else if (status.isPermanentlyDenied) {
-      openAppSettings();
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 }

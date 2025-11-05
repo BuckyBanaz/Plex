@@ -90,6 +90,23 @@ class UserApi {
   //   final resp = await dio.post('/payments/confirm', data: {'paymentIntentId': paymentIntentId});
   //   return resp.data as Map<String, dynamic>;
   // }
+  Future<Map<String, dynamic>> getAddress({
+    required int langKey,
+  }) async {
+
+    final response = await dio.get(
+      '$basePath${ApiEndpoint.userAddress}',
+      options: Options(
+        headers: {
+          'lang_id': langKey,
+        },
+      ),
+    );
+
+    return (response.data is Map<String, dynamic>)
+        ? Map<String, dynamic>.from(response.data)
+        : {'message': response.data?.toString()};
+  }
 
   Future<Map<String, dynamic>> addAddress({
     required String address,
@@ -125,4 +142,23 @@ class UserApi {
         : {'message': response.data?.toString()};
   }
 
+
+  /// DELETE /address/{id}
+  Future<Map<String, dynamic>> deleteAddress({
+    required int id,
+    required int langKey,
+  }) async {
+    final response = await dio.delete(
+      '$basePath${ApiEndpoint.userAddress}/$id',
+      options: Options(
+        headers: {
+          'lang_id': langKey,
+        },
+      ),
+    );
+
+    return (response.data is Map<String, dynamic>)
+        ? Map<String, dynamic>.from(response.data)
+        : {'message': response.data?.toString()};
+  }
 }

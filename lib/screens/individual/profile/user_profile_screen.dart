@@ -7,8 +7,6 @@ import 'package:plex_user/screens/individual/profile/user_account_screen.dart';
 import 'package:plex_user/screens/individual/profile/user_change_language.dart';
 import 'package:plex_user/screens/individual/profile/user_help_support_screen.dart';
 import 'package:plex_user/screens/individual/profile/user_reset_password_screen.dart';
-import 'package:plex_user/screens/widgets/custom_button.dart';
-import 'package:plex_user/services/domain/service/api/api_import.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});

@@ -18,15 +18,24 @@ class LocationModel {
   });
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
+    double toDouble(dynamic v) {
+      if (v == null) return 0.0;
+      if (v is double) return v;
+      if (v is int) return v.toDouble();
+      return double.tryParse(v.toString()) ?? 0.0;
+    }
+
     return LocationModel(
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
-      accuracy: (json['accuracy'] ?? 0).toDouble(),
-      heading: (json['heading'] ?? 0).toDouble(),
-      speed: (json['speed'] ?? 0).toDouble(),
+      latitude: toDouble(json['latitude'] ?? json['lat'] ?? 0),
+      longitude: toDouble(json['longitude'] ?? json['lng'] ?? json['lon'] ?? 0),
+      accuracy: toDouble(json['accuracy'] ?? 0),
+      heading: toDouble(json['heading'] ?? 0),
+      speed: toDouble(json['speed'] ?? 0),
       recordedAt: json['recorded_at'] != null
           ? DateTime.parse(json['recorded_at'])
-          : DateTime.fromMillisecondsSinceEpoch(0),
+          : (json['recordedAt'] != null
+          ? DateTime.parse(json['recordedAt'])
+          : DateTime.fromMillisecondsSinceEpoch(0)),
     );
   }
 
@@ -38,24 +47,6 @@ class LocationModel {
     'speed': speed,
     'recorded_at': recordedAt.toUtc().toIso8601String(),
   };
-
-  LocationModel copyWith({
-    double? latitude,
-    double? longitude,
-    double? accuracy,
-    double? heading,
-    double? speed,
-    DateTime? recordedAt,
-  }) {
-    return LocationModel(
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
-      accuracy: accuracy ?? this.accuracy,
-      heading: heading ?? this.heading,
-      speed: speed ?? this.speed,
-      recordedAt: recordedAt ?? this.recordedAt,
-    );
-  }
 }
 
 class VehicleModel {
@@ -74,16 +65,26 @@ class VehicleModel {
   });
 
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
+    int toInt(dynamic v) {
+      if (v == null) return 0;
+      if (v is int) return v;
+      return int.tryParse(v.toString()) ?? 0;
+    }
+
     return VehicleModel(
-      id: json['id'] is int ? json['id'] : int.tryParse('${json['id']}') ?? 0,
+      id: toInt(json['id'] ?? json['vehicle_id']),
       type: (json['type'] ?? json['vehicle_type'] ?? '').toString(),
-      licenseNo: (json['licenseNo'] ?? json['license_no'] ?? '').toString(),
+      licenseNo: (json['licenseNo'] ?? json['license_no'] ?? json['license'] ?? '').toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
-          : DateTime.fromMillisecondsSinceEpoch(0),
+          : (json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.fromMillisecondsSinceEpoch(0)),
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
-          : DateTime.fromMillisecondsSinceEpoch(0),
+          : (json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.fromMillisecondsSinceEpoch(0)),
     );
   }
 
@@ -95,29 +96,52 @@ class VehicleModel {
     'updatedAt': updatedAt.toUtc().toIso8601String(),
   };
 
-  VehicleModel copyWith({
-    int? id,
-    String? type,
-    String? licenseNo,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return VehicleModel(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      licenseNo: licenseNo ?? this.licenseNo,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+  @override
+  String toString() => 'VehicleModel(id: $id, type: $type, licenseNo: $licenseNo)';
+}
+
+class BalanceModel {
+  final int id;
+  final num balance;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  BalanceModel({
+    required this.id,
+    required this.balance,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory BalanceModel.fromJson(Map<String, dynamic> json) {
+    num toNum(dynamic v) {
+      if (v == null) return 0;
+      if (v is num) return v;
+      return num.tryParse(v.toString()) ?? 0;
+    }
+
+    return BalanceModel(
+      id: json['id'] is int ? json['id'] : int.tryParse('${json['id']}') ?? 0,
+      balance: toNum(json['balance'] ?? 0),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : (json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.fromMillisecondsSinceEpoch(0)),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : (json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.fromMillisecondsSinceEpoch(0)),
     );
   }
 
-  @override
-  String toString() =>
-      'VehicleModel(id: $id, type: $type, licenseNo: $licenseNo)';
-
-  String toRawJson() => json.encode(toJson());
-  factory VehicleModel.fromRawJson(String str) =>
-      VehicleModel.fromJson(json.decode(str));
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'balance': balance,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+    'updatedAt': updatedAt.toUtc().toIso8601String(),
+  };
 }
 
 class DriverUserModel {
@@ -125,42 +149,95 @@ class DriverUserModel {
   final String name;
   final String email;
   final String userType;
-  final bool isMobileVerified;
-  final bool isEmailVerified;
+  final String? mobile;
+  final bool mobileVerified;
+  final bool emailVerified;
   final DateTime createdAt;
   final DateTime updatedAt;
   final LocationModel location;
-  final VehicleModel? vehicle; // optional because not all users may have vehicle
+  final List<VehicleModel> vehicles;
+  final BalanceModel? currentBalance;
 
   DriverUserModel({
     required this.id,
     required this.name,
     required this.email,
     required this.userType,
-    required this.isMobileVerified,
-    required this.isEmailVerified,
+    required this.mobile,
+    required this.mobileVerified,
+    required this.emailVerified,
     required this.createdAt,
     required this.updatedAt,
     required this.location,
-    this.vehicle,
+    required this.vehicles,
+    this.currentBalance,
   });
 
   factory DriverUserModel.fromJson(Map<String, dynamic> json) {
+    int toInt(dynamic v) {
+      if (v == null) return 0;
+      if (v is int) return v;
+      return int.tryParse(v.toString()) ?? 0;
+    }
+
+    bool toBool(dynamic v) {
+      if (v == null) return false;
+      if (v is bool) return v;
+      final s = v.toString().toLowerCase();
+      return s == 'true' || s == '1' || s == 'yes';
+    }
+
+    String? parseMobile(dynamic v) {
+      if (v == null) return null;
+      final s = v.toString();
+      if (s.toLowerCase() == 'null') return null;
+      // if string contains 'null' prefix like "null890...", remove prefix
+      final cleaned = s.replaceFirst(RegExp(r'^null', caseSensitive: false), '');
+      return cleaned.isEmpty ? null : cleaned;
+    }
+
+    // parse vehicles: API might send array or single object or null
+    List<VehicleModel> parseVehicles(dynamic v) {
+      if (v == null) return [];
+      if (v is List) {
+        return v
+            .where((e) => e != null)
+            .map<VehicleModel>((e) =>
+            VehicleModel.fromJson(Map<String, dynamic>.from(e as Map)))
+            .toList();
+      } else if (v is Map) {
+        return [VehicleModel.fromJson(Map<String, dynamic>.from(v))];
+      }else if (v is String) {
+        // maybe JSON string of list/object
+        try {
+          final decoded = jsonDecode(v);
+          return parseVehicles(decoded);
+        } catch (_) {
+          return [];
+        }
+      }
+
+      return [];
+    }
+
     return DriverUserModel(
-      id: json['id'] is int ? json['id'] : int.tryParse('${json['id']}') ?? 0,
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
+      id: toInt(json['id'] ?? json['user_id']),
+      name: (json['name'] ?? '').toString(),
+      email: (json['email'] ?? '').toString(),
       userType: (json['userType'] ?? json['user_type'] ?? '').toString(),
-      isMobileVerified:
-      json['isMobileVerified'] ?? json['is_mobile_verified'] ?? false,
-      isEmailVerified:
-      json['isEmailVerified'] ?? json['is_email_verified'] ?? false,
+      mobile: parseMobile(json['mobile'] ?? json['phone'] ?? json['mobile_no']),
+      mobileVerified: toBool(json['mobileVerified'] ?? json['mobile_verified'] ?? false),
+      emailVerified: toBool(json['emailVerified'] ?? json['email_verified'] ?? false),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
-          : DateTime.fromMillisecondsSinceEpoch(0),
+          : (json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.fromMillisecondsSinceEpoch(0)),
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'])
-          : DateTime.fromMillisecondsSinceEpoch(0),
+          : (json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'])
+          : DateTime.fromMillisecondsSinceEpoch(0)),
       location: json['location'] != null
           ? LocationModel.fromJson(Map<String, dynamic>.from(json['location']))
           : LocationModel(
@@ -171,9 +248,12 @@ class DriverUserModel {
         speed: 0,
         recordedAt: DateTime.fromMillisecondsSinceEpoch(0),
       ),
-      vehicle: json['vehicle'] != null
-          ? VehicleModel.fromJson(Map<String, dynamic>.from(json['vehicle']))
-          : null,
+      vehicles: parseVehicles(json['vehicle'] ?? json['vehicles']),
+      currentBalance: json['currentBalance'] != null
+          ? BalanceModel.fromJson(Map<String, dynamic>.from(json['currentBalance']))
+          : (json['current_balance'] != null
+          ? BalanceModel.fromJson(Map<String, dynamic>.from(json['current_balance']))
+          : null),
     );
   }
 
@@ -183,15 +263,17 @@ class DriverUserModel {
       'name': name,
       'email': email,
       'userType': userType,
-      'isMobileVerified': isMobileVerified,
-      'isEmailVerified': isEmailVerified,
+      'mobile': mobile,
+      'mobileVerified': mobileVerified,
+      'emailVerified': emailVerified,
       'createdAt': createdAt.toUtc().toIso8601String(),
       'updatedAt': updatedAt.toUtc().toIso8601String(),
       'location': location.toJson(),
+      'vehicle': vehicles.map((v) => v.toJson()).toList(),
     };
 
-    if (vehicle != null) {
-      map['vehicle'] = vehicle!.toJson();
+    if (currentBalance != null) {
+      map['currentBalance'] = currentBalance!.toJson();
     }
 
     return map;
@@ -202,37 +284,35 @@ class DriverUserModel {
     String? name,
     String? email,
     String? userType,
-    bool? isMobileVerified,
-    bool? isEmailVerified,
+    String? mobile,
+    bool? mobileVerified,
+    bool? emailVerified,
     DateTime? createdAt,
     DateTime? updatedAt,
     LocationModel? location,
-    VehicleModel? vehicle,
+    List<VehicleModel>? vehicles,
+    BalanceModel? currentBalance,
   }) {
     return DriverUserModel(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
       userType: userType ?? this.userType,
-      isMobileVerified: isMobileVerified ?? this.isMobileVerified,
-      isEmailVerified: isEmailVerified ?? this.isEmailVerified,
+      mobile: mobile ?? this.mobile,
+      mobileVerified: mobileVerified ?? this.mobileVerified,
+      emailVerified: emailVerified ?? this.emailVerified,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       location: location ?? this.location,
-      vehicle: vehicle ?? this.vehicle,
+      vehicles: vehicles ?? this.vehicles,
+      currentBalance: currentBalance ?? this.currentBalance,
     );
   }
 
-  // convenience helpers
-  DriverUserModel markMobileVerified() =>
-      copyWith(isMobileVerified: true);
-  DriverUserModel markMobileUnverified() =>
-      copyWith(isMobileVerified: false);
-  DriverUserModel markEmailVerified() => copyWith(isEmailVerified: true);
-
   @override
-  String toString() =>
-      'DriverUserModel(id: $id, name: $name, email: $email, userType: $userType, vehicle: ${vehicle?.toString() ?? "none"})';
+  String toString() {
+    return 'DriverUserModel(id: $id, name: $name, email: $email, userType: $userType, mobile: $mobile, vehicles: ${vehicles.length}, balance: ${currentBalance?.balance ?? 0})';
+  }
 
   String toRawJson() => json.encode(toJson());
   factory DriverUserModel.fromRawJson(String str) =>

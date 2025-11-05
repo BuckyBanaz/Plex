@@ -27,7 +27,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       body: SafeArea(
         child: Column(
            children: [
-              TopBar(onTap: ()=> Get.toNamed(AppRoutes.userAddress)),
+              TopBar(onTap: ()=> Get.toNamed(AppRoutes.userAddress), showIcon: true,),
              // SearchAndFilterComponent(onTap: (){},isFilter: true,),
              Expanded(
                child: ListView(

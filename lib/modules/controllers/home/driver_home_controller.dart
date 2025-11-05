@@ -43,6 +43,74 @@ class DriverHomeController extends GetxController {
       'time': 'Today at 10:30 AM',
       'amount': '200',
       'initial': 'P',
+    }, {
+      'name': 'Akhil Verma',
+      'time': 'Today at 10:30 AM',
+      'amount': '200',
+      'initial': 'A',
+    },
+    {
+      'name': 'Vipin Jain',
+      'time': 'Today at 09:30 AM',
+      'amount': '200',
+      'initial': 'A',
+    },
+    {
+      'name': 'Parikshit Verma',
+      'time': 'Today at 10:30 AM',
+      'amount': '200',
+      'initial': 'P',
+    }, {
+      'name': 'Akhil Verma',
+      'time': 'Today at 10:30 AM',
+      'amount': '200',
+      'initial': 'A',
+    },
+    {
+      'name': 'Vipin Jain',
+      'time': 'Today at 09:30 AM',
+      'amount': '200',
+      'initial': 'A',
+    },
+    {
+      'name': 'Parikshit Verma',
+      'time': 'Today at 10:30 AM',
+      'amount': '200',
+      'initial': 'P',
+    }, {
+      'name': 'Akhil Verma',
+      'time': 'Today at 10:30 AM',
+      'amount': '200',
+      'initial': 'A',
+    },
+    {
+      'name': 'Vipin Jain',
+      'time': 'Today at 09:30 AM',
+      'amount': '200',
+      'initial': 'A',
+    },
+    {
+      'name': 'Parikshit Verma',
+      'time': 'Today at 10:30 AM',
+      'amount': '200',
+      'initial': 'P',
+    }, {
+      'name': 'Akhil Verma',
+      'time': 'Today at 10:30 AM',
+      'amount': '200',
+      'initial': 'A',
+    },
+    {
+      'name': 'Vipin Jain',
+      'time': 'Today at 09:30 AM',
+      'amount': '200',
+      'initial': 'A',
+    },
+    {
+      'name': 'Parikshit Verma',
+      'time': 'Today at 10:30 AM',
+      'amount': '200',
+      'initial': 'P',
     },
 
   ].obs;

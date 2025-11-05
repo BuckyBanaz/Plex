@@ -26,7 +26,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       backgroundColor: AppColors.secondary,
       body: Obx(
         () {
-
           return controller.isLoading.value ? Center(
             child: CircularProgressIndicator(
               color: AppColors.primary,
@@ -56,7 +55,6 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                           TopBar(
                             titleColor: AppColors.textColor,
                             subtitleColor: AppColors.textColor,
-                            showLanguageButton: false,
                             iconButton:IconButton(
                               onPressed: () =>
                                   Get.toNamed(AppRoutes.driverNotification),
@@ -66,7 +64,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                 size: 28,
                               ),
                             ),
-                            showIcon: true,
+
                             padding: EdgeInsets.symmetric(horizontal: 0),
                           ),
 
@@ -131,7 +129,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                       ),
                                       children:  [
                                         TextSpan(
-                                          text: controller.currentDriver.value?.vehicle?.licenseNo ?? 'RJ14 2025'.tr,
+                                          text:  'RJ14 2025'.tr,
                                           style: TextStyle(
                                             color: AppColors.textColor,
                                             fontSize: 14,
