@@ -97,7 +97,7 @@ class AuthController extends GetxController {
   }
 
   Future<void> login() async {
-    showToast(message: 'Login call.');
+    // showToast(message: 'Login call.');
     if (loginKey.currentState == null || !loginKey.currentState!.validate()) {
       return;
     }
