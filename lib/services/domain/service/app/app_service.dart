@@ -12,6 +12,7 @@ class AppService extends GetxService {
      Get.putAsync(() => DatabaseService().init()),
       Get.putAsync(() => LocaleController().init()),
       Get.putAsync(() => DeviceInfoService().init()),
+      Get.putAsync(() => MessagingService().init())
 
 
     ]);

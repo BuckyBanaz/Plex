@@ -44,6 +44,7 @@ class AuthApi {
     required String password,
     required String deviceId,
     required String otpType ,
+    required String fcmToken ,
     required int langKey,
   }) async {
     try {
@@ -59,7 +60,7 @@ class AuthApi {
           'password': password,
           'deviceId': deviceId,
           'otpType': otpType,
-          'fcmToken': "string"
+          'fcmToken': fcmToken
         },
       );
 
@@ -84,6 +85,7 @@ class AuthApi {
     required String vehicleType,
     required String licenseNo,
     required String deviceId,
+    required String fcmToken,
     required int langKey,
   }) {
     return dio.post(
@@ -99,7 +101,7 @@ class AuthApi {
         "mobile": phone,
         "vehicleType": vehicleType,
         "licenseNo": licenseNo,
-        'fcmToken': "string"
+        'fcmToken': fcmToken
       },
     );
   }

@@ -4,14 +4,14 @@ import 'dart:convert';
 class DeviceInfoModel {
     DeviceInfoModel({
         required this.deviceId,
-        // required this.firebaseToken,
+        required this.firebaseToken,
         required this.deviceModel,
         required this.deviceOs,
         required this.appVersion,
     });
 
     String deviceId;
-    // String firebaseToken;
+    String firebaseToken;
     String deviceModel;
     String deviceOs;
     String appVersion;
@@ -22,7 +22,7 @@ class DeviceInfoModel {
 
     factory DeviceInfoModel.fromJson(Map<String, dynamic> json) => DeviceInfoModel(
         deviceId: json["deviceId"],
-        // firebaseToken: json["firebaseToken"],
+        firebaseToken: json["firebaseToken"],
         deviceModel: json["deviceModel"],
         deviceOs: json["deviceOS"],
         appVersion: json["appVersion"],
@@ -30,7 +30,7 @@ class DeviceInfoModel {
 
     Map<String, dynamic> toJson() => {
         "deviceId": deviceId,
-        // "firebaseToken": firebaseToken,
+        "firebaseToken": firebaseToken,
         "deviceModel": deviceModel,
         "deviceOS": deviceOs,
         "appVersion": appVersion,

@@ -10,15 +10,17 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
-        android:label="plex_user"
+        android:label="Plex"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
 
         <!-- ✅ Move the API key here, INSIDE application but OUTSIDE activity -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyD9IfDEjZn7fDMyqdtl-yqgLNS64D0Z8a8" />
-
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="foreground_notifications" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

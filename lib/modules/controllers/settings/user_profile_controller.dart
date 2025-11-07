@@ -11,6 +11,7 @@ import '../../../services/domain/service/app/app_service_imports.dart';
 
 class UserProfileController extends GetxController{
   final DatabaseService db = Get.find<DatabaseService>();
+  final DeviceInfoService deviceInfoService = Get.find<DeviceInfoService>();
 
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   final Rx<bool> isLoading = false.obs;
@@ -28,12 +29,22 @@ class UserProfileController extends GetxController{
     super.onInit();
 
     _loadUserData();
-
+    token();
 
   }
 
 
+Future<void> token() async {
 
+    try{
+      final deviceInfo = await deviceInfoService.getDeviceInfo();
+      print("firebase token : ${deviceInfo.firebaseToken}");
+    }catch(e){
+      print("error: $e");
+    }
+
+
+}
   Future<void> _loadUserData() async {
     try {
       isLoading.value = true;

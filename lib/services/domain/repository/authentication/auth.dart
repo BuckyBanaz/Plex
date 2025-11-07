@@ -107,6 +107,7 @@ int langKey = 1;
         phone: phone,
         langKey: langKey,
         otpType: 'email',
+        fcmToken: deviceInfo.firebaseToken,
       );
 
       final statusCode =
@@ -154,6 +155,7 @@ int langKey = 1;
         vehicleType: vehicleType,
         licenseNo:licenseNo,
         deviceId: deviceInfo.deviceId,
+        fcmToken: deviceInfo.firebaseToken,
       );
 
       // check status code
