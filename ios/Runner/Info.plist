@@ -33,6 +33,8 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
+	<key>NSUserTrackingUsageDescription</key>
+    <string>App uses notifications to keep you updated about orders and messages.</string>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
@@ -54,16 +56,13 @@
     <key>CFBundleURLTypes</key>
     <array>
       <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-        <key>CFBundleURLName</key>
-        <string>com.example.plex_user</string>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>plexapp</string>
+          <string>p2dev10.in</string>
         </array>
       </dict>
     </array>
+
 
     <key>NSLocationWhenInUseUsageDescription</key>
         <string>We need your location to show available drivers near you.</string>

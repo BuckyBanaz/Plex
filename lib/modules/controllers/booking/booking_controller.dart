@@ -436,11 +436,9 @@ class BookingController extends GetxController {
       try {
         final parts = address.split(',');
         if (parts.isNotEmpty) {
-          pLocality.value = parts.first.trim();
+          pLocality.value = parts[1].trim();
         }
-        if (parts.length > 1 && pLandMarkController.text.isEmpty) {
-          pLandMarkController.text = parts[1].trim();
-        }
+
         // try to find pincode in the address parts (simple regex)
         final pincodeRegex = RegExp(r'\b\d{6}\b');
         final match = pincodeRegex.firstMatch(address);

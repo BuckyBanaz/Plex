@@ -50,7 +50,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                      onTap: () async {
                        // logout();
                        // await AuthRepository().refreshToken();
-                       Get.toNamed(AppRoutes.booking);
+                       Get.toNamed(AppRoutes.searchingDriver);
                        print('City to city tapped');
                      },
                    ),

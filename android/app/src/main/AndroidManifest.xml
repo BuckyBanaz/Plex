@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -41,13 +42,15 @@
             </intent-filter>
 
             <!-- DEEP LINK: handle plexapp://... -->
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accept plexapp://paypal/success etc. -->
-                <data android:scheme="com.example.plex_user" />
+                <data android:scheme="https"
+                    android:host="p2dev10.in"
+                    android:pathPrefix="/reset-password" />
             </intent-filter>
+
 
         </activity>
 
@@ -56,18 +59,18 @@
             android:value="2" />
     </application>
 
-    <!-- Keep queries for url_launcher / resolving browsers -->
-    <queries>
-        <!-- Allow querying web browsers for HTTP/HTTPS intents -->
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="http" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="https" />
-        </intent>
-    </queries>
+<!--    &lt;!&ndash; Keep queries for url_launcher / resolving browsers &ndash;&gt;-->
+<!--    <queries>-->
+<!--        &lt;!&ndash; Allow querying web browsers for HTTP/HTTPS intents &ndash;&gt;-->
+<!--        <intent>-->
+<!--            <action android:name="android.intent.action.VIEW" />-->
+<!--            <data android:scheme="http" />-->
+<!--        </intent>-->
+<!--        <intent>-->
+<!--            <action android:name="android.intent.action.VIEW" />-->
+<!--            <data android:scheme="https" />-->
+<!--        </intent>-->
+<!--    </queries>-->
 
     <queries>
         <intent>

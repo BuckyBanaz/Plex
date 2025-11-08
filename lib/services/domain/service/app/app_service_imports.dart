@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:io';
 
 
 
@@ -12,6 +13,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart' hide ServiceStatus;
 import 'package:plex_user/models/driver_user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

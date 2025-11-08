@@ -5,6 +5,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
+import 'package:plex_user/services/domain/service/app/deeplinking.dart';
 import 'package:plex_user/services/translations/app_translations.dart';
 import 'package:plex_user/services/translations/locale_controller.dart';
 import 'package:sizer/sizer.dart';
@@ -17,7 +18,10 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+
   await Get.putAsync(() => AppService().init());
+  initDeepLinks();
   // await TranslationService.init();
   // final localeCtrl = Get.put(LocaleController());
   // await localeCtrl.init();

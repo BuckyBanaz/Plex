@@ -20,9 +20,11 @@ import '../screens/auth/choose_account_screen.dart';
 import '../screens/auth/forgot_password.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/otp_screen.dart';
+import '../screens/auth/reset_password_screen.dart';
 import '../screens/driver/dashboard/driver_dashboard_screen.dart';
 import '../screens/driver/home/driver_home_screen.dart';
 import '../screens/individual/Booking/location_details_screens.dart';
+import '../screens/individual/Booking/searching_driver_screen.dart';
 import '../screens/individual/order/order_complete_screen.dart';
 import '../screens/individual/profile/user_help_support_screen.dart';
 import '../screens/location/add_new_user_address_screen.dart';
@@ -35,6 +37,7 @@ class AppRoutes {
   static const welcome = '/welcome';
   static const login = '/login';
   static const forgotPassword = '/forgotPassword';
+  static const resetPassword = '/resetPassword';
   static const signup = '/signup';
   static const driverSignup = '/driverSignup';
   static const choose = '/choose';
@@ -55,6 +58,7 @@ class AppRoutes {
   static const locationDetails = '/locationDetails';
   static const confirm = '/confirm';
   static const payment = '/payment';
+  static const searchingDriver = '/searchingDriver';
   static const bookingConfirm = '/bookingConfirm';
   static const orderComplete = '/orderComplete';
   static const paymentFailed = '/paymentFailed';
@@ -65,6 +69,7 @@ class AppRoutes {
     GetPage(name: splash, page: () => SplashScreen()),
     GetPage(name: login, page: () => LoginScreen(),middlewares: [EnsureAuthMiddleware()]),
     GetPage(name: forgotPassword, page: () => ForgotPasswordScreen()),
+    GetPage(name: resetPassword, page: () => ResetPasswordScreen()),
     GetPage(name: signup, page: () => SignupScreen()),
     GetPage(name: driverSignup, page: () => DriverSignupScreen()),
     GetPage(name: choose, page: () => ChooseAccountScreen()),
@@ -84,6 +89,7 @@ class AppRoutes {
     GetPage(name: locationDetails, page: () => DetailLocationScreen()),
     GetPage(name: confirm, page: () => ConfirmDetailsScreen()),
     GetPage(name: payment, page: () => PaymentScreen()),
+    GetPage(name: searchingDriver, page: () => SearchingDriverScreen()),
     GetPage(name: bookingConfirm, page: () => BookingConfirmScreen()),
     GetPage(name: orderComplete, page: () => OrderCompleteScreen()),
     GetPage(name: paymentFailed, page: () => PaymentFailedScreen()),
