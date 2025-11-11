@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as Math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/services/domain/repository/repository_imports.dart';
 
 import '../../../constant/app_colors.dart';
 import '../../../routes/appRoutes.dart';
@@ -18,6 +19,7 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  final UserRepository repo = UserRepository();
 
   @override
   void initState() {
@@ -33,6 +35,7 @@ class _SplashScreenState extends State<SplashScreen>
     // After 3 seconds -> go to Login
     Timer(const Duration(seconds: 3), () {
       Get.offAllNamed(AppRoutes.login);
+
     });
   }
 

@@ -18,7 +18,7 @@ class AppService extends GetxService {
     ]);
 
     await Get.putAsync(() => ApiService().init());
-    // await Get.putAsync(() => SocketService().init());
+    await Get.putAsync(() => SocketService().init());
 
     await Future.wait([
       Get.putAsync(() => GeolocationService().init())
@@ -44,7 +44,6 @@ class AppService extends GetxService {
 
     /// Initialize and put the ShipmentApi
     Get.put( ShipmentApi(apiService.dio));
-
 
 //
 //    /// Initialize and put the SearchApi

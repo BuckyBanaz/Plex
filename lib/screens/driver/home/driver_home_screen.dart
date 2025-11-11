@@ -8,29 +8,25 @@ import '../../individual/home/components/top_bar.dart' show TopBar;
 import 'components/delivery_notification_card.dart';
 import 'components/recent_history_list.dart';
 
-class DriverHomeScreen extends StatefulWidget {
+class DriverHomeScreen extends StatelessWidget {
   const DriverHomeScreen({Key? key}) : super(key: key);
-
-  @override
-  State<DriverHomeScreen> createState() => _DriverHomeScreenState();
-}
-
-class _DriverHomeScreenState extends State<DriverHomeScreen> {
-  bool isOnline = true;
 
   @override
   Widget build(BuildContext context) {
     final h = MediaQuery.of(context).size.height;
     final DriverHomeController controller = Get.put(DriverHomeController());
+
     return Scaffold(
       backgroundColor: AppColors.secondary,
       body: Obx(
-        () {
-          return controller.isLoading.value ? Center(
+            () {
+          return controller.isLoading.value
+              ? Center(
             child: CircularProgressIndicator(
               color: AppColors.primary,
             ),
-          ):SafeArea(
+          )
+              : SafeArea(
             bottom: false,
             child: Column(
               children: [
@@ -48,28 +44,23 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                   child: Stack(
                     clipBehavior: Clip.none,
                     children: [
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           TopBar(
                             titleColor: AppColors.textColor,
                             subtitleColor: AppColors.textColor,
-                            iconButton:IconButton(
-                              onPressed: () =>
-                                  Get.toNamed(AppRoutes.driverNotification),
+                            iconButton: IconButton(
+                              onPressed: () => Get.toNamed(AppRoutes.driverNotification),
                               icon: Icon(
                                 IconlyLight.notification,
                                 color: AppColors.textColor,
                                 size: 28,
                               ),
                             ),
-
                             padding: EdgeInsets.symmetric(horizontal: 0),
                           ),
-
                           const SizedBox(height: 35),
-
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -106,7 +97,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                       ),
-                                      children:  [
+                                      children: [
                                         TextSpan(
                                           text: controller.currentDriver.value?.id.toString() ?? 'PLEX1080'.tr,
                                           style: TextStyle(
@@ -127,9 +118,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                                         fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                       ),
-                                      children:  [
+                                      children: [
                                         TextSpan(
-                                          text:  'RJ14 2025'.tr,
+                                          text: 'RJ14 2025'.tr,
                                           style: TextStyle(
                                             color: AppColors.textColor,
                                             fontSize: 14,
@@ -143,9 +134,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                               ),
                             ],
                           ),
-
                           const Spacer(),
-
                           Text(
                             'myEarnings'.tr,
                             style: TextStyle(
@@ -166,22 +155,20 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                           const SizedBox(height: 20),
                         ],
                       ),
-
                       Positioned.directional(
-                        textDirection: Directionality.of(context), // This line is important
-                        end: 0, // 'end' will be 'right' in LTR and 'left' in RTL
+                        textDirection: Directionality.of(context),
+                        end: 0,
                         bottom: -10,
                         child: Image.asset(
                           'assets/images/driver.png',
                           height: h * 0.12,
                           fit: BoxFit.contain,
-                            matchTextDirection: true
+                          matchTextDirection: true,
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 Transform.translate(
                   offset: const Offset(0, -18),
                   child: Container(
@@ -207,14 +194,15 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '${'status'.tr} - ${isOnline ? 'online'.tr : 'offline'.tr}',
+                              // Bind status text to controller's isOnline
+                              Obx(() => Text(
+                                '${'status'.tr} - ${controller.isOnline.value ? 'online'.tr : 'offline'.tr}',
                                 style: TextStyle(
                                   color: AppColors.secondary,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
                                 ),
-                              ),
+                              )),
                               const SizedBox(height: 2),
                               Text(
                                 'openToAnyDelivery'.tr,
@@ -227,21 +215,22 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                           ),
                         ),
 
-                        GestureDetector(
-                          onTap: () => setState(() => isOnline = !isOnline),
+                        // Use GestureDetector to call controller.toggleOnlineStatus
+                        Obx(() => GestureDetector(
+                          onTap: () => controller.toggleOnlineStatus(),
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 220),
                             width: 50,
                             height: 26,
                             padding: const EdgeInsets.all(2),
                             decoration: BoxDecoration(
-                              color: isOnline
+                              color: controller.isOnline.value
                                   ? AppColors.primary
                                   : AppColors.primarySwatch.shade100,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Align(
-                              alignment: isOnline
+                              alignment: controller.isOnline.value
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
                               child: Container(
@@ -254,12 +243,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                               ),
                             ),
                           ),
-                        ),
+                        )),
                       ],
                     ),
                   ),
                 ),
-
                 Expanded(
                   child: Container(
                     width: double.infinity,
@@ -279,10 +267,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                       children: [
                         DeliveryNotificationCard(
                           deliveryCount: controller.orders.length,
-                          onViewDetails: () =>
-                              Get.toNamed(AppRoutes.driverDeliveryOrder),
+                          onViewDetails: () => Get.toNamed(AppRoutes.driverDeliveryOrder),
                         ),
-
                         RecentHistoryList(controller: controller),
                       ],
                     ),

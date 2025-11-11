@@ -2,6 +2,7 @@ import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:plex_user/routes/middleware.dart';
 import 'package:plex_user/screens/auth/companyRegisteration/company_registration_view.dart';
 import 'package:plex_user/screens/auth/driver_signup_screen.dart';
+import 'package:plex_user/screens/auth/kyc/driver_kyc_screen.dart';
 import 'package:plex_user/screens/auth/signup_screen.dart';
 import 'package:plex_user/screens/individual/Booking/booking_confirm_screen.dart';
 import 'package:plex_user/screens/individual/Booking/booking_screen.dart';
@@ -17,6 +18,7 @@ import 'package:plex_user/screens/order/driver_delivery_order_screen.dart';
 import 'package:plex_user/screens/payments/user_payment_screen.dart';
 
 import '../screens/auth/choose_account_screen.dart';
+import '../screens/auth/driver_approvel_screen.dart';
 import '../screens/auth/forgot_password.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/otp_screen.dart';
@@ -41,6 +43,8 @@ class AppRoutes {
   static const signup = '/signup';
   static const driverSignup = '/driverSignup';
   static const choose = '/choose';
+  static const kyc = '/kyc';
+  static const approvel = '/approvel';
   static const view = '/view';
   static const otp = '/otp';
   static const userDashBoard = '/userDashBoard';
@@ -75,6 +79,8 @@ class AppRoutes {
     GetPage(name: choose, page: () => ChooseAccountScreen()),
     GetPage(name: view, page: () => CompanyRegistrationScreen()),
     GetPage(name: otp, page: () => OtpScreen()),
+    GetPage(name: kyc, page: () => DriverKycFlow()),
+    GetPage(name: approvel, page: () => DriverApprovalScreen()),
     GetPage(name: userDashBoard, page: () => UserMainScreen()),
     GetPage(name: userHome, page: () => UserHomeScreen()),
     GetPage(name: userAddress, page: () => UserAddressScreen()),

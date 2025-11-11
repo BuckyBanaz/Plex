@@ -1,11 +1,14 @@
 import 'package:get/get.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter/material.dart';
+import 'package:plex_user/services/domain/repository/repository_imports.dart';
 import '../../../routes/appRoutes.dart';
 
 class StripePaymentController extends GetxController {
   var isLoading = false.obs;
   var clientSecret = ''.obs;
+  var paymentIntentId = ''.obs;
+  final UserRepository userRepo = UserRepository();
 
   Future<void> payWithStripe({
     required int amountInPaise,
@@ -49,8 +52,7 @@ class StripePaymentController extends GetxController {
 
       // Snackbar dikhao
       Get.snackbar('Success', 'Payment successful');
-
-      // Ab booking confirmation par navigate karo
+      // await userRepo.confirmPaymentStripe(paymentIntentId: paymentIntentId.value, paymentMethod: "pm_card_visa");
       print("Navigating to booking confirmation...");
       Get.offAllNamed(AppRoutes.bookingConfirm);
 

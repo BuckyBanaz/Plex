@@ -101,7 +101,9 @@ class AuthApi {
         "mobile": phone,
         "vehicleType": vehicleType,
         "licenseNo": licenseNo,
-        'fcmToken': fcmToken
+        'fcmToken': fcmToken,
+        "otpType": 'email',
+
       },
     );
   }

@@ -87,7 +87,7 @@ class _SearchingDriverScreenState extends State<SearchingDriverScreen> {
                     children: [
                       SearchingLottie(
                         speed: 3,
-                        size: 150,
+                        size: 100,
                       ),
                     ],
                   ),

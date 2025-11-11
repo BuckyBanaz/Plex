@@ -251,7 +251,7 @@ class GeolocationService {
 
   void onStatusChanged(ServiceStatus status) async {
     if(status == ServiceStatus.enabled) {
-      await sendLocationWithApi();
+      // await sendLocationWithApi();
     }
   }
   Future<String> getAddressFromPosition(Position position) async {

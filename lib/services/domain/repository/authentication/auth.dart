@@ -154,6 +154,7 @@ int langKey = 1;
         langKey: langKey,
         vehicleType: vehicleType,
         licenseNo:licenseNo,
+
         deviceId: deviceInfo.deviceId,
         fcmToken: deviceInfo.firebaseToken,
       );

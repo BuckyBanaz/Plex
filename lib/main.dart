@@ -12,7 +12,7 @@ import 'package:sizer/sizer.dart';
 import 'firebase_options.dart'; // ye file Firebase CLI se generate hoti hai
 import 'package:firebase_core/firebase_core.dart';
 import 'core/app.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -26,7 +26,14 @@ Future<void> main() async {
   // final localeCtrl = Get.put(LocaleController());
   // await localeCtrl.init();
 
-  Stripe.publishableKey = "pk_test_51SLeKk6j6LVPNcUmY7DCzoPkKCjUw6ZRJrvPYkBuOyKkPVrh1asHolMVogUcibjlXZa21iWdAWpqOT9PE3dkLu8x00j0btf3Fx";
+  // // Load env file
+await dotenv.load(fileName: "assets/.env");
+
+// Set Stripe key
+Stripe.publishableKey = dotenv.env['STRIPE_KEY'] ?? '';
+
+// Print for verification
+print("✅ Stripe Publishable Key Loaded: ${Stripe.publishableKey}");
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

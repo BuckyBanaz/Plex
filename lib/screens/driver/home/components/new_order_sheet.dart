@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plex_user/constant/app_colors.dart';
+import '../../../../models/driver_order_model.dart';
 import '../../../../modules/controllers/home/driver_home_controller.dart';
 
 class NewOrderSheet extends StatelessWidget {
-  final Map<String, dynamic> orderData;
+  final OrderModel orderData;
 
   const NewOrderSheet({super.key, required this.orderData});
 
@@ -57,7 +58,7 @@ class NewOrderSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${orderData['earnings']}',
+                        '\$${orderData.estimatedCost.toStringAsFixed(0)}',
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 24,
@@ -66,16 +67,17 @@ class NewOrderSheet extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Chip(
-                    backgroundColor: AppColors.primarySwatch.shade50,
-                    label: Text(
-                      'alreadyPaid'.tr,
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+                  // if (orderData.isPaid)
+                    Chip(
+                      backgroundColor: AppColors.primarySwatch.shade50,
+                      label: Text(
+                        'alreadyPaid'.tr,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
               const Divider(height: 32),
@@ -83,8 +85,8 @@ class NewOrderSheet extends StatelessWidget {
 
               _buildAddressRow(
                 title: 'pickup'.tr,
-                address: orderData['pickupAddress'],
-                distance: orderData['pickupDistance'],
+                address: '${orderData.pickupAddressLine1}, ${orderData.pickupAddressLine2}',
+                distance: '...',
               ),
 
 
@@ -100,21 +102,21 @@ class NewOrderSheet extends StatelessWidget {
 
               _buildAddressRow(
                 title: 'delivery'.tr,
-                address: orderData['deliveryAddress'],
-                distance: orderData['deliveryDistance'],
+                address: '${orderData.pickup.address}',
+                distance: '....',
               ),
               const SizedBox(height: 24),
 
               Text.rich(
                 TextSpan(
-                  text: '${orderData['customerName']} - ',
+                  text:'${orderData.pickup.name} - ',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                   children: [
                     TextSpan(
-                      text: orderData['customerPhone'],
+                      text: orderData.pickup.phone,
 
                     ),
                   ],
@@ -126,7 +128,9 @@ class NewOrderSheet extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: controller.rejectOrder,
+                      onPressed: (){
+                        controller.rejectOrder(orderData);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFEF3E0),
                         foregroundColor: AppColors.primary,
@@ -147,7 +151,9 @@ class NewOrderSheet extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: controller.acceptOrder,
+                      onPressed: (){
+                        controller.acceptOrder(orderData);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,

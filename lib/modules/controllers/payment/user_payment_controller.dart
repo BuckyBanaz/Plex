@@ -129,6 +129,8 @@ showToast(message: "success_card_added".tr);
       // Booking se shipment create ho chuka hai, uska clientSecret le lo
       final clientSecret = bookingController.shipmentClientSecret.value;
       print("ClientSecret from bookingController: $clientSecret");
+      final paymentIntentId = bookingController.stripePaymentIntentId.value;
+      print("paymentIntentId from bookingController: $paymentIntentId");
 
       if (clientSecret.isEmpty) {
         print("ClientSecret is empty!");
@@ -139,6 +141,8 @@ showToast(message: "success_card_added".tr);
 
       stripeController.clientSecret.value = clientSecret;
       print("Stripe controller clientSecret set: ${stripeController.clientSecret.value}");
+      stripeController.paymentIntentId.value = paymentIntentId;
+      print("Stripe controller paymentIntentId set: ${stripeController.paymentIntentId.value}");
 
       final amountInPaise = (bookingController.amountPayable * 100).toInt();
       print("Amount in paise: $amountInPaise");

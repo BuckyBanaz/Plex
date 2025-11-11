@@ -4,6 +4,7 @@ class UserRepository {
   final UserApi userApi = Get.find<UserApi>();
   final DatabaseService databaseService = Get.find<DatabaseService>();
   final LocaleController localeController = Get.find<LocaleController>();
+  final DeviceInfoService deviceInfoService = Get.find<DeviceInfoService>();
 
   // int get langKey {
   //   // Map locale to langKey required by API
@@ -53,7 +54,31 @@ class UserRepository {
     return data['clientSecret'] as String;
   }
 
+  Future<String> confirmPaymentStripe({
+    required String paymentIntentId,
+    required String paymentMethod,
+  }) async {
+    try {
+      final Map<String, dynamic> data = await userApi.confirmStripePayment(
+        paymentIntentId: paymentIntentId,
+        paymentMethod: paymentMethod,
+      );
 
+      if (data.containsKey('status')) {
+        return data['status'].toString();
+      }
+
+      if (data.containsKey('client_secret')) {
+        return data['client_secret'].toString();
+      }
+
+      // fallback: return full JSON if neither key is present
+      return jsonEncode(data);
+    } catch (e) {
+      // You may want to convert the error to your app-specific exception
+      rethrow;
+    }
+  }
   Future<List<AddressModel>> getUserAddresses() async {
     try {
       final response = await userApi.getAddress(langKey: langKey);
@@ -121,6 +146,83 @@ class UserRepository {
       debugPrint("Error deleting user Address: $e");
       showToast(message: "Failed to delete address");
       return false;
+    }
+  }
+
+  Future<void> updateStatus(bool isOnline) async {
+    try {
+      final userType = databaseService.userType; // 'individual' or 'driver'
+
+      // Run only for driver
+      if (userType != 'driver') {
+        debugPrint("⚠️ updateStatus skipped — user is not a driver ($userType)");
+        return;
+      }
+
+      final driver = databaseService.driver;
+      final driverId = driver?.id?.toString();
+
+      if (driverId == null) {
+        debugPrint("❌ No driverId found for driver");
+        showToast(message: "Failed to update status (no driverId)");
+        return;
+      }
+
+      // Call API
+      final response = await userApi.updateStatus(
+        userId: driverId,
+        isOnline: isOnline,
+      );
+
+      if (response['success'] == true || response['message'] != null) {
+        debugPrint("✅ Driver online status updated successfully");
+
+      } else {
+        debugPrint("⚠️ Failed to update driver status: $response");
+        showToast(message: "Failed to update driver status");
+      }
+    } catch (e) {
+      debugPrint("❌ Error updating driver status: $e");
+      showToast(message: "Error updating driver status");
+    }
+  }
+
+
+
+  Future<void> updateFcmToken() async {
+    try {
+      final userType = databaseService.userType; // 'individual' or 'driver'
+      final user = databaseService.user;
+      final driver = databaseService.driver;
+      final deviceInfo = await deviceInfoService.getDeviceInfo();
+
+      // Determine userId depending on user type
+      String? userId;
+      if (userType == 'individual') {
+        userId = user?.id?.toString();
+      } else if (userType == 'driver') {
+        userId = driver?.id?.toString();
+      }
+
+      if (userId == null) {
+        debugPrint("❌ No userId found for $userType");
+        showToast(message: "Failed to update FCM token (no userId)");
+        return;
+      }
+
+      // Call API
+      final response = await userApi.updateFcm(
+        userId: userId,
+        fcmToken: deviceInfo.firebaseToken,
+      );
+
+      if (response['success'] == true || response['message'] != null) {
+        debugPrint("✅ FCM token updated successfully for $userType");
+      } else {
+        debugPrint("⚠️ Failed to update FCM token: $response");
+      }
+    } catch (e) {
+      debugPrint("❌ Error updating FCM token: $e");
     }
   }
 

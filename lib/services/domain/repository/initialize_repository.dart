@@ -18,9 +18,6 @@ Future<void> initializeRepositories() async {
 
     Get.put(ShipmentRepository());
     // debugPrint('[REPO] ShipmentRepository registered');
-
-
-
     debugPrint('[REPO INIT] all repositories registered successfully');
   } catch (e, st) {
     debugPrint('[REPO ERROR] initializeRepositories failed: $e');

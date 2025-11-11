@@ -27,6 +27,7 @@ class AppInterceptors extends Interceptor {
 
     if (accessToken != null && accessToken.isNotEmpty && !skipToken) {
       options.headers['Authorization'] = 'Bearer $accessToken';
+      print("accessToken: $accessToken");
     }
 
     return handler.next(options);

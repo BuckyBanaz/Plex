@@ -455,9 +455,9 @@ class DescriptionInput extends StatelessWidget {
         decoration: InputDecoration(
           hintText: 'enter_description'.tr,
           border: InputBorder.none,
-          focusedBorder: OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.0),
-            borderSide: const BorderSide(color: AppColors.primary),
+            borderSide: BorderSide(color: AppColors.primary),
           ),
 
           contentPadding: EdgeInsets.all(16.0),

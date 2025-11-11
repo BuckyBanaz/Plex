@@ -20,7 +20,8 @@ class BookingController extends GetxController {
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
 
   // Location controller (must be already put into Get before this controller is used)
-  final LocationController locationController = Get.find<LocationController>();
+  final LocationController locationController = Get.put(LocationController());
+
 
   // Booking fields
   var selectedTime = 0.obs;
@@ -30,8 +31,20 @@ class BookingController extends GetxController {
   var description = ''.obs;
   var isLoading = false.obs;
   var selectedImages = <XFile>[].obs;
+  // add near other reactive fields
+  var scheduledDateTime = Rxn<DateTime>(); // null when not selected
 
-  void selectTime(int index) => selectedTime.value = index;
+  // setter
+  void setScheduledDateTime(DateTime dt) => scheduledDateTime.value = dt;
+
+  // modify selectTime to optionally clear scheduledDateTime when immediate chosen
+  void selectTime(int index) {
+    selectedTime.value = index;
+    if (index == 0) {
+      // if immediate selected, clear any previously picked schedule
+      scheduledDateTime.value = null;
+    }
+  }
   void selectVehicle(int index) => selectedVehicleIndex.value = index;
   void setWeight(double value) => weight.value = value;
   void setDescription(String value) => description.value = value;
@@ -117,7 +130,16 @@ class BookingController extends GetxController {
       );
       return;
     }
-
+    if (selectedTime.value == 1 && scheduledDateTime.value == null) {
+      Get.snackbar(
+        "error".tr,
+        "please_select_schedule_datetime".tr, // add translation or replace with plain string
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
     // Weight and description
     if (weight.value == 0) {
       Get.snackbar(
@@ -179,10 +201,10 @@ class BookingController extends GetxController {
         durationText.value = (data['durationText'] ?? '').toString();
         estimatedCostINR.value =
             (data['estimatedCostINR'] as num?)?.toDouble() ??
-                estimatedCostINR.value;
+            estimatedCostINR.value;
         estimatedCostUSD.value =
             (data['estimatedCostUSD'] as num?)?.toDouble() ??
-                estimatedCostUSD.value;
+            estimatedCostUSD.value;
         currency.value = (data['currency'] ?? '').toString();
         if (estimatedCostINR.value > 0) tripFare.value = estimatedCostINR.value;
       } else {
@@ -197,7 +219,8 @@ class BookingController extends GetxController {
   }
 
   void removeImage(int index) {
-    if (index >= 0 && index < selectedImages.length) selectedImages.removeAt(index);
+    if (index >= 0 && index < selectedImages.length)
+      selectedImages.removeAt(index);
   }
 
   // Pickup controllers
@@ -214,14 +237,15 @@ class BookingController extends GetxController {
 
   void updatePickUpReactive() {
     pAddress.value =
-    "${pLocality.value},${pLandMarkController.text}, ${pPincodeController.text}";
+        "${pLocality.value},${pLandMarkController.text}, ${pPincodeController.text}";
     validatePickupForm();
   }
 
   void pselectAddressType(String type) => pselectedAddressType.value = type;
 
   void validatePickupForm() {
-    isPickUpFormValid.value = pNameController.text.isNotEmpty &&
+    isPickUpFormValid.value =
+        pNameController.text.isNotEmpty &&
         pMobileController.text.isNotEmpty &&
         pLandMarkController.text.isNotEmpty &&
         pPincodeController.text.isNotEmpty &&
@@ -283,14 +307,15 @@ class BookingController extends GetxController {
     dName.value = dnameController.text;
     dPhone.value = dmobileController.text;
     dAddress.value =
-    "${dLocality.value},${dlankmarkController.text}, ${dpincodeController.text}";
+        "${dLocality.value},${dlankmarkController.text}, ${dpincodeController.text}";
     validateDropOffForm();
   }
 
   void dselectAddressType(String type) => dselectedAddressType.value = type;
 
   void validateDropOffForm() {
-    isDropOffFormValid.value = dnameController.text.isNotEmpty &&
+    isDropOffFormValid.value =
+        dnameController.text.isNotEmpty &&
         dmobileController.text.isNotEmpty &&
         dlankmarkController.text.isNotEmpty &&
         dpincodeController.text.isNotEmpty &&
@@ -327,7 +352,9 @@ class BookingController extends GetxController {
       destLng: dLng.value,
     );
 
-    routePoints.value = points.map((e) => LatLng(e['lat']!, e['lng']!)).toList();
+    routePoints.value = points
+        .map((e) => LatLng(e['lat']!, e['lng']!))
+        .toList();
 
     // Camera zoom logic
     if (mapController != null && routePoints.isNotEmpty) {
@@ -335,7 +362,9 @@ class BookingController extends GetxController {
 
       if (routePoints.length == 1) {
         bounds = LatLngBounds(
-            southwest: routePoints.first, northeast: routePoints.first);
+          southwest: routePoints.first,
+          northeast: routePoints.first,
+        );
       } else {
         bounds = LatLngBounds(
           southwest: LatLng(
@@ -349,9 +378,7 @@ class BookingController extends GetxController {
         );
       }
 
-      mapController!.animateCamera(
-        CameraUpdate.newLatLngBounds(bounds, 50.0),
-      );
+      mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50.0));
     }
   }
 
@@ -367,10 +394,11 @@ class BookingController extends GetxController {
   var estimatedCostUSD = 0.0.obs;
   var currency = ''.obs;
   var shipmentClientSecret = ''.obs;
+  var stripePaymentIntentId = ''.obs;
   double get totalFare =>
       tripFare.value -
-          (isCouponApplied.value ? couponDiscount.value : 0) +
-          gstCharges.value;
+      (isCouponApplied.value ? couponDiscount.value : 0) +
+      gstCharges.value;
   double get amountPayable => totalFare;
 
   void removeCoupon() {
@@ -385,41 +413,105 @@ class BookingController extends GetxController {
   void orderNow() {
     Get.dialog(
       AlertDialog(
-        title: const Text("Order Placed!"),
+        title: const Text("Confirm Order"),
         content: Text(
           "Placing your order for ₹${amountPayable.toStringAsFixed(2)}...",
         ),
         actions: [
           TextButton(
             onPressed: () async {
+              Get.back(); // close dialog first
               try {
                 isLoading.value = true;
+
+                // ✅ Build payload automatically
                 final res = await repo.createShipment(
-                  originLat: pLat.value.toDouble(),
-                  originLng: pLng.value.toDouble(),
-                  destinationLat: dLat.value.toDouble(),
-                  destinationLng: dLng.value.toDouble(),
+                  vehicleType: "Bike",
+                  originLat: pLat.value,
+                  originLng: pLng.value,
+                  destinationLat: dLat.value,
+                  destinationLng: dLng.value,
                   weight: weight.value,
+                  weightUnit: selectedWeightUnit.value,
+                  notes: description.value,
+                  pickup: {
+                    "name": pNameController.text,
+                    "phone": pMobileController.text,
+                    "address": pAddress.value,
+                    "latitude": pLat.value,
+                    "longitude": pLng.value,
+                  },
+                  dropoff: {
+                    "name": dnameController.text,
+                    "phone": dmobileController.text,
+                    "address": dAddress.value,
+                    "latitude": dLat.value,
+                    "longitude": dLng.value,
+                  },
+                  collectType: selectedTime.value == 0 ? "immediate" : "scheduled",
+                  scheduledAt: selectedTime.value == 1 ? scheduledDateTime.value : null,
+                  imageUrls: selectedImages.isNotEmpty
+                      ? selectedImages.map((x) => x.path).toList()
+                      : null,
                 );
+
+                // debugPrint("✅ Shipment API Response: $res");
 
                 isLoading.value = false;
 
-                // clientSecret save
-                shipmentClientSecret.value = res['clientSecret'] ?? '';
+                if (res.containsKey('error')) {
+                  Get.snackbar("Error", res['error'].toString(),
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white);
+                  return;
+                }
+
+                // --- SAFE EXTRACTION: check shipment first, then top-level keys ---
+                final shipment = (res['shipment'] is Map) ? Map<String, dynamic>.from(res['shipment']) : null;
+
+                final clientSecretFromShipment = shipment != null ? (shipment['clientSecret']?.toString() ?? '') : '';
+                final clientSecretTopLevel = res['clientSecret']?.toString() ?? '';
+                shipmentClientSecret.value = clientSecretTopLevel.isNotEmpty ? clientSecretTopLevel : clientSecretFromShipment;
+
+                final intentFromShipment = shipment != null ? (shipment['stripePaymentIntentId']?.toString() ?? '') : '';
+                final intentTopLevel = res['stripePaymentIntentId']?.toString() ?? '';
+                stripePaymentIntentId.value = intentTopLevel.isNotEmpty ? intentTopLevel : intentFromShipment;
+
+                // DEBUG logs to confirm values
+                debugPrint("Extracted clientSecret: ${shipmentClientSecret.value}");
+                debugPrint("Extracted stripePaymentIntentId: ${stripePaymentIntentId.value}");
+
+                // If client secret absent, show error
+                if (shipmentClientSecret.value.isEmpty) {
+                  Get.snackbar("Error", "Payment details missing (clientSecret).",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white);
+                  return;
+                }
 
                 Get.toNamed(AppRoutes.payment);
               } catch (e) {
-                Get.back();
                 isLoading.value = false;
-                Get.snackbar('Error', 'Something went wrong');
+                Get.snackbar('Error', e.toString(),
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white);
               }
             },
+
             child: const Text("OK"),
+          ),
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel"),
           ),
         ],
       ),
     );
   }
+
 
   // ---- NEW: Apply LocationController data into pickup fields ----
   void _applyPickupFromLocation() {
@@ -427,7 +519,8 @@ class BookingController extends GetxController {
     final String address = locationController.currentAddress.value ?? '';
 
     // If neither address nor pos available, do nothing
-    if ((address.isEmpty || address == 'loading_location'.tr) && pos == null) return;
+    if ((address.isEmpty || address == 'loading_location'.tr) && pos == null)
+      return;
 
     // Fill reactive pickup address and coords
     if (address.isNotEmpty && address != 'loading_location'.tr) {
@@ -457,10 +550,12 @@ class BookingController extends GetxController {
 
     // If we have current user info, prefill name & mobile (if empty)
     if (currentUser.value != null) {
-      if (pNameController.text.trim().isEmpty && (currentUser.value!.name?.isNotEmpty ?? false)) {
+      if (pNameController.text.trim().isEmpty &&
+          (currentUser.value!.name?.isNotEmpty ?? false)) {
         pNameController.text = currentUser.value!.name!;
       }
-      if (pMobileController.text.trim().isEmpty && (currentUser.value!.mobile?.isNotEmpty ?? false)) {
+      if (pMobileController.text.trim().isEmpty &&
+          (currentUser.value!.mobile?.isNotEmpty ?? false)) {
         pMobileController.text = currentUser.value!.mobile!;
       }
     }
@@ -474,12 +569,20 @@ class BookingController extends GetxController {
   Future<void> useCurrentLocationAsPickup() async {
     // If location is still loading, show message
     if (locationController.currentAddress.value == 'loading_location'.tr) {
-      Get.snackbar("info".tr, "please_wait_getting_location".tr, snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        "info".tr,
+        "please_wait_getting_location".tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return;
     }
 
     _applyPickupFromLocation();
-    Get.snackbar("success".tr, "pickup_set_to_current_location".tr, snackPosition: SnackPosition.BOTTOM);
+    Get.snackbar(
+      "success".tr,
+      "pickup_set_to_current_location".tr,
+      snackPosition: SnackPosition.BOTTOM,
+    );
   }
 
   @override

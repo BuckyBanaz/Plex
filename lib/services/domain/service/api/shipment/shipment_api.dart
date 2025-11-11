@@ -39,23 +39,46 @@ class ShipmentApi {
 
   Future<Map<String, dynamic>> createShipment({
     required String userId,
+    required String vehicleType,
     required double originLat,
     required double originLng,
     required double destinationLat,
     required double destinationLng,
     required double weight,
+    required String weightUnit,
+    required String notes,
+    required Map<String, dynamic> pickup,
+    required Map<String, dynamic> dropoff,
+    required String paymentMethod,
+    required String collectType, // "immediate" or "scheduled"
+    DateTime? scheduledAt, // nullable
+    List<String>? imageUrls, // optional
   }) async {
     try {
+      // Build request body dynamically
+      final Map<String, dynamic> payload = {
+        "userId": userId,
+        "vehicleType": vehicleType,
+        "weight": "$weight $weightUnit",
+        "notes": notes,
+        "pickup": pickup,
+        "dropoff": dropoff,
+        "paymentMethod": paymentMethod,
+        "collectTime": {
+          "type": collectType,
+          if (collectType == "scheduled" && scheduledAt != null)
+            "scheduledAt": scheduledAt.toUtc().toIso8601String(),
+        },
+      };
+
+      // ✅ Add image list only if available
+      if (imageUrls != null && imageUrls.isNotEmpty) {
+        payload["images"] = imageUrls;
+      }
+
       final response = await dio.post(
         ApiEndpoint.createShipment,
-        data: {
-          "userId": userId,
-          "originLat": originLat,
-          "originLng": originLng,
-          "destinationLat": destinationLat,
-          "destinationLng": destinationLng,
-          "weight": weight,
-        },
+        data: payload,
       );
 
       return (response.data is Map<String, dynamic>)
@@ -66,4 +89,5 @@ class ShipmentApi {
       return {'error': e.toString()};
     }
   }
+
 }

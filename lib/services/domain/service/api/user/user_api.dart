@@ -84,6 +84,37 @@ class UserApi {
     });
     return resp.data as Map<String, dynamic>;
   }
+
+  /// Sends `payment_method` as snake_case if your backend expects that.
+  Future<Map<String, dynamic>> confirmStripePayment({
+    required String paymentIntentId,
+    required String paymentMethod,
+  }) async {
+    try {
+      final resp = await dio.post(
+        '/confirm-stripe',
+        data: {
+          'paymentIntentId': paymentIntentId,
+          'payment_method': paymentMethod,
+          'return_url': "http://p2dev10.in/success",
+        },
+      );
+
+      // If server returned a JSON object, cast it. Otherwise wrap into a map.
+      if (resp.data is Map<String, dynamic>) {
+        return resp.data as Map<String, dynamic>;
+      } else if (resp.data is Map) {
+        // defensive cast
+        return Map<String, dynamic>.from(resp.data as Map);
+      } else {
+        // fallback: return the raw response under a key
+        return {'response': resp.data};
+      }
+    } on DioError catch (e) {
+      // Optionally inspect e.response?.data to return richer error info
+      rethrow;
+    }
+  }
   //
   // /// (Optional) endpoint to confirm payment/update order after webhook
   // Future<Map<String, dynamic>> confirmPaymentOnServer(String paymentIntentId) async {
@@ -155,6 +186,42 @@ class UserApi {
           'lang_id': langKey,
         },
       ),
+    );
+
+    return (response.data is Map<String, dynamic>)
+        ? Map<String, dynamic>.from(response.data)
+        : {'message': response.data?.toString()};
+  }
+
+
+  Future<Map<String, dynamic>> updateStatus({
+    required String userId,
+    required bool isOnline,
+  }) async {
+
+    final response = await dio.put(
+      '$basePath${ApiEndpoint.updateStatus}/$userId',
+      data: {
+        "isOnline": isOnline,
+      },
+    );
+
+    return (response.data is Map<String, dynamic>)
+        ? Map<String, dynamic>.from(response.data)
+        : {'message': response.data?.toString()};
+  }
+
+
+  Future<Map<String, dynamic>> updateFcm({
+    required String userId,
+    required String fcmToken,
+  }) async {
+
+    final response = await dio.put(
+      '$basePath${ApiEndpoint.fcmToken}/$userId',
+      data: {
+        "fcmToken": fcmToken,
+      },
     );
 
     return (response.data is Map<String, dynamic>)

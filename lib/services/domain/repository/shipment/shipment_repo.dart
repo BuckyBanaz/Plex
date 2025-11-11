@@ -33,30 +33,49 @@ class ShipmentRepository {
   }
 
   Future<Map<String, dynamic>> createShipment({
+    required String vehicleType,
     required double originLat,
     required double originLng,
     required double destinationLat,
     required double destinationLng,
     required double weight,
+    required String weightUnit,
+    required String notes,
+    required Map<String, dynamic> pickup,
+    required Map<String, dynamic> dropoff,
+    // required String paymentMethod,
+    required String collectType, // "immediate" or "scheduled"
+    DateTime? scheduledAt, // optional
+    List<String>? imageUrls, // optional
   }) async {
     try {
-      // Fetch userId and token from database service
+      // Fetch userId from database (local storage or firebase)
       final userId = databaseService.user!.id.toString();
 
       final result = await shipmentApi.createShipment(
         userId: userId,
+        vehicleType: vehicleType,
         originLat: originLat,
         originLng: originLng,
         destinationLat: destinationLat,
         destinationLng: destinationLng,
         weight: weight,
+        weightUnit: weightUnit,
+        notes: notes,
+        pickup: pickup,
+        dropoff: dropoff,
+        paymentMethod: "stripe",
+        collectType: collectType,
+        scheduledAt: scheduledAt,
+        imageUrls: imageUrls,
       );
 
-      debugPrint("Shipment created successfully: $result");
+      debugPrint("✅ Shipment created successfully: $result");
       return result;
     } catch (e) {
-      debugPrint("Error in repository while creating shipment: $e");
+      debugPrint("❌ Error in repository while creating shipment: $e");
       return {'error': e.toString()};
     }
   }
+
 }

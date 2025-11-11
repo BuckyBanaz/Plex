@@ -42,6 +42,7 @@ class AuthController extends GetxController {
 
   // repo (resolved via Get)
   final AuthRepository _authRepo = AuthRepository();
+  final UserRepository userRepo = UserRepository();
   Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   Rx<DriverUserModel?> currentDriver = Rx<DriverUserModel?>(null);
   final selectedVehicle = Rx<String?>(null);
@@ -112,6 +113,7 @@ class AuthController extends GetxController {
       );
 
       showToast(message: "Login successful");
+      userRepo.updateFcmToken();
       Get.offAllNamed(AppRoutes.location);
     } on DioError catch (e) {
       final msg = e.response?.data['message'] ?? e.message ?? '';
@@ -204,7 +206,8 @@ class AuthController extends GetxController {
         password: password,
           vehicleType: selectedVehicle.value!.toLowerCase() ?? '',
           licenseNo:licenseNo,
-        phone: "${countryCode}${phone}"
+        // phone: "${countryCode}${phone}"
+        phone: "${phone}"
       );
 
       print("✅ Driver registered: $response");

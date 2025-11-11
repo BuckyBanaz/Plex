@@ -1,3 +1,4 @@
+import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -38,21 +39,56 @@ class DriverOrderCard extends StatelessWidget {
             _buildHeader(),
             const Divider(height: 24, thickness: 1),
 
-            _buildAddressRow(
-              icon: Icons.my_location,
-              title: 'pickup'.tr,
-              line1: order.pickupAddressLine1,
-              line2: order.pickupAddressLine2,
-            ),
-            const SizedBox(height: 16),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Column(
+                    children: [
+                      Icon(Icons.my_location,
+                          color: AppColors.darkOrangeIcon, size: 24),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: DottedLine(
+                          direction: Axis.vertical,
+                          lineLength: 45,
+                          dashColor: AppColors.darkOrangeIcon.withOpacity(0.5),
+                          // dashGapLength: 2.0,
+                          lineThickness: 2,
+                          dashRadius: 6.0,
+                        ),
+                      ),
+                      Icon(IconlyLight.location,
+                          color: AppColors.darkOrangeIcon, size: 24),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12), // Spacer
 
-            _buildAddressRow(
-              icon: IconlyLight.location,
-              title: 'delivery'.tr,
-              line1: order.deliveryAddressLine1,
-              line2: order.deliveryAddressLine2,
+                // Address info column
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildAddressInfo(
+                        title: 'pickup'.tr,
+                        line1: order.pickup.address,
+                        // line2: order.pickupAddressLine2,
+                      ),
+                      const SizedBox(height: 16), // Spacer between addresses
+                      _buildAddressInfo(
+                        title: 'delivery'.tr,
+                        line1: order.dropoff.address,
+                        // line2: order.deliveryAddressLine2,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
+            // 2. END REPLACEMENT
 
             _buildActionButtons(),
           ],
@@ -74,11 +110,11 @@ class DriverOrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              order.customerName,
+              order.pickup.name,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             Text(
-              '${'orderNo'.tr} ${order.orderNumber}',
+              '${'orderNo'.tr} ${order.id}',
               style: const TextStyle(fontSize: 14),
             ),
           ],
@@ -88,23 +124,23 @@ class DriverOrderCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              '₹ ${order.amount.toStringAsFixed(0)}',
+              '₹ ${order.estimatedCost.toStringAsFixed(0)}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             Row(
               children: [
                 Icon(
-                  order.isPaid ? Icons.check_circle : Icons.cancel,
-                  color: order.isPaid
+                 order.paymentStatus != "pending" ? Icons.check_circle : Icons.cancel,
+                  color: order.paymentStatus != "pending"
                       ? AppColors.greenPaid
                       : AppColors.redUnpaid,
                   size: 16,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  order.isPaid ? 'paid'.tr : 'unpaid'.tr,
+                  order.paymentStatus != "pending" ? 'paid'.tr : 'unpaid'.tr,
                   style: TextStyle(
-                    color: order.isPaid
+                    color: order.paymentStatus != "pending"
                         ? AppColors.greenPaid
                         : AppColors.redUnpaid,
                     fontWeight: FontWeight.bold,
@@ -118,17 +154,16 @@ class DriverOrderCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAddressRow({
-    required IconData icon,
+  // <-- 3. WIDGET KO RENAME KIYA (buildAddressRow -> buildAddressInfo)
+
+  Widget _buildAddressInfo({
     required String title,
     required String line1,
-    required String line2,
+    // required String line2,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: AppColors.darkOrangeIcon, size: 28),
-        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +176,7 @@ class DriverOrderCard extends StatelessWidget {
                 ),
               ),
               Text(line1, style: const TextStyle(color: Colors.black54)),
-              Text(line2, style: const TextStyle(color: Colors.black54)),
+              // Text(line2, style: const TextStyle(color: Colors.black54)),
             ],
           ),
         ),
@@ -173,7 +208,9 @@ class DriverOrderCard extends StatelessWidget {
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: () => controller.declineDeliveryOOrder(order.id),
+            onPressed: () {
+              // controller.declineDeliveryOOrder(order.id);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.lightGreyButton,
               foregroundColor: Colors.black87,
@@ -188,7 +225,9 @@ class DriverOrderCard extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
-            onPressed: () => controller.acceptDeliveryOrder(order.id),
+            onPressed: () {
+              // controller.acceptDeliveryOrder(order.id)
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,
               foregroundColor: Colors.white,
