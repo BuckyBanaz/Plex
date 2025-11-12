@@ -6,8 +6,8 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/driver/home/driver_home_screen.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../individual/profile/user_profile_screen.dart';
-import '../profile/driver_profile_screen.dart';
+import '../../profile/profile_screen.dart';
+// import '../profile/driver_profile_screen.dart';
 
 
 class DriverMainScreenController extends GetxController {

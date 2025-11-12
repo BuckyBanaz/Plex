@@ -90,4 +90,23 @@ class ShipmentApi {
     }
   }
 
+  Future<Map<String, dynamic>> getShipments() async {
+    try {
+      final response = await dio.get(
+        ApiEndpoint.shipment, // <-- ensure ApiEndpoint.shipments exists
+      );
+
+      // If backend returns an object with success/data
+      if (response.data is Map<String, dynamic>) {
+        return Map<String, dynamic>.from(response.data);
+      }
+
+      // fallback: wrap as message
+      return {'message': response.data?.toString()};
+    } catch (e) {
+      debugPrint('Error fetching shipments: $e');
+      return {'error': e.toString()};
+    }
+  }
+
 }

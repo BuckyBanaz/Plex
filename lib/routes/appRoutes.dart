@@ -11,7 +11,6 @@ import 'package:plex_user/screens/individual/Booking/dropoff_details_screen.dart
 import 'package:plex_user/screens/individual/Booking/pickup_details_screen.dart';
 import 'package:plex_user/screens/individual/dashboards/user_main_screen.dart';
 import 'package:plex_user/screens/individual/home/user_home_screen.dart';
-import 'package:plex_user/screens/individual/profile/user_profile_screen.dart';
 import 'package:plex_user/screens/location/location_permission_screen.dart';
 import 'package:plex_user/screens/notification/driver_notification_screen.dart';
 import 'package:plex_user/screens/order/driver_delivery_order_screen.dart';
@@ -28,10 +27,11 @@ import '../screens/driver/home/driver_home_screen.dart';
 import '../screens/individual/Booking/location_details_screens.dart';
 import '../screens/individual/Booking/searching_driver_screen.dart';
 import '../screens/individual/order/order_complete_screen.dart';
-import '../screens/individual/profile/user_help_support_screen.dart';
 import '../screens/location/add_new_user_address_screen.dart';
 import '../screens/location/user_address_screen.dart';
 import '../screens/payments/payment_failed_screen.dart';
+import '../screens/profile/help_support_screen.dart';
+import '../screens/profile/profile_screen.dart';
 import '../screens/splash/splash_screen.dart';
 
 class AppRoutes {
@@ -85,7 +85,7 @@ class AppRoutes {
     GetPage(name: userHome, page: () => UserHomeScreen()),
     GetPage(name: userAddress, page: () => UserAddressScreen()),
     GetPage(name: addUserAddress, page: () => AddNewUserAddressScreen()),
-    GetPage(name: userHelp, page: () => UserHelpSupportScreen()),
+    GetPage(name: userHelp, page: () => HelpSupportScreen()),
     GetPage(name: driverDashBoard, page: () => DriverMainScreen()),
     GetPage(name: driverHome, page: () => DriverHomeScreen()),
     GetPage(name: location, page: () => LocationPermissionScreen()),

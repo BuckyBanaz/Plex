@@ -4,10 +4,10 @@ import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/individual/home/user_home_screen.dart';
-import 'package:plex_user/screens/individual/profile/user_profile_screen.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../notification/user_notification_screen.dart';
+import '../../profile/profile_screen.dart';
 import '../order/user_order_screen.dart';
 
 class UserMainScreenController extends GetxController {

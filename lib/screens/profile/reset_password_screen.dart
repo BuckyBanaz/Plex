@@ -5,15 +5,15 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
 
 import '../../../constant/app_colors.dart' show AppColors;
-import '../../../modules/controllers/settings/user_profile_controller.dart';
-import '../../widgets/custom_text_field.dart';
+import '../../../modules/controllers/settings/profile_controller.dart';
+import '../widgets/custom_text_field.dart';
 
-class UserResetPasswordScreen extends StatelessWidget {
-  const UserResetPasswordScreen({super.key});
+class ResetPasswordScreen extends StatelessWidget {
+  const ResetPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<UserProfileController>();
+    final controller = Get.find<ProfileController>();
 
     return Scaffold(
       appBar: AppBar(

@@ -4,16 +4,19 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:plex_user/models/user_models.dart';
+import 'package:plex_user/modules/controllers/booking/search_driver_controller.dart';
 
 import '../../../constant/app_colors.dart';
+import '../../../models/driver_user_model.dart';
 import '../../../services/domain/service/api/api_import.dart';
 import '../../../services/domain/service/app/app_service_imports.dart';
 
-class UserProfileController extends GetxController{
+class ProfileController extends GetxController{
   final DatabaseService db = Get.find<DatabaseService>();
   final DeviceInfoService deviceInfoService = Get.find<DeviceInfoService>();
 
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
+  final Rx<DriverUserModel?> currentDriver = Rx<DriverUserModel?>(null);
   final Rx<bool> isLoading = false.obs;
   final RxBool loading = false.obs;
 
@@ -49,13 +52,27 @@ Future<void> token() async {
     try {
       isLoading.value = true;
 
-      final UserData = db.user;
-      if (UserData != null) {
-        currentUser.value = UserData;
-        print("User:${currentUser.value?.name}");
-      } else {
-        print("No User data found in local DB.");
+      final type = db.userType;
+
+      if (type == "individual"){
+        final UserData = db.user;
+        if (UserData != null) {
+          currentUser.value = UserData;
+          print("User:${currentUser.value?.name}");
+        } else {
+          print("No User data found in local DB.");
+        }
+      }else {
+        final driverData = db.driver;
+
+        if (driverData != null) {
+          currentDriver.value = driverData;
+          print("User:${currentDriver.value?.name}");
+        } else {
+          print("No Driver data found in local DB.");
+        }
       }
+
     } catch (e) {
       print("Failed to load User data: $e");
     } finally {

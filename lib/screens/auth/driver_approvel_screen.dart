@@ -3,9 +3,6 @@ import 'package:plex_user/screens/widgets/custom_button.dart';
 
 import '../../constant/app_colors.dart';
 
-
-
-
 enum DocStatus { approved, pending, rejected }
 
 class DriverApprovalScreen extends StatelessWidget {

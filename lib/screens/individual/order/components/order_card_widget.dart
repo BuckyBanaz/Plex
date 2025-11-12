@@ -4,56 +4,37 @@ import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:intl/intl.dart';
 import 'package:plex_user/constant/app_colors.dart';
 
 import '../../../../constant/app_assets.dart';
-import '../../../../modules/controllers/orders/order_controller.dart';
+import '../../../../models/driver_order_model.dart';
+import '../../../../modules/controllers/orders/user_order_controller.dart';
+import '../../../widgets/helpers.dart';
 
 class OrderCard extends StatelessWidget {
   final OrderModel order;
   const OrderCard({super.key, required this.order});
 
-  Widget _buildStatusChip(OrderStatus status) {
-
-    String text;
-
-    switch (status) {
-      case OrderStatus.Complete:
-
-        text = "Complete";
-        break;
-      case OrderStatus.Pending:
-        text = "Pending";
-        break;
-      case OrderStatus.Cancelled:
-        text = "Cancelled";
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: AppColors.textColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-      ),
-    );
+  OrderStatus _resolveStatus() {
+    // support both Rx<OrderStatus> and direct OrderStatus
+    try {
+      if (order.status is Rx) {
+        final rx = order.status as Rx;
+        return rx.value as OrderStatus;
+      }
+    } catch (_) {}
+    return order.status as OrderStatus;
   }
 
-  Widget _buildAddressSection(
-      {required String title,
-        required String name,
-        required String phone,
-        required String address,
-        required Color iconColor}) {
+
+  Widget _buildAddressSection({
+    required String title,
+    required String name,
+    required String phone,
+    required String address,
+    required Color iconColor,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,6 +77,8 @@ class OrderCard extends StatelessWidget {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     String vehicleIconAsset = AppAssets.bike;
@@ -104,6 +87,11 @@ class OrderCard extends StatelessWidget {
     } else if (order.vehicleType == "Van") {
       vehicleIconAsset = AppAssets.van;
     }
+
+    final status = _resolveStatus();
+    final createdAt = order.createdAt;
+    final dateStr = formattedDate(createdAt);
+    final timeStr = formattedTime(createdAt);
 
     return GestureDetector(
       onTap: () {
@@ -123,10 +111,12 @@ class OrderCard extends StatelessWidget {
         ),
         child: Column(
           children: [
+            // Top row: id + date/time + status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // id + date/time column
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -142,25 +132,37 @@ class OrderCard extends StatelessWidget {
                             style: TextStyle(fontWeight: FontWeight.normal),
                           ),
                           TextSpan(
-                            text: order.orderId,
+                            text: order.id,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 2.0),
-                    Text(
-                      "${order.date}, ${order.time}",
-                      style:
-                      const TextStyle(color: Colors.black54, fontSize: 12),
+                    const SizedBox(height: 6.0),
+                    Row(
+                      children: [
+                        Text(
+                          dateStr,
+                          style: const TextStyle(color: Colors.black54, fontSize: 12),
+                        ),
+                        const SizedBox(width: 8.0),
+                        Text(
+                          timeStr,
+                          style: const TextStyle(color: Colors.black54, fontSize: 12),
+                        ),
+                      ],
                     ),
                   ],
                 ),
+
                 // Status Chip
-                _buildStatusChip(order.status),
+                buildStatusChip(status),
               ],
             ),
+
             const SizedBox(height: 12.0),
+
+            // body with vehicle icon and addresses
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -213,17 +215,17 @@ class OrderCard extends StatelessWidget {
                     children: [
                       _buildAddressSection(
                         title: "Pickup",
-                        name: order.pickupName,
-                        phone: order.pickupPhone,
-                        address: order.pickupAddress,
+                        name: order.pickup.name,
+                        phone: order.pickup.phone,
+                        address: order.pickup.address,
                         iconColor: AppColors.primary,
                       ),
                       const SizedBox(height: 6.0),
                       _buildAddressSection(
                         title: "Drop off",
-                        name: order.dropoffName,
-                        phone: order.dropoffPhone,
-                        address: order.dropoffAddress,
+                        name: order.dropoff.name,
+                        phone: order.dropoff.phone,
+                        address: order.dropoff.address,
                         iconColor: AppColors.secondary,
                       ),
                     ],

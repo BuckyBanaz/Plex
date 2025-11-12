@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import 'package:plex_user/modules/controllers/settings/user_profile_controller.dart';
-import 'package:plex_user/screens/individual/profile/user_account_screen.dart';
-import 'package:plex_user/screens/individual/profile/user_change_language.dart';
-import 'package:plex_user/screens/individual/profile/user_help_support_screen.dart';
-import 'package:plex_user/screens/individual/profile/user_reset_password_screen.dart';
+import 'package:plex_user/modules/controllers/settings/profile_controller.dart';
+
+import '../auth/reset_password_screen.dart';
+import 'account_screen.dart';
+import 'change_language.dart';
+import 'components/profile_option.dart';
+import 'help_support_screen.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final UserProfileController c = Get.put(UserProfileController());
+    final ProfileController c = Get.put(ProfileController());
 
 
     // Use SafeArea and center card with top padding similar to image
@@ -40,7 +42,7 @@ class UserProfileScreen extends StatelessWidget {
                   const SizedBox(height: 18),
 
                   Column(
-                    children: _sampleOptions().map((opt) {
+                    children: userOptions().map((opt) {
                       return Column(children: [ProfileOptionRow(option: opt)]);
                     }).toList(),
                   ),
@@ -67,122 +69,68 @@ class UserProfileScreen extends StatelessWidget {
   }
 }
 
-/// Small model for a profile option
-class ProfileOption {
-  final String title;
-  final IconData icon;
-  final VoidCallback? onTap;
 
-  ProfileOption({required this.title, required this.icon, this.onTap});
-}
-
-class ProfileHeader extends StatelessWidget {
-  final String name;
-  final ImageProvider? profileImage;
-  final bool isEdit;
-  final VoidCallback? onEditPressed;
-
-  const ProfileHeader({
-    super.key,
-    required this.name,
-    this.profileImage,
-    this.isEdit = false, // Default 'isEdit' ko false rakha hai
-    this.onEditPressed,
-  });
-
-  // Initials nikalne ka function
-  String getInitials(String name) {
-    final parts = name.trim().split(' ');
-    if (parts.isEmpty) return '';
-    if (parts.length == 1) return parts[0].substring(0, 1).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
+class DriverProfileScreen extends StatelessWidget {
+  const DriverProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            // Avatar
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: Colors.grey[300],
-              backgroundImage: profileImage,
-              child: profileImage == null
-                  ? Text(
-                getInitials(name),
-                style: const TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black54,
-                ),
-              )
-                  : null,
-            ),
+    final ProfileController c = Get.put(ProfileController());
 
 
-            if (isEdit)
-              GestureDetector(
-                onTap: onEditPressed,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary, // Primary background color
-                    shape: BoxShape.circle, // Circular shape
-                    border: Border.all(
-                      color: Colors.white, // White border
-                      width: 2,
-                    ),
-                  ),
-                  child:  Icon(
-                    IconlyLight.edit,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ),
-          ],
+    // Use SafeArea and center card with top padding similar to image
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          "nav_profile".tr,
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 12),
-        Text(
-          name,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-      ],
-    );
-  }
-}
-
-/// A single option row widget
-class ProfileOptionRow extends StatelessWidget {
-  final ProfileOption option;
-  const ProfileOptionRow({super.key, required this.option});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: option.onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 10),
-        child: Row(
+      ),
+      body: Obx(
+            () => c.isLoading.value
+            ? CircularProgressIndicator(
+          color: AppColors.primary,
+          strokeWidth: 3,
+        )
+            : ListView(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           children: [
-            // small rounded box with icon (matches orange icon in picture)
-            Icon(option.icon, color: AppColors.primary, size: 30),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                option.title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
+            const SizedBox(height: 18),
+
+          Center(
+            child: ProfileHeader(
+                name: c.currentDriver.value!.name,
+                isDriver: true,
+              driverId: "RJ144567",
+                // vehicleNumber: c.currentDriver.value!.id.toString(),
+                rating: 4.8,
               ),
+          ),
+
+            const SizedBox(height: 18),
+
+            Column(
+              children: driverOptions().map((opt) {
+                return Column(children: [ProfileOptionRow(option: opt)]);
+              }).toList(),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+            const SizedBox(height: 20),
+
+            // CustomButton(
+            //   onTap: ()=> c.logoutUser(context),
+            //   padding: EdgeInsets.all(10),
+            //   widget: Center(
+            //     child: Text(
+            //       "logout".tr,
+            //       style: TextStyle(
+            //         color: Colors.white,
+            //         fontSize: 18.0,
+            //         fontWeight: FontWeight.bold,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -190,25 +138,28 @@ class ProfileOptionRow extends StatelessWidget {
   }
 }
 
+
+
+
 /// Sample data. In real app you would load these from localization/resource files
-List<ProfileOption> _sampleOptions() {
+List<ProfileOption> userOptions() {
   return [
     ProfileOption(
       title: 'my_account'.tr,
       icon: Icons.account_circle,
       onTap: () {
-        Get.to(UserAccountScreen());
+        Get.to(AccountScreen());
       },
     ),
     ProfileOption(
       title: 'change_language'.tr,
       icon: Icons.translate,
-      onTap: () => Get.to(UserChangeLanguageScreen()),
+      onTap: () => Get.to(ChangeLanguageScreen()),
     ),
     ProfileOption(
       title: 'reset_password'.tr,
       icon: Icons.lock_reset,
-      onTap: () => Get.to(UserResetPasswordScreen()),
+      onTap: () => Get.to(ResetPasswordScreen()),
     ),
     ProfileOption(title: 'people_and_sharing'.tr, icon: Icons.share, onTap: () {}),
     ProfileOption( title: 'terms_of_use'.tr, icon: Icons.description, onTap: () {}),
@@ -220,12 +171,60 @@ List<ProfileOption> _sampleOptions() {
     ProfileOption(
       title: 'help_and_support'.tr,
       icon: Icons.help_outline,
-      onTap: ()=> Get.to(UserHelpSupportScreen()),
+      onTap: ()=> Get.to(HelpSupportScreen()),
     ),
     ProfileOption(title: 'contact_us'.tr, icon: Icons.phone_in_talk, onTap: () {}),
   ];
 }
-
+List<ProfileOption> driverOptions() {
+  return [
+    ProfileOption(
+      title: 'my_account'.tr,
+      icon: IconlyLight.profile,
+      onTap: () {
+        Get.to(AccountScreen());
+      },
+    ),
+    ProfileOption(
+      title: 'My Rides'.tr,
+      icon: IconlyLight.bookmark,
+      onTap: () {},
+    ),
+    ProfileOption(
+      title: 'Scheduled Rides'.tr,
+      icon: IconlyLight.calendar,
+      onTap:() {},
+    ),
+    ProfileOption(
+      title: 'My Wallet'.tr,
+      icon: IconlyLight.wallet,
+      onTap: () {},
+    ),
+    ProfileOption(
+      title: 'change_language'.tr,
+      icon: Icons.translate,
+      onTap: () => Get.to(ChangeLanguageScreen()),
+    ),
+    ProfileOption(
+      title: 'reset_password'.tr,
+      icon: Icons.lock_reset,
+      onTap: () => Get.to(ResetPasswordScreen()),
+    ),
+    ProfileOption(title: 'people_and_sharing'.tr, icon: Icons.share, onTap: () {}),
+    ProfileOption( title: 'terms_of_use'.tr, icon: IconlyLight.paper, onTap: () {}),
+    ProfileOption(
+      title: 'privacy_policy'.tr,
+      icon: IconlyLight.info_circle,
+      onTap: () {},
+    ),
+    ProfileOption(
+      title: 'help_and_support'.tr,
+      icon: Icons.help_outline,
+      onTap: ()=> Get.to(HelpSupportScreen()),
+    ),
+    ProfileOption(title: 'contact_us'.tr, icon: Icons.phone_in_talk, onTap: () {}),
+  ];
+}
 
 // // Ek stateful widget jo 'isEdit' state aur 'profileImage' ko manage karega
 // class ProfilePageDemo extends StatefulWidget {

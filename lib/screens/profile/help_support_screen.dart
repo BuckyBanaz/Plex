@@ -6,8 +6,8 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
 import '../../../modules/controllers/settings/help_controller.dart';
 
-class UserHelpSupportScreen extends GetView<HelpController> {
-  const UserHelpSupportScreen({super.key});
+class HelpSupportScreen extends GetView<HelpController> {
+  const HelpSupportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

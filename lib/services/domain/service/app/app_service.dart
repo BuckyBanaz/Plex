@@ -18,7 +18,9 @@ class AppService extends GetxService {
     ]);
 
     await Get.putAsync(() => ApiService().init());
-    await Get.putAsync(() => SocketService().init());
+    Get.put<SocketService>(SocketService());
+    // await Get.putAsync(() => SocketService());
+    // await Get.putAsync(() => DriverOrderSocket().init());
 
     await Future.wait([
       Get.putAsync(() => GeolocationService().init())

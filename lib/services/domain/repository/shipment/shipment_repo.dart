@@ -78,4 +78,74 @@ class ShipmentRepository {
     }
   }
 
+
+  Future<Map<String, dynamic>> getShipments({
+    bool parseToModels = true, // if you want raw response, set false
+  }) async {
+    try {
+      // Try to get token from databaseService; adjust property name if different
+
+      final result = await shipmentApi.getShipments();
+
+      if (result.containsKey('error')) {
+        debugPrint('API error while fetching shipments: ${result['error']}');
+        return {'error': result['error']};
+      }
+
+      // Backend likely returns: { success: true, message: "...", data: [ {..}, ... ] }
+      final success = result['success'] == true;
+      final data = result['data'];
+
+      if (!success) {
+        // return server-provided message if any
+        return {'success': false, 'message': result['message'] ?? 'Failed to fetch shipments', 'raw': result};
+      }
+
+      if (data == null) {
+        return {'success': true, 'shipments': <OrderModel>[]};
+      }
+
+      // If caller wants raw JSON, return it
+      if (!parseToModels) {
+        return {'success': true, 'data': data};
+      }
+
+      // Parse list into OrderModel objects
+      final List<OrderModel> orders = [];
+      if (data is List) {
+        for (final item in data) {
+          try {
+            if (item is Map<String, dynamic>) {
+              orders.add(OrderModel.fromJson(item));
+            } else {
+              // sometimes API wraps under 'shipment' key
+              if (item is Map) {
+                final map = Map<String, dynamic>.from(item as Map);
+                orders.add(OrderModel.fromJson(map));
+              }
+            }
+          } catch (e) {
+            debugPrint('Failed to parse order item: $e -- item: $item');
+            // skip malformed item
+          }
+        }
+      } else {
+        // data not a list, attempt single object parse
+        try {
+          if (data is Map<String, dynamic>) {
+            orders.add(OrderModel.fromJson(data));
+          } else if (data is Map) {
+            orders.add(OrderModel.fromJson(Map<String, dynamic>.from(data)));
+          }
+        } catch (e) {
+          debugPrint('Failed to parse single shipment object: $e');
+        }
+      }
+
+      return {'success': true, 'shipments': orders};
+    } catch (e) {
+      debugPrint('Error in repository while fetching shipments: $e');
+      return {'error': e.toString()};
+    }
+  }
 }

@@ -8,15 +8,15 @@ import 'package:plex_user/screens/widgets/custom_text_field.dart';
 import '../../../constant/app_colors.dart';
 import '../../../services/translations/locale_controller.dart';
 
-class UserChangeLanguageScreen extends StatefulWidget {
-  UserChangeLanguageScreen({Key? key}) : super(key: key);
+class ChangeLanguageScreen extends StatefulWidget {
+  ChangeLanguageScreen({Key? key}) : super(key: key);
 
   @override
-  State<UserChangeLanguageScreen> createState() =>
-      _UserChangeLanguageScreenState();
+  State<ChangeLanguageScreen> createState() =>
+      _ChangeLanguageScreenState();
 }
 
-class _UserChangeLanguageScreenState extends State<UserChangeLanguageScreen> {
+class _ChangeLanguageScreenState extends State<ChangeLanguageScreen> {
   final LocaleController controller = Get.find<LocaleController>();
 
   final List<_LanguageItem> _languages = [

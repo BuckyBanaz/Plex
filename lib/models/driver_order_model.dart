@@ -241,7 +241,7 @@ class OrderModel {
       notes: (json['shipment']?['notes'] ?? json['notes'] ?? '').toString(),
       estimate: Estimate.fromJson((json['shipment']?['estimate'] ?? json['estimate']) as Map<String, dynamic>?),
       invoiceNumber: (json['shipment']?['invoiceNumber'] ?? json['invoiceNumber'] ?? json['shipment']?['invoiceNumber'] ?? 'N/A').toString(),
-      initialStatus: _parseStatus((json['shipment']?['status'] ?? json['status'] ?? 'pending').toString()),
+      initialStatus: parseStatus((json['shipment']?['status'] ?? json['status'] ?? 'pending').toString()),
       paymentStatus: (json['shipment']?['paymentStatus'] ?? json['paymentStatus'] ?? 'pending').toString(),
       paymentMethod: (json['shipment']?['paymentMethod'] ?? json['paymentMethod'] ?? '').toString(),
       estimatedCost: _toDouble(json['shipment']?['estimatedCost'] ?? json['estimatedCost'] ?? (json['shipment']?['pricing']?['amount'] ?? 0.0)),
@@ -258,7 +258,7 @@ class OrderModel {
     );
   }
 
-  static OrderStatus _parseStatus(String status) {
+  static OrderStatus parseStatus(String status) {
     switch (status.toLowerCase()) {
       case 'created':
         return OrderStatus.Created;

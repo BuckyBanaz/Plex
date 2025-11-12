@@ -1,54 +1,49 @@
 // services/domain/service/socket/socket_service.dart
-
 import 'dart:async';
-import 'package:get/get.dart'; // <-- RxList ke liye import
-import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 
 class SocketService extends GetxService {
   IO.Socket? _socket;
 
-  // Streams taaki controller inko sun sake
+  // Streams
   final _newShipmentController = StreamController<dynamic>.broadcast();
-  // final _existingShipmentsController = StreamController<List<dynamic>>.broadcast(); // <-- HATA DIYA
   final _shipmentStatusController = StreamController<dynamic>.broadcast();
 
-  // === CHANGE START: RxList use karo cache karne ke liye ===
+  // Cache for existing shipments (kept as RxList for easy reactive usage)
   final RxList<dynamic> existingShipments = <dynamic>[].obs;
-  // === CHANGE END ===
 
-  // Public streams
   Stream<dynamic> get newShipmentStream => _newShipmentController.stream;
-  // Stream<List<dynamic>> get existingShipmentsStream => _existingShipmentsController.stream; // <-- HATA DIYA
   Stream<dynamic> get shipmentStatusStream => _shipmentStatusController.stream;
 
-  // IMPORTANT: Yahaan apna server IP aur Port daalo
+  // Server URL (adjust if needed)
   static const String _serverUrl = 'http://p2dev10.in:3000';
 
-  Future<SocketService> init() async {
-    print('SocketService init...');
-    _initSocket();
-    return this;
-  }
+  SocketService();
 
-  void _initSocket() {
-    // Apne DatabaseService se auth token lo
-    // Main assume kar raha hu ki 'db.token' mein token hai
-    final db = Get.find<DatabaseService>();
-    final token = db.accessToken ?? ''; // Ya jahaan bhi tumne token save kiya hai
+  /// Connect socket (requires auth token). This DOES NOT call init automatically.
+  /// Call connect(token) when you want to establish socket (e.g., when driver goes online).
+  void connect(String token) {
+    if (token.isEmpty) {
+      debugPrint('SocketService.connect: token empty, aborting');
+      return;
+    }
 
-    if (token == null || token.isEmpty) {
-      print('Socket Error: Auth token is missing. Cannot connect.');
+    // Prevent multiple connects
+    if (_socket != null && _socket!.connected) {
+      debugPrint('SocketService: socket already connected');
       return;
     }
 
     _socket = IO.io(
       _serverUrl,
       IO.OptionBuilder()
-          .setTransports(['websocket']) // Server config se match
-          .setPath('/socket.io/') // Server config se match
+          .setTransports(['websocket'])
+          .setPath('/socket.io/')
           .disableAutoConnect()
-          .setQuery({'token': token}) // Auth token yahaan bhej rahe hain
+          .setQuery({'token': token})
           .build(),
     );
 
@@ -57,46 +52,64 @@ class SocketService extends GetxService {
   }
 
   void _setupSocketListeners() {
+    if (_socket == null) return;
+
     _socket!.onConnect((_) {
-      print('✅ Socket connected: ${_socket!.id}');
-      // Driver ko ready state bhej sakte ho (optional)
-      _socket!
-          .emit('driver_ready', {'driverId': Get.find<DatabaseService>().driver?.id});
+      debugPrint('✅ Socket connected (${_socket!.id})');
+      final db = Get.find<DatabaseService>();
+      _socket!.emit('driver_ready', {'driverId': db.driver?.id});
     });
 
-    _socket!.onDisconnect((_) => print('🔌 Socket disconnected'));
-    _socket!.onError((data) => print('❌ Socket error: $data'));
+    _socket!.onDisconnect((_) => debugPrint('🔌 Socket disconnected'));
+    _socket!.onError((data) => debugPrint('❌ Socket error: $data'));
 
-    // Backend se events suno
-
-    // 1. Naya order/shipment
+    // New shipment
     _socket!.on('newShipment', (data) {
-      print('🔥 Socket: Received newShipment');
+      debugPrint('🔥 SocketService: newShipment received');
       _newShipmentController.add(data);
     });
 
-    // 2. Connection par existing orders ki list
+    // existing shipments list on connect or explicit emit
     _socket!.on('existingShipments', (data) {
-      print('📦 Socket: Received existingShipments');
-      // === CHANGE START: Stream ki jagah RxList ko update karo ===
-      // _existingShipmentsController.add(List<dynamic>.from(data));
-      existingShipments.assignAll(List<dynamic>.from(data));
-      // === CHANGE END ===
+      debugPrint('📦 SocketService: existingShipments received (${(data as List?)?.length ?? 0})');
+      try {
+        final list = List<dynamic>.from(data ?? []);
+        existingShipments.assignAll(list);
+      } catch (e) {
+        debugPrint('SocketService: failed parsing existingShipments: $e');
+      }
     });
 
-    // 3. Status updates (jab koi order accept/reject ho)
+    // status updates
     _socket!.on('shipment_status', (data) {
-      print('🔄 Socket: Received shipment_status');
+      debugPrint('🔄 SocketService: shipment_status received');
       _shipmentStatusController.add(data);
     });
 
-    // 4. Server se error
+    // server side error messages
     _socket!.on('error', (data) {
-      print('❌ Socket Server Error: ${data['message']}');
+      try {
+        debugPrint('❌ SocketServerError: ${data['message']}');
+      } catch (_) {
+        debugPrint('❌ SocketServerError: $data');
+      }
     });
   }
 
-  // Events jo Flutter app se backend ko bhejenge
+  /// Disconnect and cleanup
+  void disconnect() {
+    try {
+      debugPrint('SocketService: disconnecting...');
+      _socket?.disconnect();
+      _socket?.dispose();
+    } catch (e) {
+      debugPrint('SocketService.disconnect error: $e');
+    }
+    _socket = null;
+    existingShipments.clear();
+  }
+
+  // Outgoing events
   void acceptOrder(int orderId) {
     _socket?.emit('accept_order', {'orderId': orderId});
   }
@@ -109,13 +122,11 @@ class SocketService extends GetxService {
     _socket?.emit('locationUpdate', {'lat': lat, 'lng': lng});
   }
 
-  // Service close hone par streams band karo
   @override
   void onClose() {
     _newShipmentController.close();
-    // _existingShipmentsController.close(); // <-- HATA DIYA
     _shipmentStatusController.close();
-    _socket?.dispose();
+    disconnect();
     super.onClose();
   }
 }

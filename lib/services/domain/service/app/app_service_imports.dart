@@ -25,6 +25,7 @@ import '../../../../models/user_models.dart';
 import '../../../translations/locale_controller.dart';
 import '../../repository/initialize_repository.dart';
 import '../api/api_import.dart';
+import '../socket/driver_order_socket.dart';
 import '../socket/socket_service.dart';
 
 part 'app_service.dart';
