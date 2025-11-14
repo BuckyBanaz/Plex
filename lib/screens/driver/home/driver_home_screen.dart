@@ -50,6 +50,7 @@ class DriverHomeScreen extends StatelessWidget {
                           TopBar(
                             titleColor: AppColors.textColor,
                             subtitleColor: AppColors.textColor,
+                            showIcon: true,
                             iconButton: IconButton(
                               onPressed: () => Get.toNamed(AppRoutes.driverNotification),
                               icon: Icon(

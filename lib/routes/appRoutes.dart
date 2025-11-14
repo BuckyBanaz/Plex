@@ -4,6 +4,7 @@ import 'package:plex_user/screens/auth/companyRegisteration/company_registration
 import 'package:plex_user/screens/auth/driver_signup_screen.dart';
 import 'package:plex_user/screens/auth/kyc/driver_kyc_screen.dart';
 import 'package:plex_user/screens/auth/signup_screen.dart';
+import 'package:plex_user/screens/driver/driver_rides_screens.dart';
 import 'package:plex_user/screens/individual/Booking/booking_confirm_screen.dart';
 import 'package:plex_user/screens/individual/Booking/booking_screen.dart';
 import 'package:plex_user/screens/individual/Booking/confirm_details_screen.dart';
@@ -13,7 +14,7 @@ import 'package:plex_user/screens/individual/dashboards/user_main_screen.dart';
 import 'package:plex_user/screens/individual/home/user_home_screen.dart';
 import 'package:plex_user/screens/location/location_permission_screen.dart';
 import 'package:plex_user/screens/notification/driver_notification_screen.dart';
-import 'package:plex_user/screens/order/driver_delivery_order_screen.dart';
+import 'package:plex_user/screens/order/driver_jobs_screen.dart';
 import 'package:plex_user/screens/payments/user_payment_screen.dart';
 
 import '../screens/auth/choose_account_screen.dart';
@@ -68,6 +69,7 @@ class AppRoutes {
   static const paymentFailed = '/paymentFailed';
   static const driverNotification = '/driverNotification';
   static const driverDeliveryOrder = '/driverDeliveryOrder';
+  static const driverRides = '/driverRides';
 
   static get routes => [
     GetPage(name: splash, page: () => SplashScreen()),
@@ -100,7 +102,8 @@ class AppRoutes {
     GetPage(name: orderComplete, page: () => OrderCompleteScreen()),
     GetPage(name: paymentFailed, page: () => PaymentFailedScreen()),
     GetPage(name: driverNotification, page: () => DriverNotificationScreen()),
-    GetPage(name: driverDeliveryOrder, page: () => DriverDeliveryOrderScreen()),
+    GetPage(name: driverDeliveryOrder, page: () => DriverJobsScreen()),
     GetPage(name: userProfile, page: () => UserProfileScreen()),
+    GetPage(name: driverRides, page: () => DriverRideScreen()),
   ];
 }

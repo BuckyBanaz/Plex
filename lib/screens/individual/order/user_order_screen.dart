@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:plex_user/modules/controllers/orders/user_order_controller.dart';
 
 import '../../../constant/app_colors.dart';
-import '../../order/components/driver_delivery_order_card.dart' show OrderCard;
 import 'components/order_card_widget.dart';
 
 class UserOrderScreen extends StatelessWidget {

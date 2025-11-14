@@ -2,6 +2,7 @@ class ApiEndpoint {
   static const baseUrl = "http://p2dev10.in";
   static const login = "/login";
   static const forgotPassword = "/forgot-password";
+  static const resetPassword = "/reset-password";
   static const individualSignup = "/individual";
   static const driverSignup = "/driver";
   static const corporateSignup = "/corporate";

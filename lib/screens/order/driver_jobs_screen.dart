@@ -4,16 +4,16 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:plex_user/modules/controllers/home/driver_home_controller.dart';
 
-import 'components/driver_delivery_order_card.dart';
+import 'components/driver_jobs_card.dart';
 
-class DriverDeliveryOrderScreen extends StatefulWidget {
-  const DriverDeliveryOrderScreen({super.key});
+class DriverJobsScreen extends StatefulWidget {
+  const DriverJobsScreen({super.key});
 
   @override
-  State<DriverDeliveryOrderScreen> createState() => _DriverDeliveryOrderScreenState();
+  State<DriverJobsScreen> createState() => _DriverJobsScreenState();
 }
 
-class _DriverDeliveryOrderScreenState extends State<DriverDeliveryOrderScreen> {
+class _DriverJobsScreenState extends State<DriverJobsScreen> {
   @override
   Widget build(BuildContext context) {
     final DriverHomeController controller = Get.put(DriverHomeController());
@@ -32,7 +32,7 @@ class _DriverDeliveryOrderScreenState extends State<DriverDeliveryOrderScreen> {
                 final order = controller.orders[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: DriverOrderCard(order: order),
+                  child: DriverJobsCard(order: order),
                 );
               },
             ),

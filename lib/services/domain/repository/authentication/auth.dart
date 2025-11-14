@@ -279,6 +279,53 @@ int langKey = 1;
   }
 
 
+  Future<String> resetPassword({
+    required String token,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final response = await authApi.resetPassword(
+        password: newPassword,
+        conPassword: confirmPassword,
+        token: token,
+      );
+
+      final status = response.statusCode ?? 0;
+
+      // Common success codes: 200 or 201
+      if (status == 200 || status == 201) {
+        // Try to parse message from response
+        final data = response.data;
+        if (data is Map && (data['message'] != null || data['success'] != null)) {
+          // prefer message key, fallback to success
+          final message = data['message']?.toString() ?? data['success']?.toString() ?? 'Password reset successful';
+          return message;
+        }
+
+        // fallback if shape unexpected
+        return 'Password reset successful';
+      }
+
+      // Non-success status: try to extract meaningful error
+      final serverMessage = (response.data is Map)
+          ? (response.data['message'] ?? response.data['error'] ?? response.data.toString())
+          : response.data?.toString();
+
+      throw Exception(serverMessage ?? 'Password reset failed (status: $status)');
+    } on DioError catch (dioError) {
+      final serverData = dioError.response?.data;
+      final msg = (serverData is Map)
+          ? (serverData['message'] ?? serverData['error'] ?? dioError.message)
+          : dioError.message;
+      debugPrint('resetPassword() DioError: $msg');
+      throw Exception(msg ?? 'Network error while resetting password');
+    } catch (e, st) {
+      debugPrint('resetPassword() failed: $e\n$st');
+      throw Exception(e.toString());
+    }
+  }
+
   Future<bool> resendOtp({
     required String keyType,
     required String keyValue,

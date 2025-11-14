@@ -20,20 +20,31 @@ class TopBar extends StatelessWidget {
     this.iconColor,
     this.titleColor,
     this.subtitleColor,
-    this.showIcon = false,  this.iconButton, this.onTap,
+    this.showIcon = false,
+    this.iconButton,
+    this.onTap,
   });
+
+  // ---------------------------
+  // Extract Locality from Address
+  // ---------------------------
+  String _getLocality(String fullAddress) {
+    try {
+      return fullAddress.split(",").first.trim();
+    } catch (e) {
+      return fullAddress;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final LocationController locationController = Get.put(LocationController());
 
-    final bool isArabic = Get.locale?.languageCode == 'ar';
-
     return Padding(
       padding:
       padding ?? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
       child: GestureDetector(
-        onTap:onTap ,
+        onTap: onTap,
         child: Row(
           children: [
             Icon(
@@ -42,81 +53,60 @@ class TopBar extends StatelessWidget {
               size: 35,
             ),
             const SizedBox(width: 8),
+
+            // -------------------------------
+            //  TEXT SECTION (Title + Subtitle)
+            // -------------------------------
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, // Yeh RTL mein "right" align ho jayega
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        'pick_up_from'.tr, // TRANSLATION FIX: Hardcoded text ko .tr se badla
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color:
-                          titleColor ?? Colors.black,
+                  Obx(() {
+                    final fullAddress =
+                        locationController.currentAddress.value;
+
+                    return Row(
+                      children: [
+                        Text(
+                          showIcon
+                              ? _getLocality(fullAddress) // when showIcon = TRUE
+                              : 'pick_up_from'.tr,        // Default text
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: titleColor ?? Colors.black,
+                          ),
                         ),
-                      ),
-                if(showIcon != false)...[
-                  SizedBox(width: 3,),
 
-                  Icon(Icons.keyboard_arrow_down_outlined,color: titleColor,)]
-                    ],
-                  ),
+                        // dropdown arrow only when showIcon = false
+                        if (!showIcon) ...[
+                          const SizedBox(width: 3),
+                          Icon(Icons.keyboard_arrow_down_outlined,
+                              color: titleColor),
+                        ],
+                      ],
+                    );
+                  }),
 
-                    const SizedBox(height: 2),
-                    Obx(() => Text(
-                      locationController.currentAddress.value,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: subtitleColor ?? Colors.grey.shade700,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    )),
-                  ],
+                  const SizedBox(height: 2),
 
+                  Obx(() => Text(
+                    locationController.currentAddress.value,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: subtitleColor ?? Colors.grey.shade700,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  )),
+                ],
               ),
             ),
 
-            // if (showLanguageButton) ...[
-            //   const SizedBox(width: 6),
-            //   InkWell(
-            //     onTap: () {
-            //       // Yahaan language change ka logic daalein
-            //       // Example:
-            //       if (isArabic) {
-            //         Get.updateLocale(const Locale('en', 'US'));
-            //       } else {
-            //         Get.updateLocale(const Locale('ar', 'SA'));
-            //       }
-            //     },
-            //     child: Container(
-            //       width: 36,
-            //       height: 36,
-            //       decoration: BoxDecoration(
-            //         color: Colors.black,
-            //         shape: BoxShape.circle,
-            //       ),
-            //       child: Center(
-            //         child: Text(
-            //           languageButtonText,
-            //           style: const TextStyle(
-            //             color: Colors.white,
-            //             fontSize: 12,
-            //             fontWeight: FontWeight.bold,
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ],
-
+            // icon button visible when showIcon = true
             if (showIcon) ...[
               const SizedBox(width: 6),
-
-              ?iconButton
+              if (iconButton != null) iconButton!,
             ],
-
           ],
         ),
       ),

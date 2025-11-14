@@ -177,6 +177,21 @@ class AuthApi {
       }
     );
   }
+
+  Future<Response> resetPassword({
+    required String password,
+    required String conPassword,
+    required String token,
+  }) {
+    return dio.post(
+        '$basePath${ApiEndpoint.resetPassword}',
+        data: {
+          "token": token,
+          "newPassword": conPassword,
+          "confirmPassword": password
+        }
+    );
+  }
   Future<Response> refreshToken(String currentToken) {
     final options = Options(
       headers: {

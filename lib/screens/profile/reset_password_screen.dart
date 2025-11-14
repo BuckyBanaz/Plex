@@ -117,11 +117,10 @@ class ResetPasswordScreen extends StatelessWidget {
               ),
               const SizedBox(height: 6),
 
-              Obx(() => controller.loading.value
-                  ? const Center(child: CircularProgressIndicator())
-                  : CustomButton(
+              Obx(() => CustomButton(
                 onTap: () => controller.resetPassword(context),
-                widget:  Center(
+                widget:    controller.loading.value
+                    ? Center(child: CircularProgressIndicator(color: AppColors.textColor,)) :Center(
                   child: Text(
                     'reset_button'.tr,
                     style: TextStyle(

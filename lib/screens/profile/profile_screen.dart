@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/modules/controllers/settings/profile_controller.dart';
+import 'package:plex_user/routes/appRoutes.dart';
+import 'package:plex_user/screens/profile/reset_password_screen.dart';
 
-import '../auth/reset_password_screen.dart';
+
 import 'account_screen.dart';
 import 'change_language.dart';
 import 'components/profile_option.dart';
@@ -188,7 +190,7 @@ List<ProfileOption> driverOptions() {
     ProfileOption(
       title: 'My Rides'.tr,
       icon: IconlyLight.bookmark,
-      onTap: () {},
+      onTap: ()=> Get.toNamed(AppRoutes.driverRides),
     ),
     ProfileOption(
       title: 'Scheduled Rides'.tr,

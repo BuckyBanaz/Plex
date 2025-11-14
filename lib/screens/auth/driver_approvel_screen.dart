@@ -1,3 +1,5 @@
+import 'dart:math' as Math;
+
 import 'package:flutter/material.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
 
@@ -89,10 +91,16 @@ class DriverApprovalScreen extends StatelessWidget {
 
                   const DocumentTile(
                     title: 'Vehicle RC',
+                    status: DocStatus.pending,
+                    showRetryNote: true,
+                  ),
+                  const SizedBox(height: 14),
+
+                  const DocumentTile(
+                    title: 'Profile Image',
                     status: DocStatus.rejected,
                     showRetryNote: true,
                   ),
-
                   const SizedBox(height: 22),
                   const Spacer(),
                   const Text(
@@ -188,6 +196,43 @@ class DocumentTile extends StatelessWidget {
         return AppColors.primary;
     }
   }
+  Widget _statusIcon() {
+    if (status == DocStatus.pending) {
+      return RotatingDottedCircle(
+        size: 36,
+        dotColor: Colors.black,
+        child: Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.primary, width: 1.4),
+          ),
+          child: Icon(
+            _iconForStatus(),
+            size: 16,
+            color: _iconColor(),
+          ),
+        ),
+      );
+    }
+
+    // Approved / Rejected — static icon
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.primary, width: 1.4),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        _iconForStatus(),
+        size: 18,
+        color: _iconColor(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -213,15 +258,7 @@ class DocumentTile extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.primary, width: 1.4),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(_iconForStatus(), size: 18, color: _iconColor()),
-              ),
+              _statusIcon(),
             ],
           ),
         ),
@@ -257,3 +294,90 @@ class DocumentTile extends StatelessWidget {
     );
   }
 }
+class RotatingDottedCircle extends StatefulWidget {
+  final double size;
+  final Color dotColor;
+  final Widget child;
+
+  const RotatingDottedCircle({
+    super.key,
+    required this.size,
+    required this.dotColor,
+    required this.child,
+  });
+
+  @override
+  State<RotatingDottedCircle> createState() => _RotatingDottedCircleState();
+}
+
+class _RotatingDottedCircleState extends State<RotatingDottedCircle>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+    AnimationController(vsync: this, duration: const Duration(seconds: 2))
+      ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: widget.size,
+      height: widget.size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          RotationTransition(
+            turns: _controller,
+            child: CustomPaint(
+              size: Size(widget.size, widget.size),
+              painter: _DottedCirclePainter(color: widget.dotColor),
+            ),
+          ),
+          widget.child,
+        ],
+      ),
+    );
+  }
+}
+
+class _DottedCirclePainter extends CustomPainter {
+  final Color color;
+
+  _DottedCirclePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double radius = size.width / 2;
+    final Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Dot size
+    double dotRadius = 5; // Increase dot size here
+
+    // Angle 0° (Painter rotates through RotationTransition)
+    double angle = 0 * Math.pi / 179;
+
+    // Dot position on circle
+    Offset offset = Offset(
+      radius + radius * 0.70 * Math.cos(angle),
+      radius + radius * 0.70 * Math.sin(angle),
+    );
+
+    canvas.drawCircle(offset, dotRadius, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+

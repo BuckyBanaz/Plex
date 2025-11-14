@@ -9,11 +9,11 @@ import '../../../constant/app_colors.dart';
 import '../../../models/driver_order_model.dart';
 import '../../../modules/controllers/home/driver_home_controller.dart';
 
-class DriverOrderCard extends StatelessWidget {
+class DriverJobsCard extends StatelessWidget {
   final OrderModel order;
   final DriverHomeController controller = Get.find<DriverHomeController>();
 
-  DriverOrderCard({super.key, required this.order});
+  DriverJobsCard({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
