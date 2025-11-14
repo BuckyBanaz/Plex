@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/modules/controllers/home/driver_home_controller.dart';
 import 'package:plex_user/routes/appRoutes.dart';
+import 'package:plex_user/screens/order/driver_job_complete.dart';
 import '../../../constant/app_colors.dart';
 import '../../individual/home/components/top_bar.dart' show TopBar;
 import 'components/delivery_notification_card.dart';
@@ -52,7 +53,12 @@ class DriverHomeScreen extends StatelessWidget {
                             subtitleColor: AppColors.textColor,
                             showIcon: true,
                             iconButton: IconButton(
-                              onPressed: () => Get.toNamed(AppRoutes.driverNotification),
+                              // onPressed: () => Get.toNamed(AppRoutes.driverNotification),
+                              onPressed: () {
+
+                                // Drop this file into your lib/ folder and import where you need it:
+Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScreen(amount: 125.50, paymentMethod: 'Online')));
+                              },
                               icon: Icon(
                                 IconlyLight.notification,
                                 color: AppColors.textColor,

@@ -82,8 +82,6 @@ class AuthApi {
     required String email,
     required String phone,
     required String password,
-    required String vehicleType,
-    required String licenseNo,
     required String deviceId,
     required String fcmToken,
     required int langKey,
@@ -99,8 +97,6 @@ class AuthApi {
         "password": password,
         'deviceId': deviceId,
         "mobile": phone,
-        "vehicleType": vehicleType,
-        "licenseNo": licenseNo,
         'fcmToken': fcmToken,
         "otpType": 'email',
 
@@ -206,4 +202,72 @@ class AuthApi {
 
     return dio.post('$basePath${ApiEndpoint.refreshToken}', options: options);
   }
+
+  Future<Response> uploadKyc({
+    required String licenseNumber,
+    required String idCardNumber,
+    required String rcNumber,
+    required File licenseImage,
+    required File idCardImage,
+    required File rcImage,
+    required File driverImage,
+    required String token,
+    required int langKey,
+  }) {
+    final form = FormData.fromMap({
+      'licenseNumber': licenseNumber,
+      'idCardNumber': idCardNumber,
+      'rcNumber': rcNumber,
+      'licenseImage': MultipartFile.fromFileSync(
+        licenseImage.path,
+        filename: licenseImage.path.split(Platform.pathSeparator).last,
+        contentType: MediaType.parse(_guessMime(licenseImage.path)),
+      ),
+      'idCardImage': MultipartFile.fromFileSync(
+        idCardImage.path,
+        filename: idCardImage.path.split(Platform.pathSeparator).last,
+        contentType: MediaType.parse(_guessMime(idCardImage.path)),
+      ),
+      'rcImage': MultipartFile.fromFileSync(
+        rcImage.path,
+        filename: rcImage.path.split(Platform.pathSeparator).last,
+        contentType: MediaType.parse(_guessMime(rcImage.path)),
+      ),
+      'driverImage': MultipartFile.fromFileSync(
+        driverImage.path,
+        filename: driverImage.path.split(Platform.pathSeparator).last,
+        contentType: MediaType.parse(_guessMime(driverImage.path)),
+      ),
+    });
+
+    return dio.post(
+      '$basePath${ApiEndpoint.driverKyc}', // define driverKyc in ApiEndpoint
+      data: form,
+      options: Options(
+        headers: {
+          'token': token,
+          'lang_id': langKey,
+          'accept': '*/*',
+        },
+        contentType: 'multipart/form-data',
+      ),
+    );
+  }
+
+  // helper to guess mime type quickly
+  String _guessMime(String path) {
+    final ext = path.split('.').last.toLowerCase();
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'webp':
+        return 'image/webp';
+      case 'png':
+        return 'image/png';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
 }

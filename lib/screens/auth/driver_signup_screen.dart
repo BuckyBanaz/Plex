@@ -89,34 +89,34 @@ class DriverSignupScreen extends StatelessWidget {
                           hint: "name_hint".tr,
                           textInputAction: TextInputAction.next,
                           focusNode: c.nameFocus,
-                          nextFocusNode: c.licenseFocus,
-
-                          // validator: emailValidator,
-                        ),
-                        SizedBox(height: 16),
-                        //licenseNo
-                        CustomTextField(
-                          controller: c.licenseNoController,
-                          label: "License No.".tr,
-                          hint: "Enter Your License No.".tr,
-                          textInputAction: TextInputAction.next,
-                          focusNode: c.licenseFocus,
-                          nextFocusNode: c.vehicleFocus,
-
-                          // validator: emailValidator,
-                        ),
-
-                        SizedBox(height: 16),
-                        // vehicleType
-                        SelectorField(
-                          label: "VehicleType",
-                          hint: "Selected vehicleType",
-                          value: c.selectedVehicle,
-                          isDropdown: true,
-                          options: c.vehicles,
-                          focusNode: c.vehicleFocus,
                           nextFocusNode: c.emailFocus,
+
+                          // validator: emailValidator,
                         ),
+                        // SizedBox(height: 16),
+                        // //licenseNo
+                        // CustomTextField(
+                        //   controller: c.licenseNoController,
+                        //   label: "License No.".tr,
+                        //   hint: "Enter Your License No.".tr,
+                        //   textInputAction: TextInputAction.next,
+                        //   focusNode: c.licenseFocus,
+                        //   nextFocusNode: c.vehicleFocus,
+                        //
+                        //   // validator: emailValidator,
+                        // ),
+                        //
+                        // SizedBox(height: 16),
+                        // // vehicleType
+                        // SelectorField(
+                        //   label: "VehicleType",
+                        //   hint: "Selected vehicleType",
+                        //   value: c.selectedVehicle,
+                        //   isDropdown: true,
+                        //   options: c.vehicles,
+                        //   focusNode: c.vehicleFocus,
+                        //   nextFocusNode: c.emailFocus,
+                        // ),
 
                         // Email
                         SizedBox(height: 16),
@@ -145,8 +145,9 @@ class DriverSignupScreen extends StatelessWidget {
                           label: "password_label".tr,
                           hint: "password_hint".tr,
                           isPassword: true,
-                          textInputAction: TextInputAction.done,
+                          textInputAction: TextInputAction.next,
                           focusNode: c.passwordFocus,
+                          nextFocusNode: c.conPasswordFocus,
                           validator: passwordValidator,
                           onSubmitted: () {
                             // signup action
@@ -163,6 +164,8 @@ class DriverSignupScreen extends StatelessWidget {
                               .tr, // New translation key
                           hint: 're_enter_password'.tr, // New translation key
                           isPassword: true,
+                          focusNode: c.conPasswordFocus,
+                          textInputAction: TextInputAction.done,
                           validator: (value) {
                             if (value!.isEmpty) return 'Required field'.tr;
                             if (value != c.passwordController.text) {

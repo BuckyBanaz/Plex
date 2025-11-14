@@ -196,7 +196,7 @@ class AuthController extends GetxController {
     final email = emailController.text.trim();
     final password = passwordController.text;
     final phone = phoneController.text;
-    final licenseNo = licenseNoController.text;
+    // final licenseNo = licenseNoController.text;
 
     try {
       isDriverLoading.value = true;
@@ -204,8 +204,8 @@ class AuthController extends GetxController {
         name: name,
         email: email,
         password: password,
-          vehicleType: selectedVehicle.value!.toLowerCase() ?? '',
-          licenseNo:licenseNo,
+          // vehicleType: selectedVehicle.value!.toLowerCase() ?? '',
+          // licenseNo:licenseNo,
         // phone: "${countryCode}${phone}"
         phone: "${phone}"
       );

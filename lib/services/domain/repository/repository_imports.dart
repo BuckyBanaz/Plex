@@ -1,6 +1,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,6 +13,7 @@ import 'package:plex_user/models/driver_user_model.dart';
 import '../../../common/Toast/toast.dart';
 import '../../../models/corporate_register_model.dart';
 import '../../../models/driver_order_model.dart';
+import '../../../models/kyc_model.dart';
 import '../../../models/user_models.dart';
 import '../../translations/locale_controller.dart';
 import '../service/api/api_import.dart';

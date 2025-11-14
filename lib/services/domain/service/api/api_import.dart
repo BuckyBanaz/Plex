@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:plex_user/constant/api_endpoint.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 
 import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
+import 'package:http_parser/http_parser.dart';
 
 import '../../../../common/Toast/toast.dart';
 import '../../../../constant/error_string.dart';

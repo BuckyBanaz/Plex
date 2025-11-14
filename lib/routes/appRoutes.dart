@@ -4,6 +4,7 @@ import 'package:plex_user/screens/auth/companyRegisteration/company_registration
 import 'package:plex_user/screens/auth/driver_signup_screen.dart';
 import 'package:plex_user/screens/auth/kyc/driver_kyc_screen.dart';
 import 'package:plex_user/screens/auth/signup_screen.dart';
+import 'package:plex_user/screens/auth/vehicle_details_screen.dart';
 import 'package:plex_user/screens/driver/driver_rides_screens.dart';
 import 'package:plex_user/screens/individual/Booking/booking_confirm_screen.dart';
 import 'package:plex_user/screens/individual/Booking/booking_screen.dart';
@@ -45,6 +46,7 @@ class AppRoutes {
   static const driverSignup = '/driverSignup';
   static const choose = '/choose';
   static const kyc = '/kyc';
+  static const vehicleEntry = '/vehicleEntry';
   static const approvel = '/approvel';
   static const view = '/view';
   static const otp = '/otp';
@@ -82,6 +84,7 @@ class AppRoutes {
     GetPage(name: view, page: () => CompanyRegistrationScreen()),
     GetPage(name: otp, page: () => OtpScreen()),
     GetPage(name: kyc, page: () => DriverKycFlow()),
+    GetPage(name: vehicleEntry, page: () => VehicleDetailsScreen()),
     GetPage(name: approvel, page: () => DriverApprovalScreen()),
     GetPage(name: userDashBoard, page: () => UserMainScreen()),
     GetPage(name: userHome, page: () => UserHomeScreen()),

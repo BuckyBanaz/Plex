@@ -138,8 +138,6 @@ int langKey = 1;
     required String email,
     required String phone,
     required String password,
-    required String vehicleType,
-    required String licenseNo,
   }) async {
     try {
       // get device id
@@ -152,9 +150,6 @@ int langKey = 1;
         phone: phone,
         password: password,
         langKey: langKey,
-        vehicleType: vehicleType,
-        licenseNo:licenseNo,
-
         deviceId: deviceInfo.deviceId,
         fcmToken: deviceInfo.firebaseToken,
       );
@@ -406,6 +401,57 @@ int langKey = 1;
       // new error (500, network error, etc.)
       debugPrint('Refresh token failed due to other error (e.g., network). Returning failedOther.');
       return RefreshStatus.failedOther;
+    }
+  }
+
+
+  Future<KycResponse> submitDriverKyc({
+    required String licenseNumber,
+    required String idCardNumber,
+    required String rcNumber,
+    required File licenseImage,
+    required File idCardImage,
+    required File rcImage,
+    required File driverImage,
+  }) async {
+    try {
+      final token = databaseService.accessToken ?? '';
+      final response = await authApi.uploadKyc(
+        licenseNumber: licenseNumber,
+        idCardNumber: idCardNumber,
+        rcNumber: rcNumber,
+        licenseImage: licenseImage,
+        idCardImage: idCardImage,
+        rcImage: rcImage,
+        driverImage: driverImage,
+        token: token,
+        langKey: langKey,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final body = response.data;
+        if (body is Map<String, dynamic>) {
+          final kycResponse = KycResponse.fromJson(body);
+          return kycResponse;
+        } else if (body is String) {
+          throw Exception('Unexpected KYC response: $body');
+        } else {
+          // sometimes dio gives LinkedHashMap; convert then parse
+          final map = Map<String, dynamic>.from(body as Map);
+          return KycResponse.fromJson(map);
+        }
+      } else {
+        final msg = (response.data is Map) ? (response.data['message'] ?? response.data['error']) : 'KYC upload failed';
+        throw Exception(msg?.toString() ?? 'KYC upload failed with status ${response.statusCode}');
+      }
+    } on DioError catch (dioError) {
+      final serverData = dioError.response?.data;
+      final message = (serverData is Map) ? (serverData['message'] ?? serverData['error']) : dioError.message;
+      debugPrint('submitDriverKyc() DioError: $message');
+      throw Exception(message?.toString() ?? 'Network error during KYC upload');
+    } catch (e, st) {
+      debugPrint('submitDriverKyc() error: $e\n$st');
+      throw Exception('KYC submission failed: ${e.toString()}');
     }
   }
 

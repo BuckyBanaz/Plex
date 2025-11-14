@@ -7,6 +7,7 @@ class ApiEndpoint {
   static const driverSignup = "/driver";
   static const corporateSignup = "/corporate";
   static const guestSignup = "/guest";
+  static const driverKyc = "/driver/kyc";
   static const verifyOtp = "/verify-otp";
   static const resendOtp = '/resend-otp';
   static const resendSms = "/verify-otp";
