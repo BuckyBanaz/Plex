@@ -209,7 +209,7 @@ class DriverJobsCard extends StatelessWidget {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              // controller.declineDeliveryOOrder(order.id);
+              controller.rejectOrder(order);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.lightGreyButton,
@@ -226,7 +226,7 @@ class DriverJobsCard extends StatelessWidget {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              // controller.acceptDeliveryOrder(order.id)
+              controller.acceptOrder(order);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.secondary,

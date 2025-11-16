@@ -11,7 +11,7 @@ class AppDialog {
     return await Get.generalDialog(
       barrierDismissible: barrierDismissible,
       barrierLabel: '',
-      barrierColor: Colors.black38,
+      barrierColor:AppColors.primary,
       pageBuilder: pageBuilder,
     );
   }

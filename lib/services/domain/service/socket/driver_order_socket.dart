@@ -6,7 +6,6 @@ import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 import '../../../../models/driver_order_model.dart';
 import 'socket_service.dart';
 
-
 /// This class bridges SocketService -> OrderModel parsing and exposes
 /// a driver-specific reactive list and streams.
 class DriverOrderSocket {
@@ -32,9 +31,15 @@ class DriverOrderSocket {
     try {
       if (socketService.existingShipments.isNotEmpty) {
         final cached = socketService.existingShipments.toList();
-        final parsed = cached.map((j) => OrderModel.fromJson(Map<String, dynamic>.from(j))).toList();
+
+        // Parse and filter out InTransit orders
+        final parsed = cached
+            .map((j) => OrderModel.fromJson(Map<String, dynamic>.from(j)))
+            .where((o) => o.status.value != OrderStatus.InTransit)
+            .toList();
+
         orders.assignAll(parsed);
-        debugPrint('DriverOrderSocket: loaded ${parsed.length} cached orders');
+        debugPrint('DriverOrderSocket: loaded ${parsed.length} cached orders (filtered InTransit)');
       }
     } catch (e) {
       debugPrint('DriverOrderSocket: error loading cached orders: $e');
@@ -43,9 +48,12 @@ class DriverOrderSocket {
     // 2. Subscribe to future existingShipments changes (RxList) -> update orders
     socketService.existingShipments.listen((list) {
       try {
-        final parsed = list.map((j) => OrderModel.fromJson(Map<String, dynamic>.from(j))).toList();
+        final parsed = list
+            .map((j) => OrderModel.fromJson(Map<String, dynamic>.from(j)))
+            .where((o) => o.status.value != OrderStatus.InTransit)
+            .toList();
         orders.assignAll(parsed);
-        debugPrint('DriverOrderSocket: existingShipments stream updated (${parsed.length})');
+        debugPrint('DriverOrderSocket: existingShipments stream updated (${parsed.length}) (filtered InTransit)');
       } catch (e) {
         debugPrint('DriverOrderSocket: parse error existingShipments listen: $e');
       }
@@ -55,6 +63,13 @@ class DriverOrderSocket {
     _newShipmentSub = socketService.newShipmentStream.listen((payload) {
       try {
         final newOrder = OrderModel.fromJson(Map<String, dynamic>.from(payload));
+
+        // Do not insert if status is InTransit
+        if (newOrder.status.value == OrderStatus.InTransit) {
+          debugPrint('DriverOrderSocket: ignoring newShipment id=${newOrder.id} because status is InTransit');
+          return;
+        }
+
         // Insert if not present
         if (!orders.any((o) => o.id == newOrder.id)) {
           orders.insert(0, newOrder);
@@ -89,6 +104,7 @@ class DriverOrderSocket {
       }
     });
   }
+
 
   /// Stop listening to socket streams (but does not disconnect socketService).
   void stop() {

@@ -20,6 +20,7 @@ class PreferenceKeys{
 
   final String driver = 'driver';
   final String userType = 'userType';
+  final String driverCurrentOrder = 'driverCurrentOrder';
 
   final String isLocationScreenShown = 'isLocationScreenShown';
 

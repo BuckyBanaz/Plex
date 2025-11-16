@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
+import 'package:sizer/sizer.dart';
 import 'package:plex_user/modules/controllers/home/driver_home_controller.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 import 'package:plex_user/screens/order/driver_job_complete.dart';
@@ -14,7 +15,6 @@ class DriverHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final h = MediaQuery.of(context).size.height;
     final DriverHomeController controller = Get.put(DriverHomeController());
 
     return Scaffold(
@@ -31,9 +31,10 @@ class DriverHomeScreen extends StatelessWidget {
             bottom: false,
             child: Column(
               children: [
+                // use sizer units instead of MediaQuery
                 Container(
                   width: double.infinity,
-                  height: h * 0.30,
+                  height: 28.5.h, // reduced slightly from 30% to avoid overflow
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
                   decoration: const BoxDecoration(
                     color: AppColors.secondary,
@@ -55,9 +56,15 @@ class DriverHomeScreen extends StatelessWidget {
                             iconButton: IconButton(
                               // onPressed: () => Get.toNamed(AppRoutes.driverNotification),
                               onPressed: () {
-
-                                // Drop this file into your lib/ folder and import where you need it:
-Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScreen(amount: 125.50, paymentMethod: 'Online')));
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => DriverJobCompleteScreen(
+                                      amount: 125.50,
+                                      paymentMethod: 'Online',
+                                    ),
+                                  ),
+                                );
                               },
                               icon: Icon(
                                 IconlyLight.notification,
@@ -67,7 +74,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                             ),
                             padding: EdgeInsets.symmetric(horizontal: 0),
                           ),
-                          const SizedBox(height: 35),
+                          SizedBox(height: 3.5.h),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -78,7 +85,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                                     'partner'.tr,
                                     style: TextStyle(
                                       color: AppColors.primary,
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -87,7 +94,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                                     controller.currentDriver.value?.name ?? "driver".tr,
                                     style: TextStyle(
                                       color: AppColors.textColor,
-                                      fontSize: 16,
+                                      fontSize: 16.sp,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -101,7 +108,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                                       text: 'driverId'.tr,
                                       style: TextStyle(
                                         color: AppColors.primary,
-                                        fontSize: 13,
+                                        fontSize: 13.sp,
                                         fontWeight: FontWeight.w600,
                                       ),
                                       children: [
@@ -109,7 +116,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                                           text: controller.currentDriver.value?.id.toString() ?? 'PLEX1080'.tr,
                                           style: TextStyle(
                                             color: AppColors.textColor,
-                                            fontSize: 14,
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -122,7 +129,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                                       text: 'vehicleNo'.tr,
                                       style: TextStyle(
                                         color: AppColors.primary,
-                                        fontSize: 13,
+                                        fontSize: 13.sp,
                                         fontWeight: FontWeight.w600,
                                       ),
                                       children: [
@@ -130,7 +137,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                                           text: 'RJ14 2025'.tr,
                                           style: TextStyle(
                                             color: AppColors.textColor,
-                                            fontSize: 14,
+                                            fontSize: 14.sp,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -141,34 +148,34 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                               ),
                             ],
                           ),
-                          const Spacer(),
+                          SizedBox(height: 1.h),
                           Text(
                             'myEarnings'.tr,
                             style: TextStyle(
                               color: AppColors.primary,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          const Text(
+                          SizedBox(height: 0.6.h),
+                          Text(
                             '\$ 0.00',
                             style: TextStyle(
                               color: AppColors.textColor,
-                              fontSize: 28,
+                              fontSize: 20.sp,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: 1.2.h),
                         ],
                       ),
                       Positioned.directional(
                         textDirection: Directionality.of(context),
                         end: 0,
-                        bottom: -10,
+                        bottom: -1.2.h, // less negative to avoid overflow
                         child: Image.asset(
                           'assets/images/driver.png',
-                          height: h * 0.12,
+                          height: 10.5.h, // slightly smaller image
                           fit: BoxFit.contain,
                           matchTextDirection: true,
                         ),
@@ -207,7 +214,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                                 style: TextStyle(
                                   color: AppColors.secondary,
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                 ),
                               )),
                               const SizedBox(height: 2),
@@ -215,7 +222,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                                 'openToAnyDelivery'.tr,
                                 style: TextStyle(
                                   color: AppColors.primary,
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                 ),
                               ),
                             ],
@@ -237,9 +244,7 @@ Navigator.push(context, MaterialPageRoute(builder: (_) => DriverJobCompleteScree
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Align(
-                              alignment: controller.isOnline.value
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
+                              alignment: controller.isOnline.value ? Alignment.centerRight : Alignment.centerLeft,
                               child: Container(
                                 width: 20,
                                 height: 20,

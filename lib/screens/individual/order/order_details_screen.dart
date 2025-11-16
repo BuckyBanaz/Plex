@@ -280,7 +280,7 @@ class OrderDetailsScreen extends GetView<UserOrderController> {
                     vehicleIconAsset,
                     matchTextDirection: true,
                     height: 20,
-                    colorFilter: const ColorFilter.mode(
+                    colorFilter:  ColorFilter.mode(
                       AppColors.primary,
                       BlendMode.srcIn,
                     ),

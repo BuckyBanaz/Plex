@@ -23,9 +23,14 @@ class SocketService extends GetxService {
 
   SocketService();
 
-  /// Connect socket (requires auth token). This DOES NOT call init automatically.
-  /// Call connect(token) when you want to establish socket (e.g., when driver goes online).
-  void connect(String token) {
+  // Prevent registering listeners multiple times
+  bool _listenersSetup = false;
+
+  // Dedup map: shipmentId (or key) -> last seen time
+  final Map<String, DateTime> _recentShipments = {};
+
+  /// Connect socket (requires auth token).
+  void connect(String token, int userId) {
     if (token.isEmpty) {
       debugPrint('SocketService.connect: token empty, aborting');
       return;
@@ -43,7 +48,7 @@ class SocketService extends GetxService {
           .setTransports(['websocket'])
           .setPath('/socket.io/')
           .disableAutoConnect()
-          .setQuery({'token': token})
+          .setQuery({'token': token, 'userId': userId})
           .build(),
     );
 
@@ -53,20 +58,70 @@ class SocketService extends GetxService {
 
   void _setupSocketListeners() {
     if (_socket == null) return;
+    if (_listenersSetup) {
+      debugPrint('SocketService: listeners already setup — skipping.');
+      return;
+    }
+    _listenersSetup = true;
+
+    int _newShipmentCount = 0;
 
     _socket!.onConnect((_) {
       debugPrint('✅ Socket connected (${_socket!.id})');
-      final db = Get.find<DatabaseService>();
-      _socket!.emit('driver_ready', {'driverId': db.driver?.id});
+      try {
+        final db = Get.find<DatabaseService>();
+        _socket!.emit('driver_ready', {'driverId': db.driver?.id});
+      } catch (e) {
+        debugPrint('SocketService.onConnect: error finding DatabaseService: $e');
+      }
     });
 
     _socket!.onDisconnect((_) => debugPrint('🔌 Socket disconnected'));
     _socket!.onError((data) => debugPrint('❌ Socket error: $data'));
 
-    // New shipment
+    // New shipment with client-side deduplication
     _socket!.on('newShipment', (data) {
-      debugPrint('🔥 SocketService: newShipment received');
-      _newShipmentController.add(data);
+      try {
+        _newShipmentCount++;
+
+        // Build stable key: prefer explicit shipment id or orderId; fallback to payload string
+        String key;
+        try {
+          if (data is Map && (data['id'] != null || data['shipmentId'] != null)) {
+            key = (data['id'] ?? data['shipmentId']).toString();
+          } else if (data is Map && data['orderId'] != null) {
+            key = data['orderId'].toString();
+          } else {
+            key = data.toString();
+          }
+        } catch (_) {
+          key = data.toString();
+        }
+
+        // Deduplication window
+        const dedupWindow = Duration(seconds: 30);
+        final now = DateTime.now();
+        final last = _recentShipments[key];
+        if (last != null && now.difference(last) < dedupWindow) {
+          // debugPrint('SocketService: skipping duplicate newShipment (key=$key) count=$_newShipmentCount');
+          return;
+        }
+
+        // record last seen
+        _recentShipments[key] = now;
+
+        // cleanup older entries occasionally
+        _recentShipments.removeWhere((_, dt) => dt.isBefore(now.subtract(const Duration(minutes: 5))));
+
+        debugPrint('🔥 SocketService: newShipment received (count=$_newShipmentCount, key=$key)');
+        _newShipmentController.add(data);
+      } catch (e) {
+        debugPrint('SocketService.newShipment handler error: $e');
+        // fallback: still push raw payload so app can handle gracefully
+        try {
+          _newShipmentController.add(data);
+        } catch (_) {}
+      }
     });
 
     // existing shipments list on connect or explicit emit
@@ -107,6 +162,8 @@ class SocketService extends GetxService {
     }
     _socket = null;
     existingShipments.clear();
+    _recentShipments.clear();
+    _listenersSetup = false;
   }
 
   // Outgoing events

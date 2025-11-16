@@ -92,7 +92,7 @@ class UserApi {
   }) async {
     try {
       final resp = await dio.post(
-        '/confirm-stripe',
+        '/shipments/confirm-stripe',
         data: {
           'paymentIntentId': paymentIntentId,
           'payment_method': paymentMethod,

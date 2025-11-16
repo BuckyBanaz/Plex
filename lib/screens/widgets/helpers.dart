@@ -125,3 +125,36 @@ Widget buildStatusChip(OrderStatus status) {
     ),
   );
 }
+class CircularIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const CircularIconButton({
+    Key? key,
+    required this.icon,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        height: 42,
+        width: 42,
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.15),  // light orange background
+          shape: BoxShape.circle,
+        ),
+        child: Center(
+          child: Icon(
+            icon,
+            size: 22,
+            color: Colors.orange,
+          ),
+        ),
+      ),
+    );
+  }
+}

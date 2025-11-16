@@ -13,7 +13,7 @@ import '../../../services/domain/service/app/app_service_imports.dart';
 class LocationController extends GetxController {
   final GeolocationService gl = Get.find<GeolocationService>();
   final DatabaseService db = Get.find<DatabaseService>();
-  // final UserRepository userRepo = UserRepository();
+  final UserRepository userRepo = UserRepository();
   StreamSubscription<ServiceStatus>? serviceListener;
   StreamSubscription<Position>? positionStreamSub;
   final Rx<LatLng?> currentPosition = Rx<LatLng?>(null);
@@ -264,7 +264,7 @@ class LocationController extends GetxController {
       }
 
       // Call repository (which calls API)
-      // final result = await userRepo.updateUserLocation(position);
+      final result = await userRepo.updateUserLocation(position);
 
       // result is void in your repo - assuming successful if no exception.
       // Persist last-known-location as JSON string (latitude,long,timestamp,...)

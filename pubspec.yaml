@@ -31,7 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
   get: ^4.7.2
-  flutter_svg: any
   google_fonts: any
   shimmer: any
   lottie: ^3.3.2
@@ -80,6 +79,8 @@ dependencies:
   app_links: ^6.4.1
   flutter_dotenv: ^6.0.0
   dotted_border: ^3.1.0
+  flutter_polyline_points: ^3.1.0
+  flutter_svg: ^2.2.2
 
 
 

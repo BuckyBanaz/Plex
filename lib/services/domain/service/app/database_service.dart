@@ -1,13 +1,10 @@
 part of 'app_service_imports.dart';
 
-
-
 class DatabaseService {
-
   final _preferenceKeys = PreferenceKeys();
 
   // Obtain shared preferences.
-  late final SharedPreferences prefs ;
+  late final SharedPreferences prefs;
 
   Future<DatabaseService> init() async {
     prefs = await SharedPreferences.getInstance();
@@ -40,56 +37,147 @@ class DatabaseService {
     await prefs.setStringList(key, list);
   }
 
-  bool? getBoolPref(key) { return prefs.getBool(key); }
+  Future<void> putDriverCurrentOrder(dynamic value) async {
+    final key = _preferenceKeys.driverCurrentOrder;
+    try {
+      if (value == null) {
+        await putStringPref(key, '');
+        return;
+      }
 
-  int? getIntPref(key) { return prefs.getInt(key); }
+      String jsonStr;
 
-  double? getDoublePref(key) { return prefs.getDouble(key); }
+      // already a string (assume valid JSON)
+      if (value is String) {
+        jsonStr = value;
+      } else {
+        // try common serialization methods in order of likelihood
+        try {
+          // some models implement toRawJson()
+          jsonStr = value.toRawJson();
+        } catch (_) {
+          try {
+            // or try toJson -> encode
+            jsonStr = jsonEncode(value.toJson());
+          } catch (_) {
+            try {
+              // fallback: encode the whole object/map
+              jsonStr = jsonEncode(value);
+            } catch (e) {
+              // final fallback: store empty
+              jsonStr = '';
+            }
+          }
+        }
+      }
 
-  String? getStringPref(key) { return prefs.getString(key); }
+      await putStringPref(key, jsonStr);
+    } catch (e) {
+      debugPrint('putDriverCurrentOrder error: $e');
+    }
+  }
 
-  List<String>? getStringListPref(key) { return prefs.getStringList(key); }
+  bool? getBoolPref(key) {
+    return prefs.getBool(key);
+  }
 
-  bool checkKeyPref(key) {  return prefs.containsKey(key); }
+  int? getIntPref(key) {
+    return prefs.getInt(key);
+  }
 
-  Future<bool> clearPreference() async { return await prefs.clear(); }
+  double? getDoublePref(key) {
+    return prefs.getDouble(key);
+  }
 
-  Future<void> putCustomServerURL(String? value) async => await putStringPref(_preferenceKeys.customServerURL, value);
+  String? getStringPref(key) {
+    return prefs.getString(key);
+  }
+
+  List<String>? getStringListPref(key) {
+    return prefs.getStringList(key);
+  }
+
+  bool checkKeyPref(key) {
+    return prefs.containsKey(key);
+  }
+
+  Future<bool> clearPreference() async {
+    return await prefs.clear();
+  }
+
+  Future<void> putCustomServerURL(String? value) async =>
+      await putStringPref(_preferenceKeys.customServerURL, value);
   String? get customServerURL => getStringPref(_preferenceKeys.customServerURL);
 
-  Future<void> putCustomAccessToken(String? value) async => await putStringPref(_preferenceKeys.customAccessToken, value);
-  String? get customAccessToken => getStringPref(_preferenceKeys.customAccessToken);
+  Future<void> putCustomAccessToken(String? value) async =>
+      await putStringPref(_preferenceKeys.customAccessToken, value);
+  String? get customAccessToken =>
+      getStringPref(_preferenceKeys.customAccessToken);
 
-  Future<void> putHasAcceptedTerms(bool value) async => await putBoolPref(_preferenceKeys.hasAcceptedTerms, value);
+  Future<void> putHasAcceptedTerms(bool value) async =>
+      await putBoolPref(_preferenceKeys.hasAcceptedTerms, value);
   bool? get hasAcceptedTerms => getBoolPref(_preferenceKeys.hasAcceptedTerms);
 
-  Future<void> putIsSignedIn(bool value) async => await putBoolPref(_preferenceKeys.isSignedIn, value);
+  Future<void> putIsSignedIn(bool value) async =>
+      await putBoolPref(_preferenceKeys.isSignedIn, value);
   bool? get isSignedIn => getBoolPref(_preferenceKeys.isSignedIn);
 
-  Future<void> putAccessToken(String value) async => await putStringPref(_preferenceKeys.accessToken, value);
-  String? get accessToken => getStringPref(_preferenceKeys.accessToken) ;
-  Future<void> putApiKey(String value) async => await putStringPref(_preferenceKeys.apiKey, value);
-  String? get apiKey => getStringPref(_preferenceKeys.apiKey) ;
+  Future<void> putAccessToken(String value) async =>
+      await putStringPref(_preferenceKeys.accessToken, value);
+  String? get accessToken => getStringPref(_preferenceKeys.accessToken);
+  Future<void> putApiKey(String value) async =>
+      await putStringPref(_preferenceKeys.apiKey, value);
+  String? get apiKey => getStringPref(_preferenceKeys.apiKey);
 
-  Future<void> putUser(UserModel value) async => await putStringPref(_preferenceKeys.user, value.toRawJson());
-  UserModel? get user => getStringPref(_preferenceKeys.user) == null ? null : UserModel.fromRawJson(getStringPref(_preferenceKeys.user)!);
+  Future<void> putUser(UserModel value) async =>
+      await putStringPref(_preferenceKeys.user, value.toRawJson());
+  UserModel? get user => getStringPref(_preferenceKeys.user) == null
+      ? null
+      : UserModel.fromRawJson(getStringPref(_preferenceKeys.user)!);
+  // Retrieve current driver order (returns null if not present or parse fails)
+  OrderModel? get driverCurrentOrder {
+    try {
+      final s = getStringPref(_preferenceKeys.driverCurrentOrder);
+      if (s == null || s.isEmpty) return null;
+      return OrderModel.fromJson(s);
+    } catch (e) {
+      debugPrint('driverCurrentOrder parse error: $e');
+      return null;
+    }
+  }
 
-
-  Future<void> putDriver(DriverUserModel value) async => await putStringPref(_preferenceKeys.driver, value.toRawJson());
-  DriverUserModel? get driver => getStringPref(_preferenceKeys.driver) == null ? null : DriverUserModel.fromRawJson(getStringPref(_preferenceKeys.driver)!);
-  Future<void> putUserType(String? value) async => await putStringPref(_preferenceKeys.userType, value);
+  Future<void> putDriver(DriverUserModel value) async =>
+      await putStringPref(_preferenceKeys.driver, value.toRawJson());
+  DriverUserModel? get driver => getStringPref(_preferenceKeys.driver) == null
+      ? null
+      : DriverUserModel.fromRawJson(getStringPref(_preferenceKeys.driver)!);
+  Future<void> putUserType(String? value) async =>
+      await putStringPref(_preferenceKeys.userType, value);
   String? get userType => getStringPref(_preferenceKeys.userType);
-  Future<void> putIsLocationScreenShown(bool value) async => await putBoolPref(_preferenceKeys.isLocationScreenShown, value);
-  bool? get isLocationScreenShown => getBoolPref(_preferenceKeys.isLocationScreenShown) ;
+  Future<void> putIsLocationScreenShown(bool value) async =>
+      await putBoolPref(_preferenceKeys.isLocationScreenShown, value);
+  bool? get isLocationScreenShown =>
+      getBoolPref(_preferenceKeys.isLocationScreenShown);
 
-  Future<void> putLastKnownLocation(String value) async => await putStringPref(_preferenceKeys.lastKnownLocation, value);
-  String? get lastKnownLocation => getStringPref(_preferenceKeys.lastKnownLocation);
+  Future<void> putLastKnownLocation(String value) async =>
+      await putStringPref(_preferenceKeys.lastKnownLocation, value);
+  String? get lastKnownLocation =>
+      getStringPref(_preferenceKeys.lastKnownLocation);
 
-  Future<void> putIsLogin(bool value) async => await putBoolPref(_preferenceKeys.isLogin, value);
-  bool? get isLogin => getBoolPref(_preferenceKeys.isLogin) ;
+  Future<void> putIsLogin(bool value) async =>
+      await putBoolPref(_preferenceKeys.isLogin, value);
+  bool? get isLogin => getBoolPref(_preferenceKeys.isLogin);
 
-  Future<void> putSkipLogin(bool value) async => await putBoolPref(_preferenceKeys.skipLogin, value);
+  Future<void> putSkipLogin(bool value) async =>
+      await putBoolPref(_preferenceKeys.skipLogin, value);
   bool? get skipLogin => getBoolPref(_preferenceKeys.skipLogin);
 
+  // Delete (clear) the stored driver current order
+  Future<void> deleteDriverCurrentOrder() async {
+    try {
+      await putStringPref(_preferenceKeys.driverCurrentOrder, '');
+    } catch (e) {
+      debugPrint('deleteDriverCurrentOrder error: $e');
+    }
+  }
 }
-

@@ -148,4 +148,126 @@ class ShipmentRepository {
       return {'error': e.toString()};
     }
   }
+
+  Future<Map<String, dynamic>> acceptShipment({
+    required int shipmentId,
+    OrderModel? order,
+    bool optimistic = true,
+  }) async {
+    try {
+      // optimistic in-memory update (optional)
+      OrderModel? originalOrderCopy;
+      if (optimistic && order != null) {
+        try {
+          originalOrderCopy = OrderModel.fromJson({
+            'id': order.id,
+            'orderId': order.orderId,
+            'status': order.status.value.toString(),
+          });
+          order.status.value = OrderStatus.Assigned;
+        } catch (e) {
+          debugPrint('Optimistic update skipped: $e');
+        }
+      }
+
+      // call api (shipmentApi.acceptShipment should return a Map)
+      final apiResult = await shipmentApi.acceptShipment(shipmentId: shipmentId);
+
+      // normalize to Map
+      final Map<String, dynamic> raw = (apiResult is Map<String, dynamic>) ? apiResult : {'data': apiResult};
+
+      // Try many places for statusCode & message (defensive)
+      final int? statusCode = (raw['statusCode'] is int) ? raw['statusCode'] as int : (raw['raw'] is Map && raw['raw']['statusCode'] is int ? raw['raw']['statusCode'] as int : null);
+
+      String extractMessage(dynamic obj) {
+        try {
+          if (obj == null) return '';
+          if (obj is String && obj.isNotEmpty) return obj;
+          if (obj is Map) {
+            if (obj.containsKey('message') && obj['message'] != null) return obj['message'].toString();
+            if (obj.containsKey('error') && obj['error'] != null) return obj['error'].toString();
+            if (obj.containsKey('data')) {
+              final d = obj['data'];
+              if (d is Map && d.containsKey('message') && d['message'] != null) return d['message'].toString();
+              if (d is String && d.isNotEmpty) return d;
+            }
+          }
+          return obj.toString();
+        } catch (_) {
+          return '';
+        }
+      }
+
+      // Check common candidates for server message
+      String message = '';
+      message = extractMessage(raw['message']) ?? '';
+      if (message.isEmpty) message = extractMessage(raw['error']);
+      if (message.isEmpty) message = extractMessage(raw['data']);
+      if (message.isEmpty && raw['raw'] != null) message = extractMessage(raw['raw']);
+      if (message.isEmpty && raw['raw'] is Map && raw['raw']['data'] != null) message = extractMessage(raw['raw']['data']);
+
+      // If still empty, fallback to generic
+      if (message.isEmpty) message = '';
+
+      // treat any error presence or HTTP status >=400 as failure
+      final bool hasErrorKey = raw.containsKey('error') && raw['error'] != null;
+      final bool httpFailure = statusCode != null && statusCode >= 400;
+
+      if (hasErrorKey || httpFailure) {
+        // rollback optimistic in-memory
+        if (optimistic && order != null && originalOrderCopy != null) {
+          try {
+            order.status.value = OrderStatus.Pending;
+          } catch (e) {
+            debugPrint('Rollback failed: $e');
+          }
+        }
+
+        final Map<String, dynamic> result = {
+          'success': false,
+          'statusCode': statusCode,
+          'message': message.isNotEmpty ? message : 'Request failed',
+          'raw': raw,
+          'error': raw['error'],
+        };
+
+        debugPrint('acceptShipment -> FAILURE result: $result');
+        return result;
+      }
+
+      // success path — try parse shipment
+      final dynamic serverData = raw['data'] ?? raw;
+      OrderModel? updatedOrder;
+      try {
+        if (serverData is Map<String, dynamic>) {
+          // if server wraps in {data:{shipment: {...}}}
+          if (serverData['shipment'] is Map) {
+            updatedOrder = OrderModel.fromJson(Map<String, dynamic>.from(serverData['shipment']));
+          } else {
+            updatedOrder = OrderModel.fromJson(Map<String, dynamic>.from(serverData));
+          }
+        }
+      } catch (e) {
+        debugPrint('Failed to parse updated shipment: $e');
+      }
+
+      final Map<String, dynamic> successResult = {
+        'success': true,
+        'statusCode': statusCode,
+        'message': message.isNotEmpty ? message : 'Shipment accepted',
+        'raw': raw,
+        if (updatedOrder != null) 'shipment': updatedOrder,
+      };
+
+      debugPrint('acceptShipment -> SUCCESS result: $successResult');
+      return successResult;
+    } catch (e, st) {
+      debugPrint('Error in ShipmentRepository.acceptShipment: $e\n$st');
+      try {
+        if (order != null) order.status.value = OrderStatus.Pending;
+      } catch (_) {}
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
 }

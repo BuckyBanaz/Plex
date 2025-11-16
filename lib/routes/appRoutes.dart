@@ -16,6 +16,7 @@ import 'package:plex_user/screens/individual/home/user_home_screen.dart';
 import 'package:plex_user/screens/location/location_permission_screen.dart';
 import 'package:plex_user/screens/notification/driver_notification_screen.dart';
 import 'package:plex_user/screens/order/driver_jobs_screen.dart';
+import 'package:plex_user/screens/order/driver_order_tracking_screen.dart';
 import 'package:plex_user/screens/payments/user_payment_screen.dart';
 
 import '../screens/auth/choose_account_screen.dart';
@@ -72,6 +73,7 @@ class AppRoutes {
   static const driverNotification = '/driverNotification';
   static const driverDeliveryOrder = '/driverDeliveryOrder';
   static const driverRides = '/driverRides';
+  static const driverOrderTracking = '/driverOrderTracking';
 
   static get routes => [
     GetPage(name: splash, page: () => SplashScreen()),
@@ -108,5 +110,6 @@ class AppRoutes {
     GetPage(name: driverDeliveryOrder, page: () => DriverJobsScreen()),
     GetPage(name: userProfile, page: () => UserProfileScreen()),
     GetPage(name: driverRides, page: () => DriverRideScreen()),
+    GetPage(name: driverOrderTracking, page: () => DriverOrderTrackingScreen()),
   ];
 }
