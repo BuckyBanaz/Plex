@@ -52,7 +52,7 @@ class StripePaymentController extends GetxController {
 
       // Snackbar dikhao
       Get.snackbar('Success', 'Payment successful');
-       // await userRepo.confirmPaymentStripe(paymentIntentId: paymentIntentId.value, paymentMethod: "pm_card_visa");
+      // await userRepo.confirmPaymentStripe(paymentIntentId: paymentIntentId.value, paymentMethod: "pm_card_visa");
       print("Navigating to booking confirmation...");
       Get.offAllNamed(AppRoutes.bookingConfirm);
 

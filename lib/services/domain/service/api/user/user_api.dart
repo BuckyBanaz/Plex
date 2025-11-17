@@ -96,7 +96,7 @@ class UserApi {
         data: {
           'paymentIntentId': paymentIntentId,
           'payment_method': paymentMethod,
-          'return_url': "http://p2dev10.in/success",
+          'return_url': "https://p2dev10.in/success",
         },
       );
 
