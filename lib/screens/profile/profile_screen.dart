@@ -5,6 +5,7 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/modules/controllers/settings/profile_controller.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 import 'package:plex_user/screens/profile/reset_password_screen.dart';
+import 'package:plex_user/screens/profile/terms.dart';
 
 
 import 'account_screen.dart';
@@ -164,11 +165,11 @@ List<ProfileOption> userOptions() {
       onTap: () => Get.to(ResetPasswordScreen()),
     ),
     ProfileOption(title: 'people_and_sharing'.tr, icon: Icons.share, onTap: () {}),
-    ProfileOption( title: 'terms_of_use'.tr, icon: Icons.description, onTap: () {}),
+    ProfileOption( title: 'terms_of_use'.tr, icon: Icons.description, onTap: () =>Get.to(UserTermsScreen())),
     ProfileOption(
       title: 'privacy_policy'.tr,
       icon: Icons.privacy_tip,
-      onTap: () {},
+        onTap: () =>Get.to(UserPrivacyScreen())
     ),
     ProfileOption(
       title: 'help_and_support'.tr,
@@ -213,11 +214,11 @@ List<ProfileOption> driverOptions() {
       onTap: () => Get.to(ResetPasswordScreen()),
     ),
     ProfileOption(title: 'people_and_sharing'.tr, icon: Icons.share, onTap: () {}),
-    ProfileOption( title: 'terms_of_use'.tr, icon: IconlyLight.paper, onTap: () {}),
+    ProfileOption( title: 'terms_of_use'.tr, icon: IconlyLight.paper, onTap: () =>Get.to(DriverTermsScreen())),
     ProfileOption(
       title: 'privacy_policy'.tr,
       icon: IconlyLight.info_circle,
-      onTap: () {},
+        onTap: () =>Get.to(DriverPrivacyScreen ())
     ),
     ProfileOption(
       title: 'help_and_support'.tr,

@@ -19,7 +19,7 @@ class SocketService extends GetxService {
   Stream<dynamic> get shipmentStatusStream => _shipmentStatusController.stream;
 
   // Server URL (adjust if needed)
-  static const String _serverUrl = 'http://p2dev10.in:3000';
+  static const String _serverUrl = 'https://p2dev10.in:3000';
 
   SocketService();
 
