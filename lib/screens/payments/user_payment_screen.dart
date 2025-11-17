@@ -6,6 +6,7 @@ import 'package:iconly/iconly.dart' show IconlyLight;
 import 'package:plex_user/modules/controllers/payment/user_payment_controller.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 
+import '../../constant/app_colors.dart';
 import '../individual/Booking/confirm_details_screen.dart';
 import '../widgets/custom_button.dart';
 import 'components/add_new_card_sheet.dart';
@@ -50,10 +51,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ],
       ),
       bottomNavigationBar: CustomButton(onTap: (){
-        c.proceedPayment();
+        c.isLoading.value ? null : c.proceedPayment();
         // Get.offAllNamed(AppRoutes.bookingConfirm);
       },widget: Center(
-        child: Text(
+
+        child:  c.isLoading.value
+            ? CircularProgressIndicator(
+          color: AppColors.textColor,
+          strokeWidth: 3,
+        )
+            : Text(
           "pay_now".trParams({
             "amount": c.bookingController.amountPayable.toStringAsFixed(2)
           }),

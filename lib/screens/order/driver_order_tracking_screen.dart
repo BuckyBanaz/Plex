@@ -1,19 +1,3 @@
-// driver_order_tracking_controller.dart
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:iconly/iconly.dart';
-import 'package:plex_user/constant/app_colors.dart';
-import 'package:plex_user/routes/appRoutes.dart';
-import '../../common/Toast/toast.dart';
-import '../../modules/controllers/location/location_permission_controller.dart';
-import '../driver/driver_rides_screens.dart';
-import '../widgets/helpers.dart';
-import 'dart:ui' as ui;
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,11 +7,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'dart:ui' as ui;
-import 'dart:math' as math;
 import '../../common/Toast/toast.dart';
 import '../../modules/controllers/location/location_permission_controller.dart';
+import '../widgets/helpers.dart';
+import 'dart:ui' as ui;
+import 'dart:math' as math;
+
+import 'package:flutter_svg/flutter_svg.dart';
 
 enum DeliveryStage { toPickup, toDropoff, completed }
 

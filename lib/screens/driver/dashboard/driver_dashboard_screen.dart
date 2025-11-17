@@ -6,7 +6,9 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/driver/home/driver_home_screen.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../order/driver_jobs_screen.dart';
 import '../../profile/profile_screen.dart';
+import '../driver_rides_screens.dart';
 // import '../profile/driver_profile_screen.dart';
 
 
@@ -25,7 +27,7 @@ class DriverMainNavController extends GetxController {
 
   final List<Widget> tabs = [
     const DriverHomeScreen(),
-    const Center(child: Text("Order Screen")),
+    DriverRideScreen(),
     const Center(child: Text("History Screen")),
     DriverProfileScreen(),
   ];

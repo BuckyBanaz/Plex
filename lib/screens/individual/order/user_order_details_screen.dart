@@ -12,8 +12,8 @@ import '../../../../constant/app_assets.dart';
 import '../../../../models/driver_order_model.dart';
 import '../../../modules/controllers/orders/user_order_controller.dart';
 
-class OrderDetailsScreen extends GetView<UserOrderController> {
-  const OrderDetailsScreen({super.key});
+class UserOrderDetailsScreen extends GetView<UserOrderController> {
+  const UserOrderDetailsScreen({super.key});
 
   // --- Helpers ---
   String _formatDateTime(DateTime? dt) {
@@ -404,6 +404,7 @@ class OrderDetailsScreen extends GetView<UserOrderController> {
                 Expanded(child: InfoColumnItem("Vehicle Type", order.vehicleType ?? '-')),
                 Expanded(child: InfoColumnItem("Weight", order.weight ?? '-')),
                 Expanded(child: InfoColumnItem("Fee", order.estimatedCost?.toString() ?? '-')),
+                Expanded(child: InfoColumnItem("Payment Method", order.paymentMethod?.toString() ?? '-')),
               ],
             ),
             const SizedBox(height: 24.0),

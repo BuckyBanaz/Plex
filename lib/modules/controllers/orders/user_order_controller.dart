@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../models/driver_order_model.dart';
 import '../../../services/domain/repository/repository_imports.dart';
 // path adjust as needed
-import '../../../screens/individual/order/order_details_screen.dart';
+import '../../../screens/individual/order/user_order_details_screen.dart';
 
 class UserOrderController extends GetxController {
   final ShipmentRepository _shipmentRepository = Get.find<ShipmentRepository>();
@@ -105,6 +105,6 @@ class UserOrderController extends GetxController {
   void goToOrderDetails(OrderModel order) {
     selectedOrder.value = order;
     // navigate to details screen
-    Get.to(() => const OrderDetailsScreen());
+    Get.to(() => const UserOrderDetailsScreen());
   }
 }

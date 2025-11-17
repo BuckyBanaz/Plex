@@ -409,98 +409,95 @@ class BookingController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
     );
   }
+// inside BookingController class
 
-  void orderNow() {
+  /// Create shipment on server with chosen payment method.
+  /// Returns the API response Map on success, or null on failure.
+  Future<Map<String, dynamic>?> createShipmentAndPreparePayment({
+    required String paymentMethod,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final res = await repo.createShipment(
+        vehicleType: selectedVehicleIndex.value == 0 ? "Bike" : selectedVehicleIndex.value == 1 ? "Car" : "Van",
+        originLat: pLat.value,
+        originLng: pLng.value,
+        paymentMethod: paymentMethod.toLowerCase(), // <- important: pass selected payment method
+        destinationLat: dLat.value,
+        destinationLng: dLng.value,
+        weight: weight.value,
+        weightUnit: selectedWeightUnit.value,
+        notes: description.value,
+        pickup: {
+          "name": pNameController.text,
+          "phone": pMobileController.text,
+          "address": pAddress.value,
+          "latitude": pLat.value,
+          "longitude": pLng.value,
+        },
+        dropoff: {
+          "name": dnameController.text,
+          "phone": dmobileController.text,
+          "address": dAddress.value,
+          "latitude": dLat.value,
+          "longitude": dLng.value,
+        },
+        collectType: selectedTime.value == 0 ? "immediate" : "scheduled",
+        scheduledAt: selectedTime.value == 1 ? scheduledDateTime.value : null,
+        imageUrls: selectedImages.isNotEmpty ? selectedImages.map((x) => x.path).toList() : null,
+      );
+
+      isLoading.value = false;
+
+      if (res.containsKey('error')) {
+        Get.snackbar("Error", res['error'].toString(),
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+        return null;
+      }
+
+      // Extract payment keys safely (top-level or nested in shipment)
+      final shipment = (res['shipment'] is Map) ? Map<String, dynamic>.from(res['shipment']) : null;
+
+      final clientSecretFromShipment = shipment != null ? (shipment['clientSecret']?.toString() ?? '') : '';
+      final clientSecretTopLevel = res['clientSecret']?.toString() ?? '';
+      shipmentClientSecret.value = clientSecretTopLevel.isNotEmpty ? clientSecretTopLevel : clientSecretFromShipment;
+
+      final intentFromShipment = shipment != null ? (shipment['stripePaymentIntentId']?.toString() ?? '') : '';
+      final intentTopLevel = res['stripePaymentIntentId']?.toString() ?? '';
+      stripePaymentIntentId.value = intentTopLevel.isNotEmpty ? intentTopLevel : intentFromShipment;
+
+      debugPrint("Extracted clientSecret: ${shipmentClientSecret.value}");
+      debugPrint("Extracted stripePaymentIntentId: ${stripePaymentIntentId.value}");
+
+      return Map<String, dynamic>.from(res);
+    } catch (e) {
+      isLoading.value = false;
+      Get.snackbar('Error', 'failed_create_shipment'.tr);
+      debugPrint("createShipmentAndPreparePayment error: $e");
+      return null;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+   void orderNow() {
+    // Simple confirmation dialog (optional) — you can remove dialog entirely and directly navigate
     Get.dialog(
       AlertDialog(
         title: const Text("Confirm Order"),
         content: Text(
-          "Placing your order for ₹${amountPayable.toStringAsFixed(2)}...",
+          "Proceed to payment for ₹${amountPayable.toStringAsFixed(2)}?",
         ),
         actions: [
           TextButton(
-            onPressed: () async {
-              Get.back(); // close dialog first
-              try {
-                isLoading.value = true;
-
-                // ✅ Build payload automatically
-                final res = await repo.createShipment(
-                  vehicleType: "Bike",
-                  originLat: pLat.value,
-                  originLng: pLng.value,
-                  destinationLat: dLat.value,
-                  destinationLng: dLng.value,
-                  weight: weight.value,
-                  weightUnit: selectedWeightUnit.value,
-                  notes: description.value,
-                  pickup: {
-                    "name": pNameController.text,
-                    "phone": pMobileController.text,
-                    "address": pAddress.value,
-                    "latitude": pLat.value,
-                    "longitude": pLng.value,
-                  },
-                  dropoff: {
-                    "name": dnameController.text,
-                    "phone": dmobileController.text,
-                    "address": dAddress.value,
-                    "latitude": dLat.value,
-                    "longitude": dLng.value,
-                  },
-                  collectType: selectedTime.value == 0 ? "immediate" : "scheduled",
-                  scheduledAt: selectedTime.value == 1 ? scheduledDateTime.value : null,
-                  imageUrls: selectedImages.isNotEmpty
-                      ? selectedImages.map((x) => x.path).toList()
-                      : null,
-                );
-
-                // debugPrint("✅ Shipment API Response: $res");
-
-                isLoading.value = false;
-
-                if (res.containsKey('error')) {
-                  Get.snackbar("Error", res['error'].toString(),
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white);
-                  return;
-                }
-
-                // --- SAFE EXTRACTION: check shipment first, then top-level keys ---
-                final shipment = (res['shipment'] is Map) ? Map<String, dynamic>.from(res['shipment']) : null;
-
-                final clientSecretFromShipment = shipment != null ? (shipment['clientSecret']?.toString() ?? '') : '';
-                final clientSecretTopLevel = res['clientSecret']?.toString() ?? '';
-                shipmentClientSecret.value = clientSecretTopLevel.isNotEmpty ? clientSecretTopLevel : clientSecretFromShipment;
-
-                final intentFromShipment = shipment != null ? (shipment['stripePaymentIntentId']?.toString() ?? '') : '';
-                final intentTopLevel = res['stripePaymentIntentId']?.toString() ?? '';
-                stripePaymentIntentId.value = intentTopLevel.isNotEmpty ? intentTopLevel : intentFromShipment;
-
-                // DEBUG logs to confirm values
-                debugPrint("Extracted clientSecret: ${shipmentClientSecret.value}");
-                debugPrint("Extracted stripePaymentIntentId: ${stripePaymentIntentId.value}");
-
-                // If client secret absent, show error
-                if (shipmentClientSecret.value.isEmpty) {
-                  Get.snackbar("Error", "Payment details missing (clientSecret).",
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white);
-                  return;
-                }
-
-                Get.toNamed(AppRoutes.payment);
-              } catch (e) {
-                isLoading.value = false;
-                Get.snackbar('Error', e.toString(),
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.red,
-                    colorText: Colors.white);
-              }
+            onPressed: () {
+              Get.back(); // close dialog
+              // Navigate to payment screen — UserPaymentController.proceedPayment() will create shipment & handle payment
+              Get.toNamed(AppRoutes.payment);
             },
-
             child: const Text("OK"),
           ),
           TextButton(
@@ -511,6 +508,108 @@ class BookingController extends GetxController {
       ),
     );
   }
+  // void orderNow() {
+  //   Get.dialog(
+  //     AlertDialog(
+  //       title: const Text("Confirm Order"),
+  //       content: Text(
+  //         "Placing your order for ₹${amountPayable.toStringAsFixed(2)}...",
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () async {
+  //             Get.back(); // close dialog first
+  //             try {
+  //               isLoading.value = true;
+  //
+  //               // ✅ Build payload automatically
+  //               final res = await repo.createShipment(
+  //                 vehicleType: "Bike",
+  //                 originLat: pLat.value,
+  //                 originLng: pLng.value,
+  //
+  //                 destinationLat: dLat.value,
+  //                 destinationLng: dLng.value,
+  //                 weight: weight.value,
+  //                 weightUnit: selectedWeightUnit.value,
+  //                 notes: description.value,
+  //                 pickup: {
+  //                   "name": pNameController.text,
+  //                   "phone": pMobileController.text,
+  //                   "address": pAddress.value,
+  //                   "latitude": pLat.value,
+  //                   "longitude": pLng.value,
+  //                 },
+  //                 dropoff: {
+  //                   "name": dnameController.text,
+  //                   "phone": dmobileController.text,
+  //                   "address": dAddress.value,
+  //                   "latitude": dLat.value,
+  //                   "longitude": dLng.value,
+  //                 },
+  //                 collectType: selectedTime.value == 0 ? "immediate" : "scheduled",
+  //                 scheduledAt: selectedTime.value == 1 ? scheduledDateTime.value : null,
+  //                 imageUrls: selectedImages.isNotEmpty
+  //                     ? selectedImages.map((x) => x.path).toList()
+  //                     : null,
+  //               );
+  //
+  //               // debugPrint("✅ Shipment API Response: $res");
+  //
+  //               isLoading.value = false;
+  //
+  //               if (res.containsKey('error')) {
+  //                 Get.snackbar("Error", res['error'].toString(),
+  //                     snackPosition: SnackPosition.BOTTOM,
+  //                     backgroundColor: Colors.red,
+  //                     colorText: Colors.white);
+  //                 return;
+  //               }
+  //
+  //               // --- SAFE EXTRACTION: check shipment first, then top-level keys ---
+  //               final shipment = (res['shipment'] is Map) ? Map<String, dynamic>.from(res['shipment']) : null;
+  //
+  //               final clientSecretFromShipment = shipment != null ? (shipment['clientSecret']?.toString() ?? '') : '';
+  //               final clientSecretTopLevel = res['clientSecret']?.toString() ?? '';
+  //               shipmentClientSecret.value = clientSecretTopLevel.isNotEmpty ? clientSecretTopLevel : clientSecretFromShipment;
+  //
+  //               final intentFromShipment = shipment != null ? (shipment['stripePaymentIntentId']?.toString() ?? '') : '';
+  //               final intentTopLevel = res['stripePaymentIntentId']?.toString() ?? '';
+  //               stripePaymentIntentId.value = intentTopLevel.isNotEmpty ? intentTopLevel : intentFromShipment;
+  //
+  //               // DEBUG logs to confirm values
+  //               debugPrint("Extracted clientSecret: ${shipmentClientSecret.value}");
+  //               debugPrint("Extracted stripePaymentIntentId: ${stripePaymentIntentId.value}");
+  //
+  //               // If client secret absent, show error
+  //               if (shipmentClientSecret.value.isEmpty) {
+  //                 Get.snackbar("Error", "Payment details missing (clientSecret).",
+  //                     snackPosition: SnackPosition.BOTTOM,
+  //                     backgroundColor: Colors.red,
+  //                     colorText: Colors.white);
+  //                 return;
+  //               }
+  //
+  //               Get.toNamed(AppRoutes.payment);
+  //             } catch (e) {
+  //               isLoading.value = false;
+  //               Get.snackbar('Error', e.toString(),
+  //                   snackPosition: SnackPosition.BOTTOM,
+  //                   backgroundColor: Colors.red,
+  //                   colorText: Colors.white);
+  //             }
+  //           },
+  //
+  //           child: const Text("OK"),
+  //         ),
+  //         TextButton(
+  //           onPressed: () => Get.back(),
+  //           child: const Text("Cancel"),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
 
   // ---- NEW: Apply LocationController data into pickup fields ----

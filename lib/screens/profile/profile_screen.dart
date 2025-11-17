@@ -190,7 +190,7 @@ List<ProfileOption> driverOptions() {
     ProfileOption(
       title: 'My Rides'.tr,
       icon: IconlyLight.bookmark,
-      onTap: ()=> Get.toNamed(AppRoutes.driverRides),
+      onTap: ()=> Get.toNamed(AppRoutes.driverRides,arguments: "navigation"),
     ),
     ProfileOption(
       title: 'Scheduled Rides'.tr,

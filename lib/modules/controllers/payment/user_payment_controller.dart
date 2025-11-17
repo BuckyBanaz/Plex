@@ -46,7 +46,8 @@ class UserPaymentController extends GetxController {
     {'name': 'UPI', 'logo': 'assets/icons/upi.png', 'isAsset': true},
     {'name': 'PayPal', 'logo': 'assets/icons/paypal.png', 'isAsset': true},
     {'name': 'Google Pay', 'logo': 'assets/icons/gpay.png', 'isAsset': true},
-    {'name': 'Stipe', 'logo': 'assets/icons/stripe.png', 'isAsset': true},
+    {'name': 'Stripe', 'logo': 'assets/icons/stripe.png', 'isAsset': true},
+    {'name': 'COD', 'logo': Icons.money, 'isAsset': false},
     {
       'name': 'Net Banking',
       'logo': Icons.laptop_chromebook_outlined,
@@ -112,49 +113,132 @@ showToast(message: "success_card_added".tr);
     expiryDateController = TextEditingController();
     cvvController = TextEditingController();
   }
-
   Future<void> proceedPayment() async {
     print("proceedPayment called"); // function entered
 
-    if (selectedPaymentOption.value != "Stipe") {
-      print("Selected payment option is not Stripe: ${selectedPaymentOption.value}");
-      showToast(message: "This is not valid, you can use Stripe");
-      return;
+    final rawSelected = selectedPaymentOption.value;
+    final selected = rawSelected.trim();
+    print("Selected payment option: $selected");
+
+    // helper to normalize the payment method for backend
+    String _normalizePaymentMethod(String s) {
+      final lower = s.toLowerCase();
+      if (lower.contains('stripe') || lower.contains('stipe')) return 'stripe';
+      if (lower.contains('paypal')) return 'paypal';
+      if (lower.contains('upi')) return 'upi';
+      if (lower.contains('google')) return 'googlepay';
+      if (lower.contains('cod') || lower.contains('cash')) return 'cod';
+      if (lower.contains('net')) return 'net_banking';
+      return lower; // fallback
     }
+
+    final normalizedMethod = _normalizePaymentMethod(selected);
 
     try {
       isLoading.value = true;
       print("isLoading set to true");
 
-      // Booking se shipment create ho chuka hai, uska clientSecret le lo
-      final clientSecret = bookingController.shipmentClientSecret.value;
-      print("ClientSecret from bookingController: $clientSecret");
-      final paymentIntentId = bookingController.stripePaymentIntentId.value;
-      print("paymentIntentId from bookingController: $paymentIntentId");
+      // If shipment not yet created on server (no clientSecret and no intent id), create it now
+      if (bookingController.shipmentClientSecret.value.isEmpty &&
+          bookingController.stripePaymentIntentId.value.isEmpty) {
+        print("No shipment/payment initialized yet. Creating shipment with paymentMethod: $normalizedMethod");
 
-      if (clientSecret.isEmpty) {
-        print("ClientSecret is empty!");
-        showToast(message: "Payment not initialized properly");
-        isLoading.value = false;
+        final res = await bookingController.createShipmentAndPreparePayment(paymentMethod: normalizedMethod);
+
+        if (res == null) {
+          showToast(message: "Failed to create shipment. Try again.");
+          isLoading.value = false;
+          return;
+        }
+
+        // If API returned no clientSecret and payment is non-Stripe, treat accordingly
+        if (bookingController.shipmentClientSecret.value.isEmpty) {
+          // COD (server handled)
+          if (normalizedMethod == 'cod') {
+            showToast(message: "Order placed with Cash on Delivery");
+            Get.offAllNamed(AppRoutes.bookingConfirm);
+            isLoading.value = false;
+            return;
+          }
+
+          // PayPal / UPI may return a redirect URL in response; try to use it
+          if (normalizedMethod == 'paypal') {
+            final payUrl = res['paymentUrl']?.toString() ?? res['paypalUrl']?.toString() ?? '';
+            if (payUrl.isNotEmpty) {
+              // open PayPal webview if you have one
+              Get.to(() => PayPalWebView(url: payUrl));
+              isLoading.value = false;
+              return;
+            } else {
+              showToast(message: "Proceed to PayPal (implement webview flow).");
+              isLoading.value = false;
+              return;
+            }
+          }
+
+          // UPI / GooglePay: backend might return a deep link or UPI params
+          if (normalizedMethod == 'upi' || normalizedMethod == 'googlepay') {
+            final upiUrl = res['paymentUrl']?.toString() ?? res['upiUrl']?.toString() ?? '';
+            if (upiUrl.isNotEmpty) {
+              // open url launcher
+              if (await canLaunch(upiUrl)) {
+                await launch(upiUrl);
+              } else {
+                showToast(message: "Unable to open UPI app");
+              }
+              isLoading.value = false;
+              return;
+            } else {
+              showToast(message: "UPI/GooglePay flow not implemented");
+              isLoading.value = false;
+              return;
+            }
+          }
+
+          // fallback if backend handled payment and returned nothing for client secret
+          showToast(message: "Payment flow handled server-side or unsupported method.");
+          isLoading.value = false;
+          return;
+        }
+      }
+
+      // At this point, if we have a clientSecret and selected is Stripe -> perform Stripe flow
+      if (normalizedMethod == "stripe") {
+        final clientSecret = bookingController.shipmentClientSecret.value;
+        final paymentIntentId = bookingController.stripePaymentIntentId.value;
+
+        if (clientSecret.isEmpty) {
+          showToast(message: "Payment not initialized properly");
+          isLoading.value = false;
+          return;
+        }
+
+        stripeController.clientSecret.value = clientSecret;
+        stripeController.paymentIntentId.value = paymentIntentId;
+        print("Stripe controller clientSecret set: ${stripeController.clientSecret.value}");
+        print("Stripe controller paymentIntentId set: ${stripeController.paymentIntentId.value}");
+
+        final amountInPaise = (bookingController.amountPayable * 100).toInt();
+        print("Amount in paise: $amountInPaise");
+
+        await stripeController.payWithStripe(
+          amountInPaise: amountInPaise,
+          context: Get.context,
+        );
+
+        print("Stripe Payment flow completed (check logs for success/failure).");
         return;
       }
 
-      stripeController.clientSecret.value = clientSecret;
-      print("Stripe controller clientSecret set: ${stripeController.clientSecret.value}");
-      stripeController.paymentIntentId.value = paymentIntentId;
-      print("Stripe controller paymentIntentId set: ${stripeController.paymentIntentId.value}");
+      // If we reach here, payment method wasn't stripe and may already have been handled above
+      if (normalizedMethod == 'cod') {
+        showToast(message: "Order placed with Cash on Delivery");
+        Get.offAllNamed(AppRoutes.bookingConfirm);
+        return;
+      }
 
-      final amountInPaise = (bookingController.amountPayable * 100).toInt();
-      print("Amount in paise: $amountInPaise");
-
-      await stripeController.payWithStripe(
-
-        amountInPaise: amountInPaise,
-        context: Get.context,
-      );
-
-      print("Stripe Payment completed");
-
+      // Unimplemented methods default handler
+      showToast(message: "Selected payment method ($selected) is not implemented yet.");
     } catch (e) {
       print("Error in proceedPayment: $e");
       showToast(message: "Payment failed: $e");
@@ -163,6 +247,58 @@ showToast(message: "success_card_added".tr);
       print("isLoading set to false");
     }
   }
+
+
+  // Future<void> proceedPayment() async {
+  //   print("proceedPayment called"); // function entered
+  //
+  //   if (selectedPaymentOption.value != "Stipe") {
+  //     print("Selected payment option is not Stripe: ${selectedPaymentOption.value}");
+  //     showToast(message: "This is not valid, you can use Stripe");
+  //     return;
+  //   }
+  //
+  //   try {
+  //     isLoading.value = true;
+  //     print("isLoading set to true");
+  //
+  //     // Booking se shipment create ho chuka hai, uska clientSecret le lo
+  //     final clientSecret = bookingController.shipmentClientSecret.value;
+  //     print("ClientSecret from bookingController: $clientSecret");
+  //     final paymentIntentId = bookingController.stripePaymentIntentId.value;
+  //     print("paymentIntentId from bookingController: $paymentIntentId");
+  //
+  //     if (clientSecret.isEmpty) {
+  //       print("ClientSecret is empty!");
+  //       showToast(message: "Payment not initialized properly");
+  //       isLoading.value = false;
+  //       return;
+  //     }
+  //
+  //     stripeController.clientSecret.value = clientSecret;
+  //     print("Stripe controller clientSecret set: ${stripeController.clientSecret.value}");
+  //     stripeController.paymentIntentId.value = paymentIntentId;
+  //     print("Stripe controller paymentIntentId set: ${stripeController.paymentIntentId.value}");
+  //
+  //     final amountInPaise = (bookingController.amountPayable * 100).toInt();
+  //     print("Amount in paise: $amountInPaise");
+  //
+  //     await stripeController.payWithStripe(
+  //
+  //       amountInPaise: amountInPaise,
+  //       context: Get.context,
+  //     );
+  //
+  //     print("Stripe Payment completed");
+  //
+  //   } catch (e) {
+  //     print("Error in proceedPayment: $e");
+  //     showToast(message: "Payment failed: $e");
+  //   } finally {
+  //     isLoading.value = false;
+  //     print("isLoading set to false");
+  //   }
+  // }
 
 
   @override

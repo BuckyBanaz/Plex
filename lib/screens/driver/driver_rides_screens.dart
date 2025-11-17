@@ -156,13 +156,15 @@ class DriverRideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(MyRidesController());
+    final arg = Get.arguments;
+    final bool showTabs = arg != null && arg.toString() == 'navigation';
 
     return Scaffold(
 
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(),
+            _TopBar(showTitle: showTabs),
             const SizedBox(height: 8),
 
             // Tab bar (if it itself uses observables, it should handle its own Obx internally)
@@ -216,23 +218,31 @@ class DriverRideScreen extends StatelessWidget {
 
 // --- Top bar with rounded center buttons (search + filter) ---
 class _TopBar extends StatelessWidget {
+  final bool showTitle;
+  const _TopBar({this.showTitle = true});
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(CupertinoIcons.back),
-            onPressed: () => Get.back(),
-          ),
-          const SizedBox(width: 6),
+
+          if(showTitle)...[
+            IconButton(
+              icon: const Icon(CupertinoIcons.back),
+              onPressed: () => Get.back(),
+            ),
+            const SizedBox(width: 6),
+
+          ],
           const Expanded(
             child: Text(
               'My Rides',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
+          Spacer(),
+
 
           Row(
             mainAxisSize: MainAxisSize.min,
