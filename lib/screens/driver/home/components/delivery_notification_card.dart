@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:plex_user/constant/app_colors.dart'; // SVG के लिए इम्पोर्ट करें
+import 'package:plex_user/constant/app_colors.dart';
+import 'package:sizer/sizer.dart'; // SVG के लिए इम्पोर्ट करें
 
 class DeliveryNotificationCard extends StatelessWidget {
 
@@ -32,8 +33,8 @@ class DeliveryNotificationCard extends StatelessWidget {
               children: [
                 Text(
                   '$deliveryCount ${'deliveryOrdersFound'.tr}',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style:  TextStyle(
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF333333),
                   ),
@@ -45,7 +46,7 @@ class DeliveryNotificationCard extends StatelessWidget {
                     'viewDetails'.tr,
                     style: TextStyle(
                       color: AppColors.primary,
-                      fontSize: 13,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
                       decorationColor: AppColors.primary,
@@ -58,8 +59,8 @@ class DeliveryNotificationCard extends StatelessWidget {
 
 
           Container(
-            width: 80,
-            height: 80,
+            width: 10.w,
+            height: 10.h,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
             ),

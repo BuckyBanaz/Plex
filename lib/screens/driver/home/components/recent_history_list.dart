@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
+import 'package:sizer/sizer.dart';
 
 import '../../../../modules/controllers/home/driver_home_controller.dart';
 
@@ -19,7 +20,7 @@ class RecentHistoryList extends StatelessWidget {
            Text(
             'recentHistory'.tr,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -70,22 +71,22 @@ class _OrderListCard extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
       leading: CircleAvatar(
-        radius: 24,
+        radius: 20.sp,
         backgroundColor: AppColors.driverCard,
         child: Text(
           initial,
           style:  TextStyle(
             color: AppColors.primary,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 16.sp,
           ),
         ),
       ),
       title: Text(
         name,
-        style: const TextStyle(
+        style:  TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 16,
+          fontSize: 16.sp,
           color: Colors.black87,
         ),
       ),
@@ -97,7 +98,7 @@ class _OrderListCard extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               time,
-              style: const TextStyle(color: Colors.black54, fontSize: 13),
+              style:  TextStyle(color: Colors.black54, fontSize: 13.sp),
             ),
           ],
         ),
@@ -107,7 +108,7 @@ class _OrderListCard extends StatelessWidget {
         style:  TextStyle(
           color: AppColors.primary,
           fontWeight: FontWeight.bold,
-          fontSize: 16,
+          fontSize: 16.sp,
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:plex_user/constant/app_assets.dart';
+import 'package:sizer/sizer.dart';
 import '../../../../constant/app_colors.dart';
 import '../../../../modules/controllers/booking/booking_controller.dart';
 
@@ -53,8 +54,8 @@ class VehicleTypeSelector extends StatelessWidget {
         controller.selectVehicle(index);
       },
       child: Container(
-        width: 120,
-        height: 100,
+        width: 30.w,
+        height: 10.h,
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFEF3E7) : Colors.white,
           borderRadius: BorderRadius.circular(12.0),
@@ -67,8 +68,8 @@ class VehicleTypeSelector extends StatelessWidget {
           child: SvgPicture.asset(
             matchTextDirection: true,
             svgAsset,
-            height: 30,
-            width: 30,
+            height: 3.h,
+            width: 3.w,
             colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
           ),
         ),

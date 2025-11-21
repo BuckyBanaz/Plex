@@ -5,8 +5,7 @@ import 'package:sizer/sizer.dart';
 import 'package:plex_user/modules/controllers/home/driver_home_controller.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 import '../../../constant/app_colors.dart';
-import '../../individual/home/components/top_bar.dart' show TopBar;
-import '../order/driver_job_complete.dart';
+import '../../individual/home/components/top_bar.dart';
 import 'components/delivery_notification_card.dart';
 import 'components/recent_history_list.dart';
 
@@ -34,7 +33,7 @@ class DriverHomeScreen extends StatelessWidget {
                 // use sizer units instead of MediaQuery
                 Container(
                   width: double.infinity,
-                  height: 28.5.h, // reduced slightly from 30% to avoid overflow
+                  height: 30.5.h, // reduced slightly from 30% to avoid overflow
                   padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
                   decoration: const BoxDecoration(
                     color: AppColors.secondary,
@@ -54,18 +53,18 @@ class DriverHomeScreen extends StatelessWidget {
                             subtitleColor: AppColors.textColor,
                             showIcon: true,
                             iconButton: IconButton(
-                              // onPressed: () => Get.toNamed(AppRoutes.driverNotification),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => DriverJobCompleteScreen(
-                                      amount: 125.50,
-                                      paymentMethod: 'Online',
-                                    ),
-                                  ),
-                                );
-                              },
+                              onPressed: () => Get.toNamed(AppRoutes.driverNotification),
+                              // onPressed: () {
+                              //   Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //       builder: (_) => DriverJobCompleteScreen(
+                              //         amount: 125.50,
+                              //         paymentMethod: 'Online',
+                              //       ),
+                              //     ),
+                              //   );
+                              // },
                               icon: Icon(
                                 IconlyLight.notification,
                                 color: AppColors.textColor,
@@ -172,7 +171,7 @@ class DriverHomeScreen extends StatelessWidget {
                       Positioned.directional(
                         textDirection: Directionality.of(context),
                         end: 0,
-                        bottom: -1.2.h, // less negative to avoid overflow
+                        bottom: -0.6.h, // less negative to avoid overflow
                         child: Image.asset(
                           'assets/images/driver.png',
                           height: 10.5.h, // slightly smaller image
@@ -214,7 +213,7 @@ class DriverHomeScreen extends StatelessWidget {
                                 style: TextStyle(
                                   color: AppColors.secondary,
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 14.sp,
+                                  fontSize: 16.sp,
                                 ),
                               )),
                               const SizedBox(height: 2),
@@ -222,7 +221,7 @@ class DriverHomeScreen extends StatelessWidget {
                                 'openToAnyDelivery'.tr,
                                 style: TextStyle(
                                   color: AppColors.primary,
-                                  fontSize: 12.sp,
+                                  fontSize: 14.sp,
                                 ),
                               ),
                             ],
