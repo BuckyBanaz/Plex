@@ -6,7 +6,6 @@ import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/driver/home/driver_home_screen.dart';
 import 'package:sizer/sizer.dart';
 
-import '../../order/driver_jobs_screen.dart';
 import '../../profile/profile_screen.dart';
 import '../driver_rides_screens.dart';
 // import '../profile/driver_profile_screen.dart';
@@ -28,14 +27,14 @@ class DriverMainNavController extends GetxController {
   final List<Widget> tabs = [
     const DriverHomeScreen(),
     DriverRideScreen(),
-    const Center(child: Text("History Screen")),
+    const Center(child: Text("Wallet Screen")),
     DriverProfileScreen(),
   ];
 
   final List<IconData> icons = const [
     IconlyLight.home,
     Icons.inventory_2_outlined,
-    Icons.history_rounded,
+    IconlyLight.wallet,
     IconlyLight.profile,
   ];
 
@@ -77,14 +76,14 @@ class DriverMainScreen extends StatelessWidget {
               children: [
                 Icon(c.icons[index], size: 22.sp, color: color),
                 SizedBox(height: 0.6.h),
-                Text(
-                  c.labelFor(index),
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: color,
-                  ),
-                ),
+                // Text(
+                //   c.labelFor(index),
+                //   style: TextStyle(
+                //     fontSize: 14.sp,
+                //     fontWeight: FontWeight.w600,
+                //     color: color,
+                //   ),
+                // ),
               ],
             );
           },

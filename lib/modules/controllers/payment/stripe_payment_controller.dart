@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter/material.dart';
+import 'package:plex_user/common/Toast/toast.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
 import '../../../routes/appRoutes.dart';
 
@@ -21,7 +22,9 @@ class StripePaymentController extends GetxController {
     // Safety check: Agar client secret khali hai toh aage mat badho
     if (clientSecret.value.isEmpty) {
       print("❌❌❌ PAYMENT STATUS: FAILED (Client Secret is empty)");
-      Get.snackbar('Error', 'Payment details are missing. Please try again.');
+
+      showToast(message:  'Payment details are missing. Please try again.');
+      // Get.snackbar('Error', 'Payment details are missing. Please try again.');
       return;
     }
 
@@ -51,7 +54,8 @@ class StripePaymentController extends GetxController {
       print("✅✅✅ PAYMENT STATUS: SUCCESS ✅✅✅");
 
       // Snackbar dikhao
-      Get.snackbar('Success', 'Payment successful');
+      showToast(message: 'Payment successful');
+      // Get.snackbar('Success', 'Payment successful');
       // await userRepo.confirmPaymentStripe(paymentIntentId: paymentIntentId.value, paymentMethod: "pm_card_visa");
       print("Navigating to booking confirmation...");
       Get.offAllNamed(AppRoutes.bookingConfirm);
@@ -61,13 +65,15 @@ class StripePaymentController extends GetxController {
       if (e.error.code == FailureCode.Canceled) {
         // Agar user ne payment sheet ko band kar diya
         print("🔶🔶🔶 PAYMENT STATUS: CANCELED BY USER 🔶🔶🔶");
-        Get.snackbar('Cancelled', 'Payment was cancelled');
+        // Get.snackbar('Cancelled', 'Payment was cancelled');
+        showToast(message: 'Payment was cancelled');
       } else {
         // Agar payment fail hua (e.g., card declined)
         final msg = e.error.localizedMessage ?? 'Payment failed';
         print("❌❌❌ PAYMENT STATUS: FAILED (StripeException) ❌❌❌");
         print("Error Details: $msg");
-        Get.snackbar('Error', msg);
+        showToast(message: 'Payment failed');
+        // Get.snackbar('Error', msg);
       }
 
     } catch (e) {

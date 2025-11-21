@@ -4,9 +4,9 @@ import 'package:iconly/iconly.dart';
 import 'package:sizer/sizer.dart';
 import 'package:plex_user/modules/controllers/home/driver_home_controller.dart';
 import 'package:plex_user/routes/appRoutes.dart';
-import 'package:plex_user/screens/order/driver_job_complete.dart';
 import '../../../constant/app_colors.dart';
 import '../../individual/home/components/top_bar.dart' show TopBar;
+import '../order/driver_job_complete.dart';
 import 'components/delivery_notification_card.dart';
 import 'components/recent_history_list.dart';
 

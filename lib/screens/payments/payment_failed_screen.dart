@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/common/Toast/toast.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/widgets/custom_button.dart';
 
@@ -67,13 +68,14 @@ class PaymentFailedScreen extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       // TODO: Navigate to support team or open chat
-                      Get.snackbar(
-                        "Support",
-                        "Support team functionality not implemented.",
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: AppColors.primary,
-                        colorText: Colors.white,
-                      );
+                      showToast(message: "Support team functionality not implemented.",);
+                      // Get.snackbar(
+                      //   "Support",
+                      //   "Support team functionality not implemented.",
+                      //   snackPosition: SnackPosition.BOTTOM,
+                      //   backgroundColor: AppColors.primary,
+                      //   colorText: Colors.white,
+                      // );
                     },
                     child: const Text(
                       "support team",

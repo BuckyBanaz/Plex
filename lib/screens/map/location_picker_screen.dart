@@ -155,16 +155,20 @@ class LocationPickerScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: loading
-                      ? null // disable tap
+                      ? null
                       : () {
-                    Get.back(result: {
-                      "address": controller.address.value,
-                      "fullAddress": controller.fullAddress.value,
-                      "pincode": controller.pincode.value,
-                      "lat": controller.currentLatLng.value.latitude,
-                      "lng": controller.currentLatLng.value.longitude,
-                    });
+                    Get.back(
+                      result: {
+                        "address": controller.address.value,
+                        "fullAddress": controller.fullAddress.value,
+                        "pincode": controller.pincode.value,
+                        "lat": controller.currentLatLng.value.latitude,
+                        "lng": controller.currentLatLng.value.longitude,
+                      },
+                      closeOverlays: false, // <- prevent Get from closing snackbars/overlays
+                    );
                   },
+
                   child: loading
                       ? const SizedBox(
                     width: 22,

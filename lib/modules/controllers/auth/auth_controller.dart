@@ -278,25 +278,27 @@ class AuthController extends GetxController {
           barrierDismissible: false,
         );
       } else {
+        showToast(message: 'Something went wrong.');
         // API returned non-success
-        Get.snackbar(
-          'Something went wrong.',
-          message.isNotEmpty ? message : 'Something went wrong.',
-          backgroundColor: Colors.red.shade50,
-          colorText: Colors.red.shade900,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        // Get.snackbar(
+        //   'Something went wrong.',
+        //   message.isNotEmpty ? message : 'Something went wrong.',
+        //   backgroundColor: Colors.red.shade50,
+        //   colorText: Colors.red.shade900,
+        //   snackPosition: SnackPosition.BOTTOM,
+        // );
       }
     } catch (e) {
       isLoading.value = false;
       // Network / unexpected error
-      Get.snackbar(
-        'Failed to send reset link.',
-        'Failed to send reset link. Please try again later.',
-        backgroundColor: Colors.red.shade50,
-        colorText: Colors.red.shade900,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      showToast(message: 'Failed to send reset link.');
+      // Get.snackbar(
+      //   'Failed to send reset link.',
+      //   'Failed to send reset link. Please try again later.',
+      //   backgroundColor: Colors.red.shade50,
+      //   colorText: Colors.red.shade900,
+      //   snackPosition: SnackPosition.BOTTOM,
+      // );
     }
   }
 }

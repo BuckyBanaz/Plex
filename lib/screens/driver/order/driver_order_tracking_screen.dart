@@ -7,13 +7,15 @@ import 'package:dio/dio.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import '../../common/Toast/toast.dart';
-import '../../modules/controllers/location/location_permission_controller.dart';
-import '../widgets/helpers.dart';
+
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 
 import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../../common/Toast/toast.dart';
+import '../../../modules/controllers/location/location_permission_controller.dart';
+import '../../widgets/helpers.dart';
 
 enum DeliveryStage { toPickup, toDropoff, completed }
 
@@ -429,10 +431,10 @@ class DriverOrderTrackingScreen extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 22,
-              backgroundColor: Colors.orange[100],
+              backgroundColor: AppColors.primarySwatch.shade100,
               child: Text(
                 _initials((pickup['name'] as String?) ?? 'PV'),
-                style: TextStyle(color: Colors.orange[800], fontWeight: FontWeight.bold),
+                style: TextStyle(color:AppColors.primarySwatch.shade800, fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(width: 12),
@@ -465,7 +467,7 @@ class DriverOrderTrackingScreen extends StatelessWidget {
           child: ElevatedButton(
             onPressed: ctrl.isActionButtonEnabled.value ? ctrl.onActionButtonPressed : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.primary,
               padding: EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

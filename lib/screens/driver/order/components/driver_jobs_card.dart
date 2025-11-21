@@ -5,9 +5,10 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:iconly/iconly.dart';
 
-import '../../../constant/app_colors.dart';
-import '../../../models/driver_order_model.dart';
-import '../../../modules/controllers/home/driver_home_controller.dart';
+import '../../../../constant/app_colors.dart';
+import '../../../../models/driver_order_model.dart';
+import '../../../../modules/controllers/home/driver_home_controller.dart';
+
 
 class DriverJobsCard extends StatelessWidget {
   final OrderModel order;

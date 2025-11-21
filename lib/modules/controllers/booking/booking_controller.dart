@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:plex_user/common/Toast/toast.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
 import '../../../models/user_models.dart';
 import '../../../routes/appRoutes.dart';
@@ -107,13 +108,7 @@ class BookingController extends GetxController {
         pMobileController.text.trim().isEmpty ||
         pLandMarkController.text.trim().isEmpty ||
         pPincodeController.text.trim().isEmpty) {
-      Get.snackbar(
-        "error".tr,
-        "fill_pickup_fields".tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      showToast(message: "fill_pickup_fields".tr);
       return;
     }
     // Validate Drop-off
@@ -121,44 +116,24 @@ class BookingController extends GetxController {
         dmobileController.text.trim().isEmpty ||
         dlankmarkController.text.trim().isEmpty ||
         dpincodeController.text.trim().isEmpty) {
-      Get.snackbar(
-        "error".tr,
-        "fill_dropoff_fields".tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      
+      showToast(message: "fill_dropoff_fields".tr);
       return;
     }
     if (selectedTime.value == 1 && scheduledDateTime.value == null) {
-      Get.snackbar(
-        "error".tr,
-        "please_select_schedule_datetime".tr, // add translation or replace with plain string
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+     
+     showToast(message:  "please_select_schedule_datetime".tr,);
+    
       return;
     }
     // Weight and description
     if (weight.value == 0) {
-      Get.snackbar(
-        "error".tr,
-        "weight_required".tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      
+      showToast(message: "weight_required".tr);
       return;
     }
     if (description.value.trim().isEmpty) {
-      Get.snackbar(
-        "error".tr,
-        "description_required".tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      showToast(message: "description_required".tr,);
       return;
     }
 
@@ -255,18 +230,13 @@ class BookingController extends GetxController {
 
   void confirmPickupDetails() {
     if (!isPickUpFormValid.value) {
-      Get.snackbar(
-        "error".tr,
-        "fill_all_fields".tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      showToast(message: "fill_all_fields".tr);
       return;
     }
     updatePickUpReactive();
     fetchRoute();
-    Get.back();
+    // Get.back();
+    Get.back(closeOverlays: false);
   }
 
   Future<void> _loadUserData() async {
@@ -325,13 +295,8 @@ class BookingController extends GetxController {
 
   void confirmDropOffDetails() {
     if (!isDropOffFormValid.value) {
-      Get.snackbar(
-        "error".tr,
-        "fill_all_fields".tr,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+
+      showToast(message: "fill_all_fields".tr,);
       return;
     }
     updateDropOffReactive();

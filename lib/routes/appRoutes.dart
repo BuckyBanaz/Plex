@@ -15,8 +15,6 @@ import 'package:plex_user/screens/individual/dashboards/user_main_screen.dart';
 import 'package:plex_user/screens/individual/home/user_home_screen.dart';
 import 'package:plex_user/screens/location/location_permission_screen.dart';
 import 'package:plex_user/screens/notification/driver_notification_screen.dart';
-import 'package:plex_user/screens/order/driver_jobs_screen.dart';
-import 'package:plex_user/screens/order/driver_order_tracking_screen.dart';
 import 'package:plex_user/screens/payments/user_payment_screen.dart';
 
 import '../screens/auth/choose_account_screen.dart';
@@ -27,6 +25,10 @@ import '../screens/auth/otp_screen.dart';
 import '../screens/auth/reset_password_screen.dart';
 import '../screens/driver/dashboard/driver_dashboard_screen.dart';
 import '../screens/driver/home/driver_home_screen.dart';
+import '../screens/driver/order/driver_jobs_screen.dart';
+import '../screens/driver/order/driver_order_tracking_screen.dart';
+import '../screens/driver/order/dropoff_verification_screen.dart';
+import '../screens/driver/order/prickup_verification_screen.dart';
 import '../screens/individual/Booking/location_details_screens.dart';
 import '../screens/individual/Booking/searching_driver_screen.dart';
 import '../screens/individual/order/order_complete_screen.dart';
@@ -74,6 +76,8 @@ class AppRoutes {
   static const driverDeliveryOrder = '/driverDeliveryOrder';
   static const driverRides = '/driverRides';
   static const driverOrderTracking = '/driverOrderTracking';
+  static const prickupVerification = '/prickupVerification';
+  static const dropoffVerification = '/dropoffVerification';
 
   static get routes => [
     GetPage(name: splash, page: () => SplashScreen()),
@@ -111,5 +115,7 @@ class AppRoutes {
     GetPage(name: userProfile, page: () => UserProfileScreen()),
     GetPage(name: driverRides, page: () => DriverRideScreen()),
     GetPage(name: driverOrderTracking, page: () => DriverOrderTrackingScreen()),
+    GetPage(name: prickupVerification, page: () => PickupVerificationScreen()),
+    GetPage(name: dropoffVerification, page: () => DeliveryVerificationScreen()),
   ];
 }

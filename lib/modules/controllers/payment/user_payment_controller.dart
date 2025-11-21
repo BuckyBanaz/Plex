@@ -43,9 +43,9 @@ class UserPaymentController extends GetxController {
   ].obs;
 
   final List<Map<String, dynamic>> paymentOptions = [
-    {'name': 'UPI', 'logo': 'assets/icons/upi.png', 'isAsset': true},
-    {'name': 'PayPal', 'logo': 'assets/icons/paypal.png', 'isAsset': true},
-    {'name': 'Google Pay', 'logo': 'assets/icons/gpay.png', 'isAsset': true},
+    // {'name': 'UPI', 'logo': 'assets/icons/upi.png', 'isAsset': true},
+    // {'name': 'PayPal', 'logo': 'assets/icons/paypal.png', 'isAsset': true},
+    // {'name': 'Google Pay', 'logo': 'assets/icons/gpay.png', 'isAsset': true},
     {'name': 'Stripe', 'logo': 'assets/icons/stripe.png', 'isAsset': true},
     {'name': 'COD', 'logo': Icons.money, 'isAsset': false},
     {
@@ -83,7 +83,7 @@ class UserPaymentController extends GetxController {
       expiryDateController.clear();
       cvvController.clear();
 
-      Get.back();
+      Get.back(closeOverlays: false);
 showToast(message: "success_card_added".tr);
       // Get.snackbar(
       //   'Success',
