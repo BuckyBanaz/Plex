@@ -1,6 +1,6 @@
-// ---------- controllers/driver_home_controller.dart ----------
+// controllers/home/driver_home_controller.dart
 import 'dart:async';
-import 'package:flutter/material.dart' show Colors, debugPrint, Center, CircularProgressIndicator;
+import 'package:flutter/material.dart' show Center, CircularProgressIndicator, Colors, debugPrint;
 import 'package:get/get.dart';
 import 'package:plex_user/services/domain/service/socket/socket_service.dart';
 import 'package:plex_user/services/domain/service/socket/driver_order_socket.dart';
@@ -24,15 +24,20 @@ class DriverHomeController extends GetxController {
   final Rx<DriverUserModel?> currentDriver = Rx<DriverUserModel?>(null);
   final Rx<bool> isLoading = false.obs;
 
-  // Online status for driver (bound to UI)
-  final RxBool isOnline = true.obs;
+  // Online status for driver (bound to UI). Default false to avoid accidental connect.
+  final RxBool isOnline = false.obs;
 
   // Orders exposed from driverOrderSocket
   RxList<OrderModel> get orders => driverOrderSocket.orders;
 
-  // Subscriptions if you want to react to new orders separately
+  // UI-level handler references so we can remove them later
+  void Function(dynamic)? _onNewShipmentHandler;
+  void Function(dynamic)? _onSocketErrorHandler;
+
+  // Subscriptions if you want to react to new orders separately (not used for socket raw listening)
   StreamSubscription? _newOrderSub;
-  StreamSubscription? _newOrderStatus;
+
+  // Some sample recent history for UI (you already had this)
   final RxList<Map<String, String>> recentHistory = <Map<String, String>>[
     {
       'name': 'Akhil Verma',
@@ -44,7 +49,7 @@ class DriverHomeController extends GetxController {
       'name': 'Vipin Jain',
       'time': 'Today at 09:30 AM',
       'amount': '200',
-      'initial': 'A',
+      'initial': 'V',
     },
     {
       'name': 'Parikshit Verma',
@@ -52,78 +57,7 @@ class DriverHomeController extends GetxController {
       'amount': '200',
       'initial': 'P',
     },
-    {
-      'name': 'Akhil Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Vipin Jain',
-      'time': 'Today at 09:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Parikshit Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'P',
-    },
-    {
-      'name': 'Akhil Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Vipin Jain',
-      'time': 'Today at 09:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Parikshit Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'P',
-    },
-    {
-      'name': 'Akhil Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Vipin Jain',
-      'time': 'Today at 09:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Parikshit Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'P',
-    },
-    {
-      'name': 'Akhil Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Vipin Jain',
-      'time': 'Today at 09:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Parikshit Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'P',
-    },
+    // ... keep rest as needed
   ].obs;
 
   @override
@@ -131,64 +65,70 @@ class DriverHomeController extends GetxController {
     super.onInit();
     _loadDriverData();
 
+    // Setup handler references (so we can off() the same instances)
+    _onNewShipmentHandler = (dynamic payload) {
+      try {
+        final newOrder = OrderModel.fromJson(Map<String, dynamic>.from(payload));
+        // show bottom sheet (if none open)
+        if (Get.isBottomSheetOpen != true) {
+          showNewOrderSheet(newOrder);
+        } else {
+          debugPrint('DriverHomeController: bottom sheet already open; skipping newShipment sheet');
+        }
+      } catch (e) {
+        debugPrint('DriverHomeController: error parsing newShipment payload: $e');
+      }
+    };
+
+    _onSocketErrorHandler = (dynamic data) {
+      debugPrint('DriverHomeController: socket error event: $data');
+    };
+
     // React to isOnline changes: when true -> connect & start, when false -> stop & disconnect
     ever<bool>(isOnline, (online) async {
       debugPrint('DriverHomeController: isOnline changed -> $online');
+
       if (online == true) {
         // connect socket only when online
         final token = db.accessToken ?? '';
-        if (token.isEmpty) {
-          debugPrint('No token available — cannot connect socket');
+        final driver = currentDriver.value;
+        if (token.isEmpty || driver == null) {
+          debugPrint('DriverHomeController: cannot connect - missing token or driver');
+          isOnline.value = false; // revert
           return;
         }
-        socketService.connect(
-          token,
-          currentDriver.value!.id,
-        ); // establish low-level socket
-        driverOrderSocket.start(); // bind streams & populate orders
 
-        // Optionally listen to newShipment to show bottom sheet here
-        _newOrderSub?.cancel();
+        // Connect low-level socket
+        socketService.connect(token, driver.id);
 
-        _newOrderSub = socketService.newShipmentStream.listen((payload) {
-          try {
-            final newOrder = OrderModel.fromJson(
-              Map<String, dynamic>.from(payload),
-            );
-            // show bottom sheet (if none open)
-            if (Get.isBottomSheetOpen != true) {
-              showNewOrderSheet(newOrder);
-            }
-          } catch (e) {
-            debugPrint('Error parsing newShipment in controller: $e');
-          }
-        });
+        // Start driver-specific listeners (parsing & populating orders)
+        driverOrderSocket.start();
+
+        // Also attach controller-level socket listeners (for showing bottom sheet)
+        try {
+          socketService.on('newShipment', _onNewShipmentHandler!);
+          socketService.on('error', _onSocketErrorHandler!);
+        } catch (e) {
+          debugPrint('DriverHomeController: error attaching socket listeners: $e');
+        }
       } else {
         // stop listening and disconnect
-        _newOrderSub?.cancel();
-        driverOrderSocket.stop(); // stop internal listeners and clear orders
-        socketService.disconnect(); // disconnect socket
+        try {
+          if (_onNewShipmentHandler != null) socketService.off('newShipment', _onNewShipmentHandler);
+          if (_onSocketErrorHandler != null) socketService.off('error', _onSocketErrorHandler);
+        } catch (e) {
+          debugPrint('DriverHomeController: error detaching socket listeners: $e');
+        }
+
+        // Stop high-level socket handlers and clear local orders
+        driverOrderSocket.stop();
+
+        // Disconnect low-level socket
+        socketService.disconnect();
       }
     });
 
-    // Initial behaviour: start socket only if isOnline true
-    if (isOnline.value == true) {
-      final token = db.accessToken ?? '';
-      if (token.isNotEmpty) {
-        socketService.connect(token, currentDriver.value!.id);
-        driverOrderSocket.start();
-        _newOrderSub = socketService.newShipmentStream.listen((payload) {
-          try {
-            final newOrder = OrderModel.fromJson(
-              Map<String, dynamic>.from(payload),
-            );
-            if (Get.isBottomSheetOpen != true) showNewOrderSheet(newOrder);
-          } catch (e) {
-            debugPrint('Error parsing newShipment in init: $e');
-          }
-        });
-      }
-    }
+
   }
 
   Future<void> _loadDriverData() async {
@@ -215,92 +155,13 @@ class DriverHomeController extends GetxController {
     );
   }
 
-  // void acceptOrder(OrderModel order) async {
-  //   try {
-  //     // 1) Close bottom sheet immediately for snappy UI
-  //     if (Get.isBottomSheetOpen == true) Get.back();
-  //
-  //     // 2) Optional: optimistic UI update — mark status locally
-  //     try {
-  //       order.status.value = OrderStatus.Assigned;
-  //       // persist if you have a DB upsert method
-  //       try {
-  //         if ((db as dynamic).upsertShipment != null) {
-  //           await (db as dynamic).upsertShipment(order);
-  //         }
-  //       } catch (_) {}
-  //     } catch (_) {}
-  //
-  //     // 3) Call repository / api to accept
-  //     final ShipmentRepository repo = Get.find<ShipmentRepository>();
-  //     final result = await repo.acceptShipment(
-  //       shipmentId: int.tryParse(order.id) ?? 0,
-  //       order: order,
-  //     );
-  //
-  //     if (result.containsKey('error') || result['success'] != true) {
-  //       // If API failed, revert and show error
-  //       order.status.value = OrderStatus.Pending;
-  //       showToast(message: 'Failed to accept order');
-  //       debugPrint('Accept API error: ${result['error'] ?? result['message']}');
-  //       return;
-  //     }
-  //
-  //     // 4) If server returned updated shipment, prefer that
-  //     final OrderModel? updated = result['shipment'] is OrderModel
-  //         ? result['shipment'] as OrderModel
-  //         : null;
-  //     final OrderModel finalOrder = updated ?? order;
-  //
-  //     // 5) Navigate to Driver Order Tracking screen and pass shipment as map (safer)
-  //     // Convert to a simple Map if you don't have toJson - pass minimal fields needed
-  //     final Map<String, dynamic> args = {
-  //       'shipment': {
-  //         'id': finalOrder.id,
-  //         'orderId': finalOrder.orderId,
-  //         'pickup': {
-  //           'name': finalOrder.pickup.name,
-  //           'phone': finalOrder.pickup.phone,
-  //           'address': finalOrder.pickup.address,
-  //           'latitude': finalOrder.pickup.latitude,
-  //           'longitude': finalOrder.pickup.longitude,
-  //         },
-  //         'dropoff': {
-  //           'name': finalOrder.dropoff.name,
-  //           'phone': finalOrder.dropoff.phone,
-  //           'address': finalOrder.dropoff.address,
-  //           'latitude': finalOrder.dropoff.latitude,
-  //           'longitude': finalOrder.dropoff.longitude,
-  //         },
-  //         'invoiceNumber': finalOrder.invoiceNumber,
-  //         'estimatedCost': finalOrder.estimatedCost,
-  //         'driverId': finalOrder.driverId,
-  //       },
-  //     };
-  //
-  //     // navigate
-  //     Get.toNamed(AppRoutes.driverOrderTracking, arguments: args);
-  //   } catch (e, st) {
-  //     debugPrint('Error accepting order: $e\n$st');
-  //     showToast(message: 'Something went wrong while accepting order');
-  //     try {
-  //       order.status.value = OrderStatus.Pending;
-  //     } catch (_) {}
-  //   }
-  // }
+  /// Accept order flow (uses repository; optimistic UI update + rollback on failure).
   void acceptOrder(OrderModel order) async {
     bool loaderShown = false;
 
-    // show loader
     try {
+      // show loader
       if (Get.isDialogOpen == false) {
-        Get.dialog(
-          Center(child: CircularProgressIndicator(color: Colors.orange)),
-          barrierDismissible: false,
-        );
-        loaderShown = true;
-      } else {
-        // if some dialog is already open, still try to show loader and mark flag
         Get.dialog(
           Center(child: CircularProgressIndicator(color: Colors.orange)),
           barrierDismissible: false,
@@ -339,7 +200,6 @@ class DriverHomeController extends GetxController {
 
         // close loader only (not any other dialogs)
         if (loaderShown && Get.isDialogOpen == true) {
-          // pop loader dialog we opened
           Get.back();
           loaderShown = false;
         }
@@ -352,7 +212,6 @@ class DriverHomeController extends GetxController {
             probe.contains('conflict');
 
         if (isTaken) {
-          // show user dialog (this should remain until user taps OK)
           Get.defaultDialog(
             title: 'Order taken',
             middleText: 'Shipment already taken or not found. This order is not available.',
@@ -383,7 +242,7 @@ class DriverHomeController extends GetxController {
         loaderShown = false;
       }
 
-      // navigate
+      // navigate to tracking
       final Map<String, dynamic> args = {
         'shipment': {
           'id': finalOrder.id,
@@ -419,7 +278,6 @@ class DriverHomeController extends GetxController {
       }
       showToast(message: 'Something went wrong');
     } finally {
-      // Only close loader if still open. Do NOT close other dialogs.
       if (loaderShown && Get.isDialogOpen == true) {
         Get.back();
         loaderShown = false;
@@ -427,22 +285,21 @@ class DriverHomeController extends GetxController {
     }
   }
 
-
   void rejectOrder(OrderModel order) {
     driverOrderSocket.rejectOrder(order);
-    Get.back(); // close bottom sheet
+    if (Get.isBottomSheetOpen == true) Get.back();
   }
 
+  /// Toggle online status: flips local state and attempts to update backend.
   Future<void> toggleOnlineStatus() async {
-    // Flip local state immediately for snappy UI
+    // Flip local state immediately for snappy UI; the `ever` will react and connect/disconnect sockets.
     isOnline.value = !isOnline.value;
 
     try {
-      // Call repository which ensures driver-only logic
       await userRepo.updateStatus(isOnline.value);
       debugPrint("Updated driver online status to: ${isOnline.value}");
     } catch (e) {
-      // Revert state on failure and show toast
+      // Revert on failure
       isOnline.value = !isOnline.value;
       debugPrint("Error updating driver status: $e");
       showToast(message: "Failed to update online status");
@@ -451,6 +308,14 @@ class DriverHomeController extends GetxController {
 
   @override
   void onClose() {
+    // detach socket handlers
+    try {
+      if (_onNewShipmentHandler != null) socketService.off('newShipment', _onNewShipmentHandler);
+      if (_onSocketErrorHandler != null) socketService.off('error', _onSocketErrorHandler);
+    } catch (e) {
+      debugPrint('DriverHomeController.onClose: error detaching listeners: $e');
+    }
+
     _newOrderSub?.cancel();
     driverOrderSocket.stop();
     socketService.disconnect();

@@ -68,16 +68,27 @@ class NewOrderSheet extends StatelessWidget {
                     ],
                   ),
                   // if (orderData.isPaid)
-                    Chip(
-                      backgroundColor: AppColors.primarySwatch.shade50,
-                      label: Text(
-                        'alreadyPaid'.tr,
+                  Row(
+                    children: [
+                      Icon(
+                        orderData.paymentStatus != "pending" ? Icons.check_circle : Icons.cancel,
+                        color: orderData.paymentStatus != "pending"
+                            ? AppColors.greenPaid
+                            : AppColors.redUnpaid,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        orderData.paymentStatus != "pending" ? 'paid'.tr : 'unpaid'.tr,
                         style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
+                          color: orderData.paymentStatus != "pending"
+                              ? AppColors.greenPaid
+                              : AppColors.redUnpaid,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
+                    ],
+                  ),
                 ],
               ),
               const Divider(height: 32),
