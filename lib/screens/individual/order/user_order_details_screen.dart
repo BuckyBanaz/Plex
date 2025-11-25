@@ -83,6 +83,76 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
     );
   }
 
+
+  Widget _buildTrackButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        onPressed: () {
+          // TODO: Tracking screen navigation
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Tracking functionality coming soon!")),
+          );
+          // Get.snackbar(
+          //   "Tracking",
+          //   "Tracking functionality coming soon!",
+          //   snackPosition: SnackPosition.BOTTOM,
+          //   backgroundColor: AppColors.primary,
+          //   colorText: Colors.white,
+          // );
+        },
+        child: const Text(
+          "Track Your Package",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String getInitials(String name) {
+    if (name.isEmpty) return "?";
+
+    List<String> parts = name.trim().split(" ");
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase(); // Single name
+    }
+    return (parts[0][0] + parts[1][0]).toUpperCase(); // First + Last initials
+  }
+  Widget buildProfileAvatar(String? imageUrl, String driverName) {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return CircleAvatar(
+        radius: 24,
+        backgroundImage: NetworkImage(imageUrl),
+      );
+    }
+
+    // initials fallback
+    return CircleAvatar(
+      radius: 24,
+      backgroundColor: AppColors.primary,
+      child: Text(
+        getInitials(driverName),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   Widget _buildRatingStars(String ratingString) {
     double rating = double.tryParse(ratingString) ?? 0.0;
     int filledStars = rating.floor();
@@ -245,28 +315,34 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
               children: [
                 const SizedBox(width: 12.0),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        driverName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      buildProfileAvatar(driver?['profile'], driverName),
+                      SizedBox(width: 12.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            driverName,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4.0),
+                          Text(
+                            driverPhone,
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
+                          // optionally show rating if available in driver map
+                          if (driver != null && driver['rating'] != null)
+                            _buildRatingStars(driver['rating'].toString()),
+                        ],
                       ),
-                      const SizedBox(height: 4.0),
-                      Text(
-                        driverPhone,
-                        style: const TextStyle(
-                          color: Colors.black54,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 8.0),
-                      // optionally show rating if available in driver map
-                      if (driver != null && driver['rating'] != null)
-                        _buildRatingStars(driver['rating'].toString()),
                     ],
                   ),
                 ),
@@ -327,7 +403,7 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
                           dashRadius: 2.0,
                         ),
                       ),
-                      Icon(Icons.location_on, color: AppColors.secondary, size: 16.0),
+                      Icon(IconlyBold.location, color: AppColors.secondary, size: 16.0),
                     ],
                   ),
                 ),
@@ -365,6 +441,11 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
               ],
             ),
             const SizedBox(height: 24.0),
+            if (order.status.value == OrderStatus.InTransit) ...[
+              const SizedBox(height: 20),
+              _buildTrackButton(context),
+            ],
+            const SizedBox(height: 20),
 
             // Collect time (immediate or scheduled)
             Column(
