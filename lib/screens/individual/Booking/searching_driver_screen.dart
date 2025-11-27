@@ -38,12 +38,12 @@ class _SearchingDriverScreenState extends State<SearchingDriverScreen> {
     ever(searchCtrl.found, (bool f) {
       if (f == true && searchCtrl.foundDriver.value != null) {
         final d = searchCtrl.foundDriver.value!;
-        final userLoc = locCtrl.currentPosition.value ?? LatLng(29.0333067, 75.939065);
+        final userLoc =
+            locCtrl.currentPosition.value ?? LatLng(29.0333067, 75.939065);
         trackCtrl.startTracking(d, userLoc);
-        Get.to(() => DriverTrackingScreen(driverId: d.id));
+        // Get.to(() => DriverTrackingScreen(driverId: d.id));
       }
     });
-
   }
 
   @override
@@ -84,18 +84,11 @@ class _SearchingDriverScreenState extends State<SearchingDriverScreen> {
               if (searchCtrl.isSearching.value)
                 const Center(
                   child: Stack(
-                    children: [
-                      SearchingLottie(
-                        speed: 3,
-                        size: 100,
-                      ),
-                    ],
+                    children: [SearchingLottie(speed: 3, size: 100)],
                   ),
                 ),
             ],
           ),
-
-
         ],
       ),
       bottomSheet: _buildBottomSheet(context),
@@ -210,7 +203,13 @@ class _SearchingDriverScreenState extends State<SearchingDriverScreen> {
                   searchCtrl.cancelSearch();
                   Get.back();
                 },
-                child: Text("Cancel", style: TextStyle(color: Colors.orange,fontWeight: FontWeight.bold)),
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],

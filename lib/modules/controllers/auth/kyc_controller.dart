@@ -259,7 +259,7 @@ class _NameFuelResult {
 /// Cleans owner name and tries to extract fuel type if merged into the string.
 /// Removes common OCR garbage like "Fuel Used", "Son/Daughter/Wife of", "Address", "Owner", trailing numbers etc.
 _NameFuelResult _cleanOwnerNameAndExtractFuel(String rawName, String fallbackFuel) {
-  if (rawName == null || rawName.trim().isEmpty) {
+  if (rawName.trim().isEmpty) {
     return _NameFuelResult('', fallbackFuel ?? '');
   }
   String s = rawName.trim();
@@ -270,7 +270,7 @@ _NameFuelResult _cleanOwnerNameAndExtractFuel(String rawName, String fallbackFue
   // Common fuel words to search for
   final fuelWords = ['PETROL', 'DIESEL', 'CNG', 'LPG', 'Electric', 'ELECTRIC', 'PETROl'];
 
-  String foundFuel = fallbackFuel?.trim() ?? '';
+  String foundFuel = fallbackFuel.trim() ?? '';
 
   // If fuel word exists in string, extract it
   for (final f in fuelWords) {
@@ -309,7 +309,6 @@ _NameFuelResult _cleanOwnerNameAndExtractFuel(String rawName, String fallbackFue
 /// Parse date strings like "17/11/2023", "03-08-2023", "03/08/23", "03/08/2023 00:00:00"
 /// Returns computed age in 'X years Y months' or null if cannot compute.
 String? _computeAgeFromString(String dateStr) {
-  if (dateStr == null) return null;
   final s = dateStr.trim();
 
   // Try to find pattern dd/mm/yyyy or dd-mm-yyyy

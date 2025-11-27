@@ -246,8 +246,8 @@ class BookingController extends GetxController {
       final UserData = db.user;
       if (UserData != null) {
         currentUser.value = UserData;
-        pNameController.text = UserData!.name;
-        pMobileController.text = UserData!.mobile;
+        pNameController.text = UserData.name;
+        pMobileController.text = UserData.mobile;
         print("User:${currentUser.value?.name}");
       } else {
         print("No User data found in local DB.");
@@ -343,7 +343,11 @@ class BookingController extends GetxController {
         );
       }
 
-      mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50.0));
+      try {
+        mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50.0));
+      } catch (e) {
+        debugPrint('fetchRoute animateCamera error: $e');
+      }
     }
   }
 

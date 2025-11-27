@@ -24,5 +24,6 @@ class ApiEndpoint {
   static const getShipments = '/shipments';
   static const acceptShipment = '/shipments/:id/accept';
   static const rejectShipment = '/shipments/:id/reject';
+  static const driverTracking = '/shipments/:id/location';
 
 }

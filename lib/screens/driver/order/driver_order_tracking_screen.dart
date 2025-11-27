@@ -349,15 +349,24 @@ class DriverOrderTrackingController extends GetxController {
     try {
       mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 100));
     } catch (e) {
+      debugPrint('_fitCameraToRoute error: $e');
       if (currentLatLng != null) {
-        mapController!.animateCamera(CameraUpdate.newLatLng(currentLatLng!));
+        try {
+          mapController!.animateCamera(CameraUpdate.newLatLng(currentLatLng!));
+        } catch (e2) {
+          debugPrint('_fitCameraToRoute fallback error: $e2');
+        }
       }
     }
   }
 
   void _fitCameraToIncludeCurrent() {
     if (currentLatLng == null || mapController == null) return;
-    mapController!.animateCamera(CameraUpdate.newLatLngZoom(currentLatLng!, 15));
+    try {
+      mapController!.animateCamera(CameraUpdate.newLatLngZoom(currentLatLng!, 15));
+    } catch (e) {
+      debugPrint('_fitCameraToIncludeCurrent error: $e');
+    }
   }
 
   void onMapCreated(GoogleMapController controller) {

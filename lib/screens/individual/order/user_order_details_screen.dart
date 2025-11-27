@@ -7,10 +7,13 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
+import 'package:plex_user/screens/individual/Booking/driver_tracking_screen.dart';
 import 'package:plex_user/screens/widgets/helpers.dart';
 import '../../../../constant/app_assets.dart';
 import '../../../../models/driver_order_model.dart';
 import '../../../modules/controllers/orders/user_order_controller.dart';
+import '../../../modules/controllers/booking/driver_tracking_controller.dart';
+import '../../../modules/controllers/booking/search_driver_controller.dart';
 
 class UserOrderDetailsScreen extends GetView<UserOrderController> {
   const UserOrderDetailsScreen({super.key});
@@ -19,8 +22,10 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
   String _formatDateTime(DateTime? dt) {
     if (dt == null) return '-';
     final d = dt.toLocal();
-    final date = "${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}";
-    final time = "${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}";
+    final date =
+        "${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}";
+    final time =
+        "${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}";
     return "$date • $time";
   }
 
@@ -83,8 +88,10 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
     );
   }
 
-
   Widget _buildTrackButton(BuildContext context) {
+    final order = controller.selectedOrder.value;
+    final isLoadingLocation = controller.isLoadingDriverLocation.value;
+
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -95,28 +102,62 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        onPressed: () {
-          // TODO: Tracking screen navigation
+        onPressed: isLoadingLocation
+            ? null
+            : () {
+                if (order == null) return;
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Tracking functionality coming soon!")),
-          );
-          // Get.snackbar(
-          //   "Tracking",
-          //   "Tracking functionality coming soon!",
-          //   snackPosition: SnackPosition.BOTTOM,
-          //   backgroundColor: AppColors.primary,
-          //   colorText: Colors.white,
-          // );
-        },
-        child: const Text(
-          "Track Your Package",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+                // Get driver details from order
+                final driverDetails = order.driverDetails;
+                if (driverDetails == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Driver information not available"),
+                    ),
+                  );
+                  return;
+                }
+
+                // Create DriverModel
+                final driver = DriverModel(
+                  id: driverDetails['driverId'] ?? '',
+                  name: driverDetails['name'] ?? '',
+                  lat: driverDetails['lat'] ?? 0.0,
+                  lng: driverDetails['lng'] ?? 0.0,
+                  vehicle: driverDetails['vehicle'] ?? '',
+                  avatarUrl: driverDetails['profile'].toString(),
+                );
+
+                final driverLocation = controller.driverLocation.value;
+
+                // Initialize tracking controller
+                if (driverLocation != null) {
+                  final trackingController = Get.put(
+                    DriverTrackingController(),
+                  );
+                  trackingController.startTracking(driver, driverLocation);
+                }
+
+                // Navigate to tracking screen
+                Get.to(() => DriverTrackingScreen(order: order));
+              },
+        child: isLoadingLocation
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : const Text(
+                "Track Your Package",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
       ),
     );
   }
@@ -130,12 +171,10 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
     }
     return (parts[0][0] + parts[1][0]).toUpperCase(); // First + Last initials
   }
+
   Widget buildProfileAvatar(String? imageUrl, String driverName) {
     if (imageUrl != null && imageUrl.isNotEmpty) {
-      return CircleAvatar(
-        radius: 24,
-        backgroundImage: NetworkImage(imageUrl),
-      );
+      return CircleAvatar(radius: 24, backgroundImage: NetworkImage(imageUrl));
     }
 
     // initials fallback
@@ -196,34 +235,36 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
         const SizedBox(height: 12.0),
         imageUrls.isEmpty
             ? const Text(
-          "No images available.",
-          style: TextStyle(color: Colors.black54),
-        )
+                "No images available.",
+                style: TextStyle(color: Colors.black54),
+              )
             : SizedBox(
-          height: 100,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: imageUrls.length,
-            itemBuilder: (context, index) {
-              final url = imageUrls[index];
-              return Container(
-                margin: const EdgeInsets.only(right: 10.0),
-                width: 100,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8.0),
-                  image: url.isNotEmpty
-                      ? DecorationImage(
-                    image: NetworkImage(url),
-                    fit: BoxFit.cover,
-                  )
-                      : null,
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: imageUrls.length,
+                  itemBuilder: (context, index) {
+                    final url = imageUrls[index];
+                    return Container(
+                      margin: const EdgeInsets.only(right: 10.0),
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8.0),
+                        image: url.isNotEmpty
+                            ? DecorationImage(
+                                image: NetworkImage(url),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                      ),
+                      child: url.isEmpty
+                          ? const Center(child: Icon(Icons.image_not_supported))
+                          : null,
+                    );
+                  },
                 ),
-                child: url.isEmpty ? const Center(child: Icon(Icons.image_not_supported)) : null,
-              );
-            },
-          ),
-        ),
+              ),
         const SizedBox(height: 20.0),
       ],
     );
@@ -231,7 +272,10 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
 
   List<String> _extractImages(OrderModel order) {
     try {
-      final imgs = (order.images ?? []).map((e) => e?.toString() ?? '').where((s) => s.isNotEmpty).toList();
+      final imgs = (order.images ?? [])
+          .map((e) => e?.toString() ?? '')
+          .where((s) => s.isNotEmpty)
+          .toList();
       return List<String>.from(imgs);
     } catch (_) {
       return <String>[];
@@ -254,10 +298,23 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
           backgroundColor: AppColors.secondary,
           foregroundColor: AppColors.textColor,
         ),
-        body: const Center(
-          child: Text("No order selected."),
-        ),
+        body: const Center(child: Text("No order selected.")),
       );
+    }
+
+    // Fetch driver location when screen opens (if order is in transit/accepted/assigned)
+    final shouldFetchLocation =
+        order.status.value == OrderStatus.InTransit ||
+        order.status.value == OrderStatus.Accepted ||
+        order.status.value == OrderStatus.Assigned;
+
+    if (shouldFetchLocation &&
+        controller.driverLocation.value == null &&
+        !controller.isLoadingDriverLocation.value) {
+      // Fetch driver location in the background
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.fetchDriverLocation(order.id);
+      });
     }
 
     String vehicleIconAsset = AppAssets.bike;
@@ -269,12 +326,20 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
 
     // driver details safe read
     final Map<String, dynamic>? driver = order.driverDetails;
-    final driverName = driver != null ? (driver['name']?.toString() ?? 'Driver') : 'No driver';
-    final driverPhone = driver != null ? (driver['phone']?.toString() ?? '-') : '-';
+    final driverName = driver != null
+        ? (driver['name']?.toString() ?? 'Driver')
+        : 'No driver';
+    final driverPhone = driver != null
+        ? (driver['phone']?.toString() ?? '-')
+        : '-';
 
     final images = _extractImages(order);
-    final pickupImages = images.isEmpty ? <String>[] : images.sublist(0, (images.length / 2).ceil());
-    final deliveryImages = images.length <= 1 ? <String>[] : images.sublist((images.length / 2).ceil());
+    final pickupImages = images.isEmpty
+        ? <String>[]
+        : images.sublist(0, (images.length / 2).ceil());
+    final deliveryImages = images.length <= 1
+        ? <String>[]
+        : images.sublist((images.length / 2).ceil());
 
     // collect time display logic
     final collectType = order.collectTime?.type ?? 'immediate';
@@ -283,7 +348,10 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.secondary,
-        title: Text("Order Details", style: TextStyle(color: AppColors.textColor)),
+        title: Text(
+          "Order Details",
+          style: TextStyle(color: AppColors.textColor),
+        ),
         elevation: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
@@ -356,7 +424,7 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
                     vehicleIconAsset,
                     matchTextDirection: true,
                     height: 20,
-                    colorFilter:  ColorFilter.mode(
+                    colorFilter: ColorFilter.mode(
                       AppColors.primary,
                       BlendMode.srcIn,
                     ),
@@ -403,7 +471,11 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
                           dashRadius: 2.0,
                         ),
                       ),
-                      Icon(IconlyBold.location, color: AppColors.secondary, size: 16.0),
+                      Icon(
+                        IconlyBold.location,
+                        color: AppColors.secondary,
+                        size: 16.0,
+                      ),
                     ],
                   ),
                 ),
@@ -419,7 +491,10 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
                       const SizedBox(height: 4.0),
                       Text(
                         order.pickup.address,
-                        style: const TextStyle(color: Colors.black, fontSize: 14),
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                        ),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -431,7 +506,10 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
                       const SizedBox(height: 4.0),
                       Text(
                         order.dropoff.address,
-                        style: const TextStyle(color: Colors.black, fontSize: 14),
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                        ),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -451,26 +529,40 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Collect Time", style: TextStyle(color: Colors.black54, fontSize: 12)),
+                const Text(
+                  "Collect Time",
+                  style: TextStyle(color: Colors.black54, fontSize: 12),
+                ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
                     Text(
                       collectType.capitalizeFirst!,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     if (collectType.toLowerCase() == 'scheduled')
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Text(
-                          scheduledAt != null ? _formatDateTime(scheduledAt) : 'Scheduled time not set',
-                          style: const TextStyle(color: Colors.black54, fontSize: 12),
+                          scheduledAt != null
+                              ? _formatDateTime(scheduledAt)
+                              : 'Scheduled time not set',
+                          style: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                   ],
@@ -482,17 +574,34 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(child: InfoColumnItem("Vehicle Type", order.vehicleType ?? '-')),
+                Expanded(
+                  child: InfoColumnItem(
+                    "Vehicle Type",
+                    order.vehicleType ?? '-',
+                  ),
+                ),
                 Expanded(child: InfoColumnItem("Weight", order.weight ?? '-')),
-                Expanded(child: InfoColumnItem("Fee", order.estimatedCost?.toString() ?? '-')),
-                Expanded(child: InfoColumnItem("Payment Method", order.paymentMethod?.toString() ?? '-')),
+                Expanded(
+                  child: InfoColumnItem(
+                    "Fee",
+                    order.estimatedCost?.toString() ?? '-',
+                  ),
+                ),
+                Expanded(
+                  child: InfoColumnItem(
+                    "Payment Method",
+                    order.paymentMethod?.toString() ?? '-',
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24.0),
 
             // Images (if any)
-            if (pickupImages.isNotEmpty) _buildImageGallery("Pickup image(s)", pickupImages),
-            if (deliveryImages.isNotEmpty) _buildImageGallery("Delivery image(s)", deliveryImages),
+            if (pickupImages.isNotEmpty)
+              _buildImageGallery("Pickup image(s)", pickupImages),
+            if (deliveryImages.isNotEmpty)
+              _buildImageGallery("Delivery image(s)", deliveryImages),
 
             Align(
               alignment: Alignment.centerLeft,

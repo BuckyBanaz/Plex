@@ -300,7 +300,7 @@ class RoundIconButton extends StatelessWidget {
 // Tab bar widget that updates reactively with GetX
 class _TabBarWidget extends StatelessWidget {
   final MyRidesController controller;
-  const _TabBarWidget({super.key, required this.controller});
+  const _TabBarWidget({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -341,7 +341,6 @@ class _TabButton extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
   const _TabButton({
-    super.key,
     required this.label,
     required this.selected,
     required this.onTap,

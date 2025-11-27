@@ -271,12 +271,16 @@ class UserAddressController extends GetxController {
 
   Future<void> animateToLocation(LatLng locationLatLng) async {
     if (mapControllerCompleter.isCompleted) {
-      final ctrl = await mapControllerCompleter.future;
-      await ctrl.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: locationLatLng, zoom: 16.0),
-        ),
-      );
+      try {
+        final ctrl = await mapControllerCompleter.future;
+        await ctrl.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(target: locationLatLng, zoom: 16.0),
+          ),
+        );
+      } catch (e) {
+        debugPrint('animateToLocation error: $e');
+      }
     }
   }
 
@@ -360,8 +364,12 @@ class UserAddressController extends GetxController {
 
         // animate map
         if (mapControllerCompleter.isCompleted) {
-          final ctrl = await mapControllerCompleter.future;
-          await ctrl.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16));
+          try {
+            final ctrl = await mapControllerCompleter.future;
+            await ctrl.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16));
+          } catch (e) {
+            debugPrint('selectSuggestion animateCamera error: $e');
+          }
         }
 
         // update selected address using reverse geocode

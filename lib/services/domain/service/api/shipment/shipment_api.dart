@@ -170,6 +170,26 @@ class ShipmentApi {
     }
   }
 
+  // Get driver location for a shipment
+  Future<Map<String, dynamic>> getDriverLocation({
+    required String shipmentId,
+  }) async {
+    try {
+      final endpoint = ApiEndpoint.driverTracking.replaceFirst(':id', shipmentId);
+      
+      final response = await dio.get(endpoint);
+
+      if (response.data is Map<String, dynamic>) {
+        return Map<String, dynamic>.from(response.data);
+      }
+
+      return {'message': response.data?.toString()};
+    } catch (e) {
+      debugPrint('Error fetching driver location: $e');
+      return {'error': e.toString()};
+    }
+  }
+
 // helper: extract common server message safely
   String? _extractMessageFrom(dynamic respData) {
     try {

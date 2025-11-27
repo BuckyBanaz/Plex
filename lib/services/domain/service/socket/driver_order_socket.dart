@@ -2,8 +2,11 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:plex_user/modules/controllers/booking/driver_tracking_controller.dart';
 import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 import '../../../../models/driver_order_model.dart';
+import '../../../../modules/controllers/location/location_permission_controller.dart';
 import 'socket_service.dart';
 
 class DriverOrderSocket {
@@ -24,7 +27,9 @@ class DriverOrderSocket {
   void start() {
     final sock = socketService.socket;
     if (sock == null) {
-      debugPrint('DriverOrderSocket.start: socket is null — make sure SocketService.connect was called');
+      debugPrint(
+        'DriverOrderSocket.start: socket is null — make sure SocketService.connect was called',
+      );
       return;
     }
 
@@ -32,7 +37,9 @@ class DriverOrderSocket {
 
     // 1) existingShipments - keep the central cache in socketService and also parse into orders
     socketService.on('existingShipments', (data) {
-      debugPrint('DriverOrderSocket: existingShipments received (${(data as List?)?.length ?? 0})');
+      debugPrint(
+        'DriverOrderSocket: existingShipments received (${(data as List?)?.length ?? 0})',
+      );
       try {
         final list = List<dynamic>.from(data ?? []);
         // update central cache (optional)
@@ -44,7 +51,9 @@ class DriverOrderSocket {
             .where((o) => o.status.value != OrderStatus.InTransit)
             .toList();
         orders.assignAll(parsed);
-        debugPrint('DriverOrderSocket: parsed ${parsed.length} cached orders (filtered InTransit)');
+        debugPrint(
+          'DriverOrderSocket: parsed ${parsed.length} cached orders (filtered InTransit)',
+        );
       } catch (e) {
         debugPrint('DriverOrderSocket: error parsing existingShipments: $e');
       }
@@ -55,7 +64,8 @@ class DriverOrderSocket {
       try {
         // Build stable key: prefer explicit shipment id or orderId; fallback to payload string
         String key;
-        if (payload is Map && (payload['id'] != null || payload['shipmentId'] != null)) {
+        if (payload is Map &&
+            (payload['id'] != null || payload['shipmentId'] != null)) {
           key = (payload['id'] ?? payload['shipmentId']).toString();
         } else if (payload is Map && payload['orderId'] != null) {
           key = payload['orderId'].toString();
@@ -68,17 +78,25 @@ class DriverOrderSocket {
         final now = DateTime.now();
         final last = _recentShipments[key];
         if (last != null && now.difference(last) < dedupWindow) {
-          debugPrint('DriverOrderSocket: skipping duplicate newShipment key=$key');
+          debugPrint(
+            'DriverOrderSocket: skipping duplicate newShipment key=$key',
+          );
           return;
         }
         _recentShipments[key] = now;
         // cleanup old entries
-        _recentShipments.removeWhere((_, dt) => dt.isBefore(now.subtract(const Duration(minutes: 5))));
+        _recentShipments.removeWhere(
+          (_, dt) => dt.isBefore(now.subtract(const Duration(minutes: 5))),
+        );
 
-        final newOrder = OrderModel.fromJson(Map<String, dynamic>.from(payload));
+        final newOrder = OrderModel.fromJson(
+          Map<String, dynamic>.from(payload),
+        );
 
         if (newOrder.status.value == OrderStatus.InTransit) {
-          debugPrint('DriverOrderSocket: ignoring newShipment id=${newOrder.id} because status is InTransit');
+          debugPrint(
+            'DriverOrderSocket: ignoring newShipment id=${newOrder.id} because status is InTransit',
+          );
           return;
         }
 
@@ -99,19 +117,89 @@ class DriverOrderSocket {
 
         final idx = orders.indexWhere((o) => o.id == shipmentId);
         if (idx != -1) {
-          if (status == 'in_transit' || status == 'rejected' || status == 'cancelled') {
+          if (status == 'in_transit' ||
+              status == 'rejected' ||
+              status == 'cancelled') {
             orders.removeAt(idx);
-            debugPrint('DriverOrderSocket: removed order $shipmentId due to status $status');
+            debugPrint(
+              'DriverOrderSocket: removed order $shipmentId due to status $status',
+            );
           } else {
             try {
               orders[idx].status.value = OrderModel.parseStatus(status);
             } catch (_) {}
           }
         } else {
-          debugPrint('DriverOrderSocket: shipment_status for unknown id=$shipmentId, status=$status');
+          debugPrint(
+            'DriverOrderSocket: shipment_status for unknown id=$shipmentId, status=$status',
+          );
         }
       } catch (e) {
         debugPrint('DriverOrderSocket: error handling shipment_status: $e');
+      }
+    });
+
+    socketService.on('locationUpdate', (payload) {
+      debugPrint('DriverOrderSocket: locationUpdate received: $payload');
+      try {
+        Map<String, dynamic> data;
+        if (payload is Map) {
+          data = Map<String, dynamic>.from(payload);
+        } else {
+          debugPrint(
+            'DriverOrderSocket: locationUpdate payload is not a Map, ignoring',
+          );
+          return;
+        }
+
+        final lat = (data['lat'] ?? data['latitude']) as num?;
+        final lng = (data['lng'] ?? data['longitude'] ?? data['lon']) as num?;
+
+        if (lat != null && lng != null) {
+          final location = LatLng(lat.toDouble(), lng.toDouble());
+
+          // Update driver tracking controller if it exists
+          try {
+            final trackingController = Get.find<DriverTrackingController>();
+            final driver = trackingController.driver.value;
+            if (driver != null) {
+              // Update driver's position directly
+              driver.lat = location.latitude;
+              driver.lng = location.longitude;
+              trackingController.driver.refresh();
+              debugPrint(
+                'DriverOrderSocket: Updated driver position to $location',
+              );
+            } else {
+              debugPrint(
+                'DriverOrderSocket: DriverTrackingController exists but no driver is set',
+              );
+            }
+          } catch (e) {
+            debugPrint(
+              'DriverOrderSocket: DriverTrackingController not found or error: $e',
+            );
+          }
+
+          // Also update LocationController if available
+          try {
+            final locationController = Get.find<LocationController>();
+            locationController.currentPosition.value = location;
+            debugPrint(
+              'DriverOrderSocket: Updated LocationController position to $location',
+            );
+          } catch (e) {
+            debugPrint(
+              'DriverOrderSocket: LocationController not found, skipping update: $e',
+            );
+          }
+        } else {
+          debugPrint(
+            'DriverOrderSocket: Invalid locationUpdate payload - missing lat/lng. Data: $data',
+          );
+        }
+      } catch (e) {
+        debugPrint('DriverOrderSocket: Error handling locationUpdate: $e');
       }
     });
 
@@ -127,6 +215,7 @@ class DriverOrderSocket {
       socketService.off('existingShipments');
       socketService.off('newShipment');
       socketService.off('shipment_status');
+      socketService.off('locationUpdate');
       socketService.off('error');
     } catch (e) {
       debugPrint('DriverOrderSocket.stop: error while off(): $e');

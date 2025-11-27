@@ -200,7 +200,7 @@ class DriverKycFlow extends StatelessWidget {
 
 class _ProgressIndicator extends StatelessWidget {
   final int step;
-  const _ProgressIndicator({super.key, required this.step});
+  const _ProgressIndicator({required this.step});
 
   @override
   Widget build(BuildContext context) {

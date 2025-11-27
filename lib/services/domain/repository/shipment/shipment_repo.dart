@@ -271,4 +271,58 @@ class ShipmentRepository {
     }
   }
 
+  Future<Map<String, dynamic>> getDriverLocation({
+    required String shipmentId,
+  }) async {
+    try {
+      final result = await shipmentApi.getDriverLocation(shipmentId: shipmentId);
+
+      if (result.containsKey('error')) {
+        debugPrint('API error while fetching driver location: ${result['error']}');
+        return {'error': result['error']};
+      }
+
+      // Backend likely returns: { success: true, data: { lat: ..., lng: ... } }
+      final success = result['success'] == true;
+      final data = result['data'] ?? result;
+
+      if (!success && !result.containsKey('lat')) {
+        return {
+          'success': false,
+          'message': result['message'] ?? 'Failed to fetch driver location',
+        };
+      }
+
+      // Extract lat/lng from response
+      double? lat;
+      double? lng;
+
+      if (data is Map) {
+        lat = (data['lat'] ?? data['latitude']) is num
+            ? (data['lat'] ?? data['latitude']).toDouble()
+            : null;
+        lng = (data['lng'] ?? data['longitude'] ?? data['lon']) is num
+            ? (data['lng'] ?? data['longitude'] ?? data['lon']).toDouble()
+            : null;
+      }
+
+      if (lat != null && lng != null) {
+        return {
+          'success': true,
+          'lat': lat,
+          'lng': lng,
+          'data': data,
+        };
+      }
+
+      return {
+        'success': false,
+        'message': 'Driver location data not found',
+      };
+    } catch (e) {
+      debugPrint('Error in repository while fetching driver location: $e');
+      return {'error': e.toString()};
+    }
+  }
+
 }

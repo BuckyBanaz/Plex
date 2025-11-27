@@ -131,8 +131,12 @@ class MapLocationController extends GetxController {
       final lng = (details['lng'] as double?) ?? 0.0;
 
 
-      final mapCtrl = await mapController.future;
-      mapCtrl.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16));
+      try {
+        final mapCtrl = await mapController.future;
+        mapCtrl.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16));
+      } catch (e) {
+        debugPrint('selectSuggestion animateCamera error: $e');
+      }
 
       await _updateAddress(lat, lng);
       _sessionToken = _generateSessionToken();

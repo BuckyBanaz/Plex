@@ -278,7 +278,7 @@ class OrderModel {
           json = {};
         }
       } else if (rawJson is Map) {
-        json = Map<String, dynamic>.from(rawJson as Map);
+        json = Map<String, dynamic>.from(rawJson);
       } else {
         json = {};
       }
@@ -434,7 +434,7 @@ class OrderModel {
       }
 
       if (raw is List) {
-        return (raw as List).map((e) => OrderModel.fromJson(e)).toList();
+        return (raw).map((e) => OrderModel.fromJson(e)).toList();
       }
 
       // fallback: if it's a single shipment-like map
