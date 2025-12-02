@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class SocketService extends GetxService {
@@ -61,7 +62,7 @@ class SocketService extends GetxService {
       debugPrint('✅ SocketService: connected (${_socket!.id})');
       // keep only basic emit on connect (optional)
       try {
-        final db = Get.find<dynamic>(); // replace with actual DatabaseService type if you want
+        final db = Get.find<DatabaseService>(); // replace with actual DatabaseService type if you want
         // prefer driver.id or fallback to stored userId for emit
         final driverId = db?.driver?.id ?? _currentUserId;
         _socket!.emit('driver_ready', {'driverId': driverId});

@@ -31,24 +31,6 @@ class UserOrderSocket {
 
     debugPrint('UserOrderSocket: attaching listeners');
 
-    // 1) existingShipments (server might send list of shipments relevant to this user)
-    socketService.on('existingShipments', (data) {
-      debugPrint('UserOrderSocket: existingShipments received ${(data as List?)?.length ?? 0}');
-      try {
-        final list = List<dynamic>.from(data ?? []);
-        final parsed = list.map((j) => OrderModel.fromJson(Map<String, dynamic>.from(j))).toList();
-        // keep only shipments for this user (if backend sends global list)
-        final userId = socketService.currentUserId?.toString();
-        if (userId != null && userId.isNotEmpty) {
-          orders.assignAll(parsed.where((o) => o.userId?.toString() == userId).toList());
-        } else {
-          orders.assignAll(parsed);
-        }
-      } catch (e) {
-        debugPrint('UserOrderSocket: error parsing existingShipments: $e');
-      }
-    });
-
     // 2) shipment_status or shipment_update -> update single order status
     socketService.on('shipment_status', (payload) {
       try {
@@ -76,28 +58,6 @@ class UserOrderSocket {
         }
       } catch (e) {
         debugPrint('UserOrderSocket: error handling shipment_status: $e');
-      }
-    });
-
-    // 3) newShipment or order_assigned -> could be new order for user
-    socketService.on('newShipment', (payload) {
-      try {
-        // dedupe
-        final key = payload is Map ? ((payload['id'] ?? payload['orderId'] ?? payload.toString()).toString()) : payload.toString();
-        final now = DateTime.now();
-        final last = _recent[key];
-        if (last != null && now.difference(last).inSeconds < 10) return;
-        _recent[key] = now;
-
-        final newOrder = OrderModel.fromJson(Map<String, dynamic>.from(payload));
-        // add if belongs to this user or if backend already filtered
-        if (socketService.currentUserId == null || newOrder.userId == null || newOrder.userId == socketService.currentUserId) {
-          orders.removeWhere((o) => o.id == newOrder.id);
-          orders.insert(0, newOrder);
-          debugPrint('UserOrderSocket: newShipment added id=${newOrder.id}');
-        }
-      } catch (e) {
-        debugPrint('UserOrderSocket: error parsing newShipment: $e');
       }
     });
 
