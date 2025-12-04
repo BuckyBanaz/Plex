@@ -79,7 +79,6 @@ class ShipmentRepository {
     }
   }
 
-
   Future<Map<String, dynamic>> getShipments({
     bool parseToModels = true, // if you want raw response, set false
   }) async {
@@ -99,7 +98,11 @@ class ShipmentRepository {
 
       if (!success) {
         // return server-provided message if any
-        return {'success': false, 'message': result['message'] ?? 'Failed to fetch shipments', 'raw': result};
+        return {
+          'success': false,
+          'message': result['message'] ?? 'Failed to fetch shipments',
+          'raw': result,
+        };
       }
 
       if (data == null) {
@@ -172,24 +175,35 @@ class ShipmentRepository {
       }
 
       // call api (shipmentApi.acceptShipment should return a Map)
-      final apiResult = await shipmentApi.acceptShipment(shipmentId: shipmentId);
+      final apiResult = await shipmentApi.acceptShipment(
+        shipmentId: shipmentId,
+      );
 
       // normalize to Map
-      final Map<String, dynamic> raw = (apiResult is Map<String, dynamic>) ? apiResult : {'data': apiResult};
+      final Map<String, dynamic> raw = (apiResult is Map<String, dynamic>)
+          ? apiResult
+          : {'data': apiResult};
 
       // Try many places for statusCode & message (defensive)
-      final int? statusCode = (raw['statusCode'] is int) ? raw['statusCode'] as int : (raw['raw'] is Map && raw['raw']['statusCode'] is int ? raw['raw']['statusCode'] as int : null);
+      final int? statusCode = (raw['statusCode'] is int)
+          ? raw['statusCode'] as int
+          : (raw['raw'] is Map && raw['raw']['statusCode'] is int
+                ? raw['raw']['statusCode'] as int
+                : null);
 
       String extractMessage(dynamic obj) {
         try {
           if (obj == null) return '';
           if (obj is String && obj.isNotEmpty) return obj;
           if (obj is Map) {
-            if (obj.containsKey('message') && obj['message'] != null) return obj['message'].toString();
-            if (obj.containsKey('error') && obj['error'] != null) return obj['error'].toString();
+            if (obj.containsKey('message') && obj['message'] != null)
+              return obj['message'].toString();
+            if (obj.containsKey('error') && obj['error'] != null)
+              return obj['error'].toString();
             if (obj.containsKey('data')) {
               final d = obj['data'];
-              if (d is Map && d.containsKey('message') && d['message'] != null) return d['message'].toString();
+              if (d is Map && d.containsKey('message') && d['message'] != null)
+                return d['message'].toString();
               if (d is String && d.isNotEmpty) return d;
             }
           }
@@ -204,8 +218,10 @@ class ShipmentRepository {
       message = extractMessage(raw['message']) ?? '';
       if (message.isEmpty) message = extractMessage(raw['error']);
       if (message.isEmpty) message = extractMessage(raw['data']);
-      if (message.isEmpty && raw['raw'] != null) message = extractMessage(raw['raw']);
-      if (message.isEmpty && raw['raw'] is Map && raw['raw']['data'] != null) message = extractMessage(raw['raw']['data']);
+      if (message.isEmpty && raw['raw'] != null)
+        message = extractMessage(raw['raw']);
+      if (message.isEmpty && raw['raw'] is Map && raw['raw']['data'] != null)
+        message = extractMessage(raw['raw']['data']);
 
       // If still empty, fallback to generic
       if (message.isEmpty) message = '';
@@ -243,9 +259,13 @@ class ShipmentRepository {
         if (serverData is Map<String, dynamic>) {
           // if server wraps in {data:{shipment: {...}}}
           if (serverData['shipment'] is Map) {
-            updatedOrder = OrderModel.fromJson(Map<String, dynamic>.from(serverData['shipment']));
+            updatedOrder = OrderModel.fromJson(
+              Map<String, dynamic>.from(serverData['shipment']),
+            );
           } else {
-            updatedOrder = OrderModel.fromJson(Map<String, dynamic>.from(serverData));
+            updatedOrder = OrderModel.fromJson(
+              Map<String, dynamic>.from(serverData),
+            );
           }
         }
       } catch (e) {
@@ -275,29 +295,55 @@ class ShipmentRepository {
     required String shipmentId,
   }) async {
     try {
-      final result = await shipmentApi.getDriverLocation(shipmentId: shipmentId);
+      final result = await shipmentApi.getDriverLocation(
+        shipmentId: shipmentId,
+      );
 
       if (result.containsKey('error')) {
-        debugPrint('API error while fetching driver location: ${result['error']}');
+        debugPrint(
+          'API error while fetching driver location: ${result['error']}',
+        );
         return {'error': result['error']};
       }
 
-      // Backend likely returns: { success: true, data: { lat: ..., lng: ... } }
+      // Backend returns: { success: true, data: { liveLocation: { lat: ..., lng: ... } } }
       final success = result['success'] == true;
-      final data = result['data'] ?? result;
+      final data = result['data'];
 
-      if (!success && !result.containsKey('lat')) {
+      if (!success) {
         return {
           'success': false,
           'message': result['message'] ?? 'Failed to fetch driver location',
         };
       }
 
-      // Extract lat/lng from response
+      if (data == null || data is! Map) {
+        return {'success': false, 'message': 'Invalid response data format'};
+      }
+
+      // Extract lat/lng from nested liveLocation object
       double? lat;
       double? lng;
 
-      if (data is Map) {
+      final liveLocation = data['liveLocation'];
+      if (liveLocation is Map) {
+        lat = (liveLocation['lat'] ?? liveLocation['latitude']) is num
+            ? (liveLocation['lat'] ?? liveLocation['latitude']).toDouble()
+            : null;
+        lng =
+            (liveLocation['lng'] ??
+                    liveLocation['longitude'] ??
+                    liveLocation['lon'])
+                is num
+            ? (liveLocation['lng'] ??
+                      liveLocation['longitude'] ??
+                      liveLocation['lon'])
+                  .toDouble()
+            : null;
+      }
+
+      // Fallback: try direct data level (for backward compatibility)
+      if (lat == null || lng == null) {
         lat = (data['lat'] ?? data['latitude']) is num
             ? (data['lat'] ?? data['latitude']).toDouble()
             : null;
@@ -312,17 +358,19 @@ class ShipmentRepository {
           'lat': lat,
           'lng': lng,
           'data': data,
+          'timestamp': liveLocation is Map
+              ? liveLocation['timestamp']
+              : data['lastUpdated'],
         };
       }
 
       return {
         'success': false,
-        'message': 'Driver location data not found',
+        'message': 'Driver location data not found in response',
       };
     } catch (e) {
       debugPrint('Error in repository while fetching driver location: $e');
       return {'error': e.toString()};
     }
   }
-
 }

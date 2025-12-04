@@ -7,7 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import 'package:plex_user/screens/individual/Booking/driver_tracking_screen.dart';
+import 'package:plex_user/screens/individual/Booking/shipment_tracking_screen.dart';
 import 'package:plex_user/screens/widgets/helpers.dart';
 import '../../../../constant/app_assets.dart';
 import '../../../../models/driver_order_model.dart';
@@ -90,76 +90,79 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
 
   Widget _buildTrackButton(BuildContext context) {
     final order = controller.selectedOrder.value;
-    final isLoadingLocation = controller.isLoadingDriverLocation.value;
 
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+    return Obx(() {
+      final isLoadingLocation = controller.isLoadingDriverLocation.value;
+
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
+          onPressed: isLoadingLocation
+              ? null
+              : () {
+                  if (order == null) return;
+
+                  // Get driver details from order
+                  final driverDetails = order.driverDetails;
+                  if (driverDetails == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Driver information not available"),
+                      ),
+                    );
+                    return;
+                  }
+
+                  // Create DriverModel
+                  final driver = DriverModel(
+                    id: driverDetails['driverId'] ?? '',
+                    name: driverDetails['name'] ?? '',
+                    lat: driverDetails['lat'] ?? 0.0,
+                    lng: driverDetails['lng'] ?? 0.0,
+                    vehicle: driverDetails['vehicle'] ?? '',
+                    avatarUrl: driverDetails['profile'].toString(),
+                  );
+
+                  final driverLocation = controller.driverLocation.value;
+
+                  // Initialize tracking controller
+                  if (driverLocation != null) {
+                    final trackingController = Get.put(
+                      DriverTrackingController(),
+                    );
+                    trackingController.startTracking(driver, driverLocation);
+                  }
+
+                  // Navigate to tracking screen
+                  Get.to(() => ShipmentTrackingScreen(order: order));
+                },
+          child: isLoadingLocation
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : const Text(
+                  "Track Your Package",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
         ),
-        onPressed: isLoadingLocation
-            ? null
-            : () {
-                if (order == null) return;
-
-                // Get driver details from order
-                final driverDetails = order.driverDetails;
-                if (driverDetails == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Driver information not available"),
-                    ),
-                  );
-                  return;
-                }
-
-                // Create DriverModel
-                final driver = DriverModel(
-                  id: driverDetails['driverId'] ?? '',
-                  name: driverDetails['name'] ?? '',
-                  lat: driverDetails['lat'] ?? 0.0,
-                  lng: driverDetails['lng'] ?? 0.0,
-                  vehicle: driverDetails['vehicle'] ?? '',
-                  avatarUrl: driverDetails['profile'].toString(),
-                );
-
-                final driverLocation = controller.driverLocation.value;
-
-                // Initialize tracking controller
-                if (driverLocation != null) {
-                  final trackingController = Get.put(
-                    DriverTrackingController(),
-                  );
-                  trackingController.startTracking(driver, driverLocation);
-                }
-
-                // Navigate to tracking screen
-                Get.to(() => DriverTrackingScreen(order: order));
-              },
-        child: isLoadingLocation
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : const Text(
-                "Track Your Package",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-      ),
-    );
+      );
+    });
   }
 
   String getInitials(String name) {

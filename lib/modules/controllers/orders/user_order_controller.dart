@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:plex_user/modules/controllers/booking/driver_tracking_controller.dart';
-import 'package:plex_user/modules/controllers/booking/search_driver_controller.dart';
 import '../../../models/driver_order_model.dart';
 import '../../../services/domain/repository/repository_imports.dart';
 // path adjust as needed
@@ -148,8 +146,6 @@ class UserOrderController extends GetxController {
         driverLocation.value = null;
         debugPrint('Driver location not available: ${result['message']}');
       }
-
-      isLoadingDriverLocation.value = false;
     } catch (e) {
       debugPrint('Error in controller while fetching driver location: $e');
       driverLocation.value = null;

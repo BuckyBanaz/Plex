@@ -11,6 +11,9 @@ import GoogleMaps
     // Initialize Google Maps SDK
     if let apiKey = Bundle.main.object(forInfoDictionaryKey: "GMSApiKey") as? String {
       GMSServices.provideAPIKey(apiKey)
+      print("✅ Google Maps API Key initialized: \(apiKey.prefix(20))...")
+    } else {
+      print("❌ GMSApiKey not found in Info.plist")
     }
     
     GeneratedPluginRegistrant.register(with: self)

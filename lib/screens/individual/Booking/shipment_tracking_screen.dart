@@ -9,15 +9,16 @@ import 'package:plex_user/models/driver_order_model.dart';
 import '../../../modules/controllers/booking/driver_tracking_controller.dart';
 import '../../../modules/controllers/location/location_permission_controller.dart';
 
-class DriverTrackingScreen extends StatefulWidget {
+class ShipmentTrackingScreen extends StatefulWidget {
   final OrderModel order;
-  const DriverTrackingScreen({Key? key, required this.order}) : super(key: key);
+  const ShipmentTrackingScreen({Key? key, required this.order})
+    : super(key: key);
 
   @override
-  State<DriverTrackingScreen> createState() => _DriverTrackingScreenState();
+  State<ShipmentTrackingScreen> createState() => _ShipmentTrackingScreenState();
 }
 
-class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
+class _ShipmentTrackingScreenState extends State<ShipmentTrackingScreen> {
   final DriverTrackingController trackCtrl = Get.put(
     DriverTrackingController(),
   );
@@ -56,8 +57,12 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userLoc = locCtrl.currentPosition.value ?? LatLng(29.0350, 75.9400);
-    final cam = CameraPosition(target: userLoc, zoom: 13.5);
+    final userLocationInfo = widget.order.pickup;
+    final userLatLng = LatLng(
+      userLocationInfo.latitude!,
+      userLocationInfo.longitude!,
+    );
+    final cam = CameraPosition(target: userLatLng, zoom: 13.5);
 
     return Scaffold(
       body: Stack(
@@ -72,7 +77,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
               markers.add(
                 Marker(
                   markerId: MarkerId('user'),
-                  position: userLoc,
+                  position: userLatLng,
                   icon: BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueBlue,
                   ),
@@ -99,7 +104,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                   Polyline(
                     color: AppColors.primary,
                     polylineId: PolylineId('route'),
-                    points: [LatLng(d.lat, d.lng), userLoc],
+                    points: [LatLng(d.lat, d.lng), userLatLng],
                     width: 6,
                   ),
                 );

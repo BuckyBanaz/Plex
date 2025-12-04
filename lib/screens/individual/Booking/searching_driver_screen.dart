@@ -7,7 +7,7 @@ import '../../widgets/lottie_helpers.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'driver_tracking_screen.dart';
+import 'shipment_tracking_screen.dart';
 
 class SearchingDriverScreen extends StatefulWidget {
   const SearchingDriverScreen({Key? key}) : super(key: key);
