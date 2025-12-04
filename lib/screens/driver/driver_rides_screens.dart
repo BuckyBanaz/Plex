@@ -1,211 +1,259 @@
+// file: screens/orders/orders_screen.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../../../services/domain/repository/repository_imports.dart'; // adjust to your repo locator
+import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 
-// --- Models ---
-class Ride {
-  final String pickup;
-  final String dropoff;
-  final DateTime dateTime;
-  final double amount;
-  final String paymentMethod; // e.g. 'UPI'
-  final String status; // 'completed', 'cancelled', 'pending'
+import '../../models/driver_order_model.dart';
 
-  Ride({
-    required this.pickup,
-    required this.dropoff,
-    required this.dateTime,
-    required this.amount,
-    required this.paymentMethod,
-    required this.status,
-  });
-}
+/// Controller: fetches shipments, groups them and provides navigation + driver location
+class MyOrdersController extends GetxController {
+  final ShipmentRepository _shipmentRepository = Get.find<ShipmentRepository>();
 
-// --- Controller (GetX) ---
-class MyRidesController extends GetxController {
-  final allRides = <Ride>[].obs;
-  final filtered = <String, List<Ride>>{}.obs; // grouped map
-  final activeTab = 'All'.obs; // All, Completed, Cancelled
+  // grouped map: {'Today': [OrderModel,...], 'Yesterday': [...], '03 Dec, 2025': [...]}
+  final grouped = <String, List<OrderModel>>{}.obs;
+
+  final selectedOrder = Rx<OrderModel?>(null);
+  final isLoading = false.obs;
+  final errorMessage = Rx<String?>(null);
+
+  // driver location for details
+  final isLoadingDriverLocation = false.obs;
+  final driverLocation = Rx<LatLng?>(null);
+
+  // optional filter like tabs (All, InTransit, Delivered, Cancelled)
+  final activeTab = 'All'.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _populateDummy();
-    _applyFilter();
+    fetchAndGroupShipments();
   }
 
-  void _populateDummy() {
-    final now = DateTime.now();
-    allRides.assignAll([
-      Ride(
-        pickup: 'Gbagi market road, sector, Jaipur',
-        dropoff: 'Tulip Pharmacy, sector 15, Jaipur',
-        dateTime: DateTime(now.year, now.month, now.day, 12, 59),
-        amount: 230,
-        paymentMethod: 'UPI',
-        status: 'completed',
-      ),
-      Ride(
-        pickup: 'Gbagi market road, sector, Jaipur',
-        dropoff: 'Tulip Pharmacy, sector 15, Jaipur',
-        dateTime: DateTime(now.year, now.month, now.day, 14, 0),
-        amount: 230,
-        paymentMethod: 'Cash',
-        status: 'completed',
-      ),
-      // Yesterday
-      Ride(
-        pickup: 'Gbagi market road, sector, Jaipur',
-        dropoff: 'Tulip Pharmacy, sector 15, Jaipur',
-        dateTime: now.subtract(const Duration(days: 1)).add(const Duration(hours: 1)),
-        amount: 230,
-        paymentMethod: 'UPI',
-        status: 'completed',
-      ),
-      Ride(
-        pickup: 'Gbagi market road, sector, Jaipur',
-        dropoff: 'Tulip Pharmacy, sector 15, Jaipur',
-        dateTime: now.subtract(const Duration(days: 1)).add(const Duration(hours: 3)),
-        amount: 230,
-        paymentMethod: 'UPI',
-        status: 'cancelled',
-      ),
-      // older date
-      Ride(
-        pickup: 'New Market Road, Jaipur',
-        dropoff: 'Central Mall, Jaipur',
-        dateTime: now.subtract(const Duration(days: 4)).add(const Duration(hours: 2)),
-        amount: 320,
-        paymentMethod: 'Card',
-        status: 'completed',
-      ),
-    ]);
+  Future<void> fetchAndGroupShipments() async {
+    try {
+      isLoading.value = true;
+      errorMessage.value = null;
+
+      final res = await _shipmentRepository.getShipments(parseToModels: true);
+
+      if (res is Map && res.containsKey('error')) {
+        errorMessage.value = res['error'].toString();
+        grouped.value = {};
+        return;
+      }
+
+      if (res is Map && res['success'] != true) {
+        errorMessage.value = res['message']?.toString() ?? 'Failed to fetch shipments';
+        grouped.value = {};
+        return;
+      }
+
+      List<OrderModel> orders;
+      if (res is Map && res['shipments'] is List<OrderModel>) {
+        orders = List<OrderModel>.from(res['shipments'] as List<OrderModel>);
+      } else if (res is List<OrderModel>) {
+        orders = List<OrderModel>.from(res as List<OrderModel>);
+      } else {
+        // Fallback attempt to parse via OrderModel.listFromApi if repository returned raw JSON
+        try {
+          final raw = res;
+          orders = OrderModel.listFromApi(raw);
+        } catch (_) {
+          orders = [];
+        }
+      }
+
+      // Optional: filter per activeTab
+      List<OrderModel> filteredList = orders;
+      if (activeTab.value != 'All') {
+        final a = activeTab.value.toLowerCase();
+        filteredList = orders.where((o) {
+          final s = o.status.value.toString().toLowerCase();
+          return s.contains(a);
+        }).toList();
+      }
+
+      // Sort by createdAt desc (most recent first)
+      filteredList.sort((a, b) {
+        final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+
+      // Group them by day label
+      final Map<String, List<OrderModel>> groups = {};
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+
+      for (var o in filteredList) {
+        final created = o.createdAt;
+        String label;
+        if (created == null) {
+          label = DateFormat('dd MMM, yyyy').format(now); // fallback to today
+        } else {
+          final createdDate = DateTime(created.year, created.month, created.day);
+          if (createdDate == today) {
+            label = 'Today';
+          } else if (createdDate == yesterday) {
+            label = 'Yesterday';
+          } else {
+            label = DateFormat('dd MMM, yyyy').format(createdDate);
+          }
+        }
+        groups.putIfAbsent(label, () => []).add(o);
+      }
+
+      // Sort keys descending: Today -> Yesterday -> newest date -> oldest
+      final sortedKeys = groups.keys.toList()
+        ..sort((a, b) {
+          final aDate = _parseGroupKeyToDate(a);
+          final bDate = _parseGroupKeyToDate(b);
+          return bDate.compareTo(aDate);
+        });
+
+      final Map<String, List<OrderModel>> sortedMap = {};
+      for (var k in sortedKeys) {
+        final list = groups[k]!;
+        // sort rides within group by createdAt desc
+        list.sort((x, y) {
+          final xd = x.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final yd = y.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return yd.compareTo(xd);
+        });
+        sortedMap[k] = list;
+      }
+
+      grouped.value = sortedMap;
+    } catch (e, st) {
+      errorMessage.value = e.toString();
+      debugPrint('fetchAndGroupShipments error: $e\n$st');
+      grouped.value = {};
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void setTab(String tab) {
     activeTab.value = tab;
-    _applyFilter();
+    fetchAndGroupShipments();
   }
 
-  void _applyFilter() {
-    // filter by tab
-    List<Ride> list;
-    if (activeTab.value == 'All') {
-      list = List.from(allRides);
-    } else if (activeTab.value == 'Completed') {
-      list = allRides.where((r) => r.status == 'completed').toList();
-    } else {
-      list = allRides.where((r) => r.status == 'cancelled').toList();
+// controller
+  Future<void> refresh() async => await fetchAndGroupShipments();
+
+
+  void goToOrderDetails(OrderModel order) {
+    selectedOrder.value = order;
+    // optionally fetch driver location for in-transit orders
+    final status = order.status.value;
+    if (status == OrderStatus.InTransit ||
+        status == OrderStatus.Accepted ||
+        status == OrderStatus.Assigned) {
+      fetchDriverLocation(order.id);
     }
-
-    // group by day label
-    final Map<String, List<Ride>> groups = {};
-
-    for (var r in list) {
-      final label = _dayLabel(r.dateTime);
-      groups.putIfAbsent(label, () => []).add(r);
-    }
-
-    // sort groups so Today, Yesterday first, then by date descending
-    final sortedKeys = groups.keys.toList()..sort((a, b) {
-      final aDate = _parseGroupKey(a);
-      final bDate = _parseGroupKey(b);
-      return bDate.compareTo(aDate);
-    });
-
-    final sortedMap = <String, List<Ride>>{};
-    for (var k in sortedKeys) {
-      // sort rides in descending time inside group
-      groups[k]!.sort((x, y) => y.dateTime.compareTo(x.dateTime));
-      sortedMap[k] = groups[k]!;
-    }
-
-    filtered.assignAll(sortedMap);
+    // Get.to(() => const UserOrderDetailsScreen());
   }
 
-  String _dayLabel(DateTime dt) {
-    final now = DateTime.now();
-    final dtDate = DateTime(dt.year, dt.month, dt.day);
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
+  Future<void> fetchDriverLocation(String shipmentId) async {
+    try {
+      isLoadingDriverLocation.value = true;
+      final result = await _shipmentRepository.getDriverLocation(shipmentId: shipmentId);
 
-    if (dtDate == today) return 'Today';
-    if (dtDate == yesterday) return 'Yesterday';
+      if (result is Map && result.containsKey('error')) {
+        debugPrint('Error fetching driver location: ${result['error']}');
+        driverLocation.value = null;
+        return;
+      }
 
-    return DateFormat('dd MMM, yyyy').format(dtDate);
+      if (result is Map && result['success'] == true && result['lat'] != null && result['lng'] != null) {
+        driverLocation.value = LatLng(result['lat'] as double, result['lng'] as double);
+      } else {
+        driverLocation.value = null;
+        debugPrint('Driver location not available: ${result['message'] ?? result}');
+      }
+    } catch (e) {
+      debugPrint('Error fetchDriverLocation: $e');
+      driverLocation.value = null;
+    } finally {
+      isLoadingDriverLocation.value = false;
+    }
   }
 
-  DateTime _parseGroupKey(String key) {
+  DateTime _parseGroupKeyToDate(String key) {
     if (key == 'Today') return DateTime.now();
     if (key == 'Yesterday') return DateTime.now().subtract(const Duration(days: 1));
     try {
       return DateFormat('dd MMM, yyyy').parse(key);
     } catch (_) {
-      return DateTime(1970);
+      return DateTime.fromMillisecondsSinceEpoch(0);
     }
   }
 }
 
-// --- UI Screen ---
+/// Screen: displays grouped orders using OrderModel
 class DriverRideScreen extends StatelessWidget {
   const DriverRideScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MyRidesController());
+    final controller = Get.put(MyOrdersController());
     final arg = Get.arguments;
-    final bool showTabs = arg != null && arg.toString() == 'navigation';
+    final bool showTitle = arg != null && arg.toString() == 'navigation';
 
     return Scaffold(
-
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(showTitle: showTabs),
+            _OrdersTopBar(showTitle: showTitle),
             const SizedBox(height: 8),
-
-            // Tab bar (if it itself uses observables, it should handle its own Obx internally)
-            _TabBarWidget(controller: controller),
-
+            _OrdersTabBar(controller: controller),
             const SizedBox(height: 8),
-
-            // Expanded provides bounded height to the inner ListView
             Expanded(
               child: Obx(() {
-                // Access the RxMap inside Obx so GetX can track changes
-                final groupedEntries = controller.filtered.entries.toList();
-
-                if (groupedEntries.isEmpty) {
-                  return const Center(child: Text('No rides found'));
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (controller.errorMessage.value != null) {
+                  return Center(child: Text(controller.errorMessage.value!));
                 }
 
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: groupedEntries.length,
-                  itemBuilder: (context, index) {
-                    final entry = groupedEntries[index];
-                    final key = entry.key;
-                    final rides = entry.value;
+                final entries = controller.grouped.entries.toList();
+                if (entries.isEmpty) {
+                  return const Center(child: Text('No orders found'));
+                }
 
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Text(
-                            key,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                return RefreshIndicator(
+                  onRefresh: controller.refresh,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: entries.length,
+                    itemBuilder: (context, index) {
+                      final entry = entries[index];
+                      final key = entry.key;
+                      final list = entry.value;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(
+                              key,
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                            ),
                           ),
-                        ),
-                        // build ride cards
-                        ...rides.map((r) => _RideCard(ride: r)).toList(),
-                        const SizedBox(height: 8),
-                      ],
-                    );
-                  },
+                          ...list.map((o) => _OrderCard(order: o, onTap: () => controller.goToOrderDetails(o))).toList(),
+                          const SizedBox(height: 8),
+                        ],
+                      );
+                    },
+                  ),
                 );
               }),
             ),
@@ -216,39 +264,32 @@ class DriverRideScreen extends StatelessWidget {
   }
 }
 
-// --- Top bar with rounded center buttons (search + filter) ---
-class _TopBar extends StatelessWidget {
+/// Top bar (search/filter + title)
+class _OrdersTopBar extends StatelessWidget {
   final bool showTitle;
-  const _TopBar({this.showTitle = true});
+  const _OrdersTopBar({this.showTitle = true});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         children: [
-
-          if(showTitle)...[
-            IconButton(
-              icon: const Icon(CupertinoIcons.back),
-              onPressed: () => Get.back(),
-            ),
+          if (showTitle) ...[
+            IconButton(icon: const Icon(CupertinoIcons.back), onPressed: () => Get.back()),
             const SizedBox(width: 6),
-
           ],
           const Expanded(
             child: Text(
-              'My Rides',
+              'My Orders',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          Spacer(),
-
-
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               RoundIconButton(icon: CupertinoIcons.search, onTap: () {}),
-             SizedBox(width: 10,),
+              const SizedBox(width: 10),
               RoundIconButton(icon: IconlyLight.filter, onTap: () {}),
             ],
           ),
@@ -262,11 +303,7 @@ class RoundIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const RoundIconButton({
-    super.key,
-    required this.icon,
-    required this.onTap,
-  });
+  const RoundIconButton({super.key, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -278,29 +315,18 @@ class RoundIconButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: const Color(0xFFE6ECF5),
-            width: 2,
-          ),
+          border: Border.all(color: const Color(0xFFE6ECF5), width: 2),
         ),
-        child: Center(
-          child: Icon(
-            icon,
-            size: 22,
-            color: AppColors.secondary, // navy blue like image
-          ),
-        ),
+        child: Center(child: Icon(icon, size: 22, color: AppColors.secondary)),
       ),
     );
   }
 }
 
-
-// --- Tab bar ---
-// Tab bar widget that updates reactively with GetX
-class _TabBarWidget extends StatelessWidget {
-  final MyRidesController controller;
-  const _TabBarWidget({required this.controller});
+/// Tab bar for filtering by status (All, InTransit, Delivered, Cancelled)
+class _OrdersTabBar extends StatelessWidget {
+  final MyOrdersController controller;
+  const _OrdersTabBar({required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -308,81 +334,41 @@ class _TabBarWidget extends StatelessWidget {
       final active = controller.activeTab.value;
       return Row(
         children: [
-          Expanded(
-            child: _TabButton(
-              label: 'All',
-              selected: active == 'All',
-              onTap: () => controller.setTab('All'),
-            ),
-          ),
-          Expanded(
-            child: _TabButton(
-              label: 'Completed',
-              selected: active == 'Completed',
-              onTap: () => controller.setTab('Completed'),
-            ),
-          ),
-          Expanded(
-            child: _TabButton(
-              label: 'Cancelled',
-              selected: active == 'Cancelled',
-              onTap: () => controller.setTab('Cancelled'),
-            ),
-          ),
+          Expanded(child: _TabButton(label: 'All', selected: active == 'All', onTap: () => controller.setTab('All'))),
+          Expanded(child: _TabButton(label: 'InTransit', selected: active == 'InTransit', onTap: () => controller.setTab('InTransit'))),
+          Expanded(child: _TabButton(label: 'Delivered', selected: active == 'Delivered', onTap: () => controller.setTab('Delivered'))),
+          Expanded(child: _TabButton(label: 'Cancelled', selected: active == 'Cancelled', onTap: () => controller.setTab('Cancelled'))),
         ],
       );
     });
   }
 }
 
-// Improved tab button: ripple, animation, and underline indicator
 class _TabButton extends StatelessWidget {
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  const _TabButton({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+  const _TabButton({required this.label, required this.selected, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
       padding: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-      ),
       child: GestureDetector(
         onTap: onTap,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Label
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                  color: selected ? Colors.black : Colors.grey.shade700,
-                ),
-              ),
+              child: Text(label, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: selected ? Colors.black : Colors.grey.shade700)),
             ),
-
-            // small space and underline indicator
-            AnimatedContainer(
-              duration:  Duration(milliseconds: 200),
+            Container(
+              // decoration: const Duration(milliseconds: 200),
               height: 3,
               width: double.infinity,
-              // animate the visibility using width and opacity
-              // wrap in Opacity if you want fade effect
-              decoration: BoxDecoration(
-                color: selected ? AppColors.primary : Colors.grey.shade200,
-              ),
+              decoration: BoxDecoration(color: selected ? AppColors.primary : Colors.grey.shade200),
             ),
           ],
         ),
@@ -391,145 +377,131 @@ class _TabButton extends StatelessWidget {
   }
 }
 
-// --- Ride Card --
-class _RideCard extends StatelessWidget {
-  final Ride ride;
-  const _RideCard({required this.ride});
+/// Card widget to display order summary
+class _OrderCard extends StatelessWidget {
+  final OrderModel order;
+  final VoidCallback? onTap;
+
+  const _OrderCard({required this.order, this.onTap});
+
+  String _timeLabel(DateTime? dt) {
+    if (dt == null) return '';
+    return DateFormat('h:mm a').format(dt);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isCompleted = ride.status == "completed";
-    final timeLabel = DateFormat('h:mm a').format(ride.dateTime);
+    final timeLabel = _timeLabel(order.createdAt);
+    final price = order.estimatedCost.toStringAsFixed(0);
+    final statusStr = order.status.value.toString().split('.').last;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          )
-        ],
-      ),
-      child: Column(
-        children: [
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Left Icons (auto aligned to text height)
-                Column(
-                  children: [
-                    Icon(Icons.my_location, color: AppColors.primary, size: 24),
-                    Expanded(
-                      child: Container(
-                        width: 2,
-                        color: AppColors.primary.withOpacity(0.4),
-                      ),
-                    ),
-                    Icon(IconlyLight.location, color: AppColors.primary, size: 26),
-                  ],
-                ),
-
-                const SizedBox(width: 14),
-
-                // Middle Content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 3))],
+        ),
+        child: Column(
+          children: [
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // left icons
+                  Column(
                     children: [
-                      Text(
-                        ride.pickup,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                      Icon(Icons.my_location, color: AppColors.primary, size: 24),
+                      Expanded(child: Container(width: 2, color: AppColors.primary.withOpacity(0.4))),
+                      Icon(IconlyLight.location, color: AppColors.primary, size: 26),
+                    ],
+                  ),
+                  const SizedBox(width: 14),
+                  // addresses
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order.pickupAddressLine1 + (order.pickupAddressLine2.isNotEmpty ? ', ${order.pickupAddressLine2}' : ''),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        ride.dropoff,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                        const SizedBox(height: 12),
+                        Text(
+                          order.dropoffAddressLine1 + (order.dropoffAddressLine2.isNotEmpty ? ', ${order.dropoffAddressLine2}' : ''),
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // time & status
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(timeLabel, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _statusColor(order.status.value).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          statusStr,
+                          style: TextStyle(color: _statusColor(order.status.value), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
-                  ),
-                ),
-
-                // Time
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      timeLabel,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          // Amount + Payment method
-          Row(
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.money, size: 20),
-                  const SizedBox(width: 6),
-
-                  // Amount (red if cancelled)
-                  Text(
-                    "₹${ride.amount.toInt()}",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: isCompleted ? Colors.black : Colors.red,
-                    ),
                   ),
                 ],
               ),
-
-              const SizedBox(width: 14),
-
-              // Payment type only for completed
-              if (isCompleted)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        ride.paymentMethod,
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.money, size: 20),
+                    const SizedBox(width: 6),
+                    Text('₹$price', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  ],
                 ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 14),
+                if (order.paymentMethod.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.payment, size: 18, color: Colors.green),
+                        const SizedBox(width: 6),
+                        Text(order.paymentMethod, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Color _statusColor(OrderStatus s) {
+    switch (s) {
+      case OrderStatus.InTransit:
+      case OrderStatus.Assigned:
+      case OrderStatus.Accepted:
+        return Colors.orange;
+      case OrderStatus.Delivered:
+        return Colors.green;
+      case OrderStatus.Cancelled:
+      case OrderStatus.Declined:
+        return Colors.red;
+      default:
+        return Colors.blueGrey;
+    }
   }
 }
