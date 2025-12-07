@@ -17,7 +17,7 @@ import '../../../models/driver_order_model.dart';
 import '../../../services/domain/service/socket/user_order_socket.dart';
 
 class ShipmentTrackingController extends GetxController {
-  final UserOrderSocket userOrderSocket = Get.find<UserOrderSocket>();
+  final UserOrderSocket userOrderSocket = Get.put(UserOrderSocket());
   final Rxn<OrderModel> order = Rxn<OrderModel>();
 final SocketService socketService  = Get.find<SocketService>();
 final DatabaseService db = Get.find<DatabaseService>();
