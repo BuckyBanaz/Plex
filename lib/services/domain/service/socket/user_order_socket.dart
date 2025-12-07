@@ -3,16 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../models/driver_order_model.dart';
-
 import 'socket_service.dart';
 
 class UserOrderSocket {
   final SocketService socketService = Get.find<SocketService>();
 
   final RxList<OrderModel> orders = <OrderModel>[].obs;
-
   final RxMap<String, Map<String, dynamic>> liveLocations = <String, Map<String, dynamic>>{}.obs;
-
   final Rx<OrderModel?> activeTrackingOrder = Rx<OrderModel?>(null);
 
   final List<StreamSubscription> _subs = [];
@@ -52,7 +49,7 @@ class UserOrderSocket {
           } catch (_) {}
         }
       } catch (e) {
-        debugPrint('UserOrderSocket: error handling shipment_status: $e');
+        debugPrint('UserOrderSocket: shipment_status error: $e');
       }
     });
 
@@ -74,7 +71,7 @@ class UserOrderSocket {
           'raw': p,
         };
 
-        // update OrderModel.liveLocation if order is present
+        // update orders list if present
         final idx = orders.indexWhere((o) => o.id == shipmentId);
         if (idx != -1) {
           final m = _safeToMap(orders[idx]);
@@ -82,11 +79,10 @@ class UserOrderSocket {
           orders[idx] = OrderModel.fromJson(m);
         }
 
-        if (activeTrackingOrder.value?.id == shipmentId) {
-          liveLocations.refresh();
-        }
+        // notify listeners (controllers subscribe to liveLocations)
+        liveLocations.refresh();
       } catch (e) {
-        debugPrint('UserOrderSocket: error handling locationUpdate: $e');
+        debugPrint('UserOrderSocket: locationUpdate error: $e');
       }
     });
 
@@ -103,7 +99,7 @@ class UserOrderSocket {
           }
         }
       } catch (e) {
-        debugPrint('UserOrderSocket: order_confirmed parse error: $e');
+        debugPrint('UserOrderSocket: order_confirmed error: $e');
       }
     });
 
@@ -119,7 +115,10 @@ class UserOrderSocket {
   }
 
   void startTracking(OrderModel order) {
-    if (socketService.socket == null) return;
+    if (socketService.socket == null) {
+      debugPrint('startTracking: socket is null, make sure to call socketService.connect(...) and userOrderSocket.start()');
+      return;
+    }
     final id = int.tryParse(order.id) ?? 0;
     if (id > 0) {
       socketService.emit('joinShipment', id);
@@ -129,9 +128,7 @@ class UserOrderSocket {
     }
   }
 
-  void stopTracking() {
-    activeTrackingOrder.value = null;
-  }
+  void stopTracking() => activeTrackingOrder.value = null;
 
   Map<String, dynamic>? getLiveLocation(String shipmentId) => liveLocations[shipmentId];
 
@@ -151,14 +148,12 @@ class UserOrderSocket {
       socketService.off('order_confirmed');
       socketService.off('error');
     } catch (e) {
-      debugPrint('UserOrderSocket.stop: error while off(): $e');
+      debugPrint('UserOrderSocket.stop error: $e');
     }
     orders.clear();
     liveLocations.clear();
     activeTrackingOrder.value = null;
-    for (final s in _subs) {
-      s.cancel();
-    }
+    for (final s in _subs) s.cancel();
     _subs.clear();
   }
 

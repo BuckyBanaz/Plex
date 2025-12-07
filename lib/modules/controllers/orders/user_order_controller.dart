@@ -23,6 +23,7 @@ class UserOrderController extends GetxController {
   void onInit() {
     super.onInit();
     Get.put<UserOrderSocket>(UserOrderSocket());
+
     fetchAndGroupShipments();
   }
 

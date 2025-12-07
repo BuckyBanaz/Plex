@@ -9,6 +9,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
+import 'package:plex_user/services/domain/service/socket/socket_service.dart';
 
 import '../../../constant/app_colors.dart';
 import '../../../models/driver_order_model.dart';
@@ -17,7 +19,8 @@ import '../../../services/domain/service/socket/user_order_socket.dart';
 class ShipmentTrackingController extends GetxController {
   final UserOrderSocket userOrderSocket = Get.find<UserOrderSocket>();
   final Rxn<OrderModel> order = Rxn<OrderModel>();
-
+final SocketService socketService  = Get.find<SocketService>();
+final DatabaseService db = Get.find<DatabaseService>();
   final Rxn<LatLng> driverLocation = Rxn<LatLng>();
   final RxDouble driverBearing = 0.0.obs;
   final RxInt etaMinutes = 0.obs;
@@ -124,6 +127,17 @@ class ShipmentTrackingController extends GetxController {
   }
 
   void startTracking(OrderModel o) {
+    final token = db.accessToken ?? '';
+    final id = db.user!.id;
+    if (token.isEmpty || id == null) {
+      debugPrint('Shipment Controller: cannot connect - missing token or driver');
+      // isOnline.value = false; // revert
+      return;
+    }
+
+    // Connect low-level socket
+    socketService.connect(token, id);
+
     _liveLocSub?.cancel();
     order.value = o;
 
