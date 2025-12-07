@@ -28,6 +28,8 @@ class PreferenceKeys{
 
   final String isLogin = 'isLogin';
 
+  final String isKycDone = 'isKycDone';
+
   final String skipLogin = 'skipLogin';
 
   final String hasAcceptedTerms = 'hasAcceptedTerms';

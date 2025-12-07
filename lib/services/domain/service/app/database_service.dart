@@ -168,6 +168,10 @@ class DatabaseService {
       await putBoolPref(_preferenceKeys.isLogin, value);
   bool? get isLogin => getBoolPref(_preferenceKeys.isLogin);
 
+  Future<void> putKycDone(bool value) async =>
+      await putBoolPref(_preferenceKeys.isKycDone, value);
+  bool? get isKycDone => getBoolPref(_preferenceKeys.isKycDone);
+
   Future<void> putSkipLogin(bool value) async =>
       await putBoolPref(_preferenceKeys.skipLogin, value);
   bool? get skipLogin => getBoolPref(_preferenceKeys.skipLogin);

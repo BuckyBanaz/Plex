@@ -155,35 +155,35 @@ class MyOrdersController extends GetxController {
     if (status == OrderStatus.InTransit ||
         status == OrderStatus.Accepted ||
         status == OrderStatus.Assigned) {
-      fetchDriverLocation(order.id);
+      // fetchDriverLocation(order.id);
     }
     // Get.to(() => const UserOrderDetailsScreen());
   }
 
-  Future<void> fetchDriverLocation(String shipmentId) async {
-    try {
-      isLoadingDriverLocation.value = true;
-      final result = await _shipmentRepository.getDriverLocation(shipmentId: shipmentId);
-
-      if (result is Map && result.containsKey('error')) {
-        debugPrint('Error fetching driver location: ${result['error']}');
-        driverLocation.value = null;
-        return;
-      }
-
-      if (result is Map && result['success'] == true && result['lat'] != null && result['lng'] != null) {
-        driverLocation.value = LatLng(result['lat'] as double, result['lng'] as double);
-      } else {
-        driverLocation.value = null;
-        debugPrint('Driver location not available: ${result['message'] ?? result}');
-      }
-    } catch (e) {
-      debugPrint('Error fetchDriverLocation: $e');
-      driverLocation.value = null;
-    } finally {
-      isLoadingDriverLocation.value = false;
-    }
-  }
+  // Future<void> fetchDriverLocation(String shipmentId) async {
+  //   try {
+  //     isLoadingDriverLocation.value = true;
+  //     final result = await _shipmentRepository.getDriverLocation(shipmentId: shipmentId);
+  //
+  //     if (result is Map && result.containsKey('error')) {
+  //       debugPrint('Error fetching driver location: ${result['error']}');
+  //       driverLocation.value = null;
+  //       return;
+  //     }
+  //
+  //     if (result is Map && result['success'] == true && result['lat'] != null && result['lng'] != null) {
+  //       driverLocation.value = LatLng(result['lat'] as double, result['lng'] as double);
+  //     } else {
+  //       driverLocation.value = null;
+  //       debugPrint('Driver location not available: ${result['message'] ?? result}');
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Error fetchDriverLocation: $e');
+  //     driverLocation.value = null;
+  //   } finally {
+  //     isLoadingDriverLocation.value = false;
+  //   }
+  // }
 
   DateTime _parseGroupKeyToDate(String key) {
     if (key == 'Today') return DateTime.now();

@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:plex_user/constant/app_colors.dart';
+import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 
 import '../../../services/domain/repository/repository_imports.dart'; // adjust path if needed
 import '../../../routes/appRoutes.dart';
@@ -95,7 +97,7 @@ class DriverKycController extends GetxController {
   Future<void> _onSubmit() async {
     try {
       Get.dialog(
-        const Center(child: CircularProgressIndicator()),
+        const Center(child: CircularProgressIndicator(color: AppColors.primary,)),
         barrierDismissible: false,
       );
 
@@ -132,6 +134,7 @@ class DriverKycController extends GetxController {
 
       if (kycResponse.success && kycResponse.data != null) {
         Get.snackbar("Success", kycResponse.message ?? "KYC completed");
+
 
         final license = kycResponse.data?.extractedText?.license;
         final idCard = kycResponse.data?.extractedText?.idCard;

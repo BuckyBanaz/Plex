@@ -5,8 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:plex_user/routes/appRoutes.dart';
 
 import '../../../constant/app_colors.dart';
+import '../../services/domain/service/app/app_service_imports.dart';
 import '../widgets/custom_text_field.dart';
 
 class VehicleDetailsScreen extends StatefulWidget {
@@ -25,6 +27,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
   final fuelTypeCtrl = TextEditingController();
   final vehicleAgeCtrl = TextEditingController();
   final vehicleStatusCtrl = TextEditingController();
+  final DatabaseService databaseService = Get.find<DatabaseService>();
 
   final ImagePicker _picker = ImagePicker();
   File? _pickedImage;
@@ -154,6 +157,9 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
       if (_pickedImage != null) 'vehicleImagePath': _pickedImage!.path,
       if (_vehicleImageUrl != null) 'vehicleImageUrl': _vehicleImageUrl,
     };
+    databaseService.putKycDone(true);
+    print("final DatabaseService databaseService = Get.find<DatabaseService>(); ${databaseService.isKycDone}");
+    Get.offAllNamed(AppRoutes.approvel);
 
     Get.back(result: result);
   }

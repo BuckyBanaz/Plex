@@ -150,6 +150,7 @@ class DriverUserModel {
   final String email;
   final String userType;
   final String? mobile;
+  final String? kycStatus;
   final bool mobileVerified;
   final bool emailVerified;
   final DateTime createdAt;
@@ -164,6 +165,7 @@ class DriverUserModel {
     required this.email,
     required this.userType,
     required this.mobile,
+    required this.kycStatus,
     required this.mobileVerified,
     required this.emailVerified,
     required this.createdAt,
@@ -226,6 +228,7 @@ class DriverUserModel {
       email: (json['email'] ?? '').toString(),
       userType: (json['userType'] ?? json['user_type'] ?? '').toString(),
       mobile: parseMobile(json['mobile'] ?? json['phone'] ?? json['mobile_no']),
+      kycStatus: parseMobile(json['kycStatus'] ?? json['kycStatus'] ?? json['kycStatus']),
       mobileVerified: toBool(json['mobileVerified'] ?? json['mobile_verified'] ?? false),
       emailVerified: toBool(json['emailVerified'] ?? json['email_verified'] ?? false),
       createdAt: json['createdAt'] != null
@@ -264,6 +267,7 @@ class DriverUserModel {
       'email': email,
       'userType': userType,
       'mobile': mobile,
+      'kycStatus': kycStatus,
       'mobileVerified': mobileVerified,
       'emailVerified': emailVerified,
       'createdAt': createdAt.toUtc().toIso8601String(),
@@ -299,6 +303,7 @@ class DriverUserModel {
       email: email ?? this.email,
       userType: userType ?? this.userType,
       mobile: mobile ?? this.mobile,
+      kycStatus: kycStatus ?? this.kycStatus,
       mobileVerified: mobileVerified ?? this.mobileVerified,
       emailVerified: emailVerified ?? this.emailVerified,
       createdAt: createdAt ?? this.createdAt,
@@ -311,7 +316,7 @@ class DriverUserModel {
 
   @override
   String toString() {
-    return 'DriverUserModel(id: $id, name: $name, email: $email, userType: $userType, mobile: $mobile, vehicles: ${vehicles.length}, balance: ${currentBalance?.balance ?? 0})';
+    return 'DriverUserModel(id: $id, name: $name, email: $email, userType: $userType, mobile: $mobile,kycStatus: $kycStatus, vehicles: ${vehicles.length}, balance: ${currentBalance?.balance ?? 0})';
   }
 
   String toRawJson() => json.encode(toJson());

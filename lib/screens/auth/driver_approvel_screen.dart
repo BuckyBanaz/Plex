@@ -83,24 +83,39 @@ class DriverApprovalScreen extends StatelessWidget {
 
                   const DocumentTile(
                     title: 'ID Card',
-                    status: DocStatus.rejected,
-                    showRetryNote: true,
+                    status: DocStatus.approved,
+                    // showRetryNote: true,
                   ),
+
+                  // const DocumentTile(
+                  //   title: 'ID Card',
+                  //   status: DocStatus.rejected,
+                  //   showRetryNote: true,
+                  // ),
 
                   const SizedBox(height: 14),
 
                   const DocumentTile(
                     title: 'Vehicle RC',
-                    status: DocStatus.pending,
-                    showRetryNote: true,
+                    status: DocStatus.approved,
                   ),
+                  // const DocumentTile(
+                  //   title: 'Vehicle RC',
+                  //   status: DocStatus.pending,
+                  //   showRetryNote: true,
+                  // ),
                   const SizedBox(height: 14),
 
                   const DocumentTile(
                     title: 'Profile Image',
-                    status: DocStatus.rejected,
-                    showRetryNote: true,
+                    status: DocStatus.approved,
                   ),
+
+                  // const DocumentTile(
+                  //   title: 'Profile Image',
+                  //   status: DocStatus.rejected,
+                  //   showRetryNote: true,
+                  // ),
                   const SizedBox(height: 22),
                   const Spacer(),
                   const Text(
