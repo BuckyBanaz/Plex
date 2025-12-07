@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:plex_user/constant/app_colors.dart';
-import '../../../modules/controllers/booking/driver_tracking_controller.dart';
+import '../../../modules/controllers/booking/shipment_tracking_controller.dart';
 import '../../../modules/controllers/booking/search_driver_controller.dart';
 import '../../../modules/controllers/location/location_permission_controller.dart';
 import '../../widgets/lottie_helpers.dart';
@@ -18,7 +18,7 @@ class SearchingDriverScreen extends StatefulWidget {
 
 class _SearchingDriverScreenState extends State<SearchingDriverScreen> {
   late final SearchDriverController searchCtrl;
-  late final DriverTrackingController trackCtrl;
+  late final ShipmentTrackingController trackCtrl;
   late final LocationController locCtrl;
   GoogleMapController? mapController;
   Marker? userMarker;
@@ -28,7 +28,7 @@ class _SearchingDriverScreenState extends State<SearchingDriverScreen> {
   void initState() {
     super.initState();
     searchCtrl = Get.put(SearchDriverController());
-    trackCtrl = Get.put(DriverTrackingController());
+    trackCtrl = Get.put(ShipmentTrackingController());
     locCtrl = Get.find<LocationController>();
 
     if (locCtrl.currentPosition.value == null) {
@@ -40,7 +40,7 @@ class _SearchingDriverScreenState extends State<SearchingDriverScreen> {
         final d = searchCtrl.foundDriver.value!;
         final userLoc =
             locCtrl.currentPosition.value ?? LatLng(29.0333067, 75.939065);
-        trackCtrl.startTracking(d, userLoc);
+        // trackCtrl.startTracking(d, userLoc);
         // Get.to(() => DriverTrackingScreen(driverId: d.id));
       }
     });

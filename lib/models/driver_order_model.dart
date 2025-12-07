@@ -1,4 +1,4 @@
-// file: models/order_model.dart
+// file: lib/models/order_model.dart
 import 'dart:convert';
 
 import 'package:get/get.dart';
@@ -24,7 +24,6 @@ class CollectTime {
     if (json == null) return CollectTime(type: 'unknown');
     try {
       if (json is String) {
-        // sometimes backend gives stringified JSON
         final parsed = jsonDecode(json);
         return CollectTime.fromJson(parsed);
       }
@@ -70,11 +69,13 @@ class LocationInfo {
       double? _lng;
       try {
         if (json['latitude'] != null) _lat = (json['latitude'] as num).toDouble();
+        else if (json['lat'] != null) _lat = (json['lat'] as num).toDouble();
       } catch (_) {
         _lat = null;
       }
       try {
         if (json['longitude'] != null) _lng = (json['longitude'] as num).toDouble();
+        else if (json['lng'] != null) _lng = (json['lng'] as num).toDouble();
       } catch (_) {
         _lng = null;
       }
@@ -150,6 +151,7 @@ class Pricing {
       int? distanceMeters;
       try {
         if (json['distanceMeters'] != null) distanceMeters = int.tryParse(json['distanceMeters'].toString());
+        else if (json['distance'] != null) distanceMeters = int.tryParse(json['distance'].toString());
       } catch (_) {
         distanceMeters = null;
       }
@@ -198,7 +200,7 @@ class Estimate {
       return Estimate(
         estimatedCostINR: _toDouble(json['estimatedCostINR'] ?? json['estimatedCost'] ?? 0.0),
         estimatedCostUSD: _toDouble(json['estimatedCostUSD'] ?? 0.0),
-        distanceKm: _toDouble(json['distanceKm'] ?? 0.0),
+        distanceKm: _toDouble(json['distanceKm'] ?? json['distance'] ?? 0.0),
         durationText: (json['durationText'] ?? '').toString(),
         currency: (json['currency'] ?? 'INR').toString(),
       );
@@ -236,6 +238,10 @@ class OrderModel {
   final String? clientSecret;
   final DateTime? deliveredAt;
 
+  /// new: store last known live location (if backend provides it in payload or socket)
+  /// format: { 'lat': double, 'lng': double, 'timestamp': String, 'raw': dynamic }
+  final Map<String, dynamic>? liveLocation;
+
   OrderModel({
     required this.id,
     required this.orderId,
@@ -263,11 +269,11 @@ class OrderModel {
     this.stripePaymentIntentId,
     this.clientSecret,
     this.deliveredAt,
+    this.liveLocation,
   }) : status = initialStatus.obs;
 
   // Primary factory — accepts many possible shapes
   factory OrderModel.fromJson(dynamic rawJson) {
-    // normalize input
     try {
       Map<String, dynamic> json;
       if (rawJson is String) {
@@ -289,12 +295,11 @@ class OrderModel {
         if (first is Map) json = Map<String, dynamic>.from(first);
       }
 
-      // If the payload is wrapped as { "shipment": { ... } } then unwrap it
+      // unwrap "shipment"
       if (json.containsKey('shipment') && json['shipment'] is Map) {
         json = Map<String, dynamic>.from(json['shipment']);
       }
 
-      // Helper parsing functions
       DateTime? _parseDate(dynamic v) {
         if (v == null) return null;
         try {
@@ -310,19 +315,16 @@ class OrderModel {
         return double.tryParse(v.toString()) ?? 0.0;
       }
 
-      // id could be numeric or string
-      final idVal = json['id'] ?? json['shipmentId'] ?? json['orderId'] ?? '';
-      final idStr = idVal == null ? '' : idVal.toString();
-
-      // orderId prefer explicit orderId field
-      final orderIdVal = json['orderId'] ?? json['order_id'] ?? idStr;
-
-      // userId
       int? parseInt(dynamic v) {
         if (v == null) return null;
         if (v is int) return v;
         return int.tryParse(v.toString());
       }
+
+      final idVal = json['id'] ?? json['shipmentId'] ?? json['orderId'] ?? '';
+      final idStr = idVal == null ? '' : idVal.toString();
+
+      final orderIdVal = json['orderId'] ?? json['order_id'] ?? idStr;
 
       final userId = parseInt(json['userId'] ?? json['user_id']);
       final driverId = parseInt(json['driverId'] ?? json['driver_id']);
@@ -334,8 +336,8 @@ class OrderModel {
 
       final collectTime = CollectTime.fromJson(json['collectTime'] ?? json['collect_time']);
 
-      final pickup = LocationInfo.fromJson(json['pickup']);
-      final dropoff = LocationInfo.fromJson(json['dropoff']);
+      final pickup = LocationInfo.fromJson(json['pickup'] ?? json['from'] ?? json['origin']);
+      final dropoff = LocationInfo.fromJson(json['dropoff'] ?? json['to'] ?? json['destination']);
 
       final weight = (json['weight'] ?? '').toString();
       final notes = (json['notes'] ?? '').toString();
@@ -365,6 +367,20 @@ class OrderModel {
 
       final reference = (json['reference'] ?? '').toString();
 
+      // Live location in payload (optional)
+      Map<String, dynamic>? liveLoc;
+      try {
+        if (json['liveLocation'] != null && json['liveLocation'] is Map) {
+          liveLoc = Map<String, dynamic>.from(json['liveLocation']);
+        } else if (json['live_location'] != null && json['live_location'] is Map) {
+          liveLoc = Map<String, dynamic>.from(json['live_location']);
+        } else if (json['tracking'] != null && json['tracking'] is Map) {
+          liveLoc = Map<String, dynamic>.from(json['tracking']);
+        }
+      } catch (_) {
+        liveLoc = null;
+      }
+
       return OrderModel(
         id: idStr,
         orderId: orderIdVal?.toString() ?? '',
@@ -392,9 +408,9 @@ class OrderModel {
         stripePaymentIntentId: stripePaymentIntentId,
         clientSecret: clientSecret,
         deliveredAt: deliveredAt,
+        liveLocation: liveLoc,
       );
     } catch (e) {
-      // If anything goes wrong, return a minimal safe OrderModel
       return OrderModel(
         id: '',
         orderId: '',
@@ -412,10 +428,9 @@ class OrderModel {
         paymentStatus: 'pending',
         paymentMethod: '',
         estimatedCost: 0.0,
+        liveLocation: null,
       );
     }
-
-
   }
 
   // Helper to parse a list response (handles { "shipments": [ ... ] } or List payloads)
@@ -437,7 +452,6 @@ class OrderModel {
         return (raw).map((e) => OrderModel.fromJson(e)).toList();
       }
 
-      // fallback: if it's a single shipment-like map
       if (raw is Map) {
         return [OrderModel.fromJson(raw)];
       }
@@ -458,7 +472,6 @@ class OrderModel {
         return OrderStatus.Accepted;
       case 'in_transit':
       case 'in-transit':
-      case 'intransit':
       case 'intransit':
         return OrderStatus.InTransit;
       case 'delivered':

@@ -12,7 +12,7 @@ import 'package:plex_user/screens/widgets/helpers.dart';
 import '../../../../constant/app_assets.dart';
 import '../../../../models/driver_order_model.dart';
 import '../../../modules/controllers/orders/user_order_controller.dart';
-import '../../../modules/controllers/booking/driver_tracking_controller.dart';
+import '../../../modules/controllers/booking/shipment_tracking_controller.dart';
 import '../../../modules/controllers/booking/search_driver_controller.dart';
 
 class UserOrderDetailsScreen extends GetView<UserOrderController> {
@@ -133,12 +133,9 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
                   final driverLocation = controller.driverLocation.value;
 
                   // Initialize tracking controller
-                  if (driverLocation != null) {
-                    final trackingController = Get.put(
-                      DriverTrackingController(),
-                    );
-                    trackingController.startTracking(driver, driverLocation);
-                  }
+                  final trackingController = Get.put(ShipmentTrackingController());
+                  trackingController.startTracking(order);
+
 
                   // Navigate to tracking screen
                   Get.to(() => ShipmentTrackingScreen(order: order));

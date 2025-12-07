@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:plex_user/modules/controllers/booking/driver_tracking_controller.dart';
+import 'package:plex_user/modules/controllers/booking/shipment_tracking_controller.dart';
 import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 import '../../../../models/driver_order_model.dart';
 import '../../../../modules/controllers/location/location_permission_controller.dart';
@@ -139,69 +139,69 @@ class DriverOrderSocket {
       }
     });
 
-    socketService.on('locationUpdate', (payload) {
-      debugPrint('DriverOrderSocket: locationUpdate received: $payload');
-      try {
-        Map<String, dynamic> data;
-        if (payload is Map) {
-          data = Map<String, dynamic>.from(payload);
-        } else {
-          debugPrint(
-            'DriverOrderSocket: locationUpdate payload is not a Map, ignoring',
-          );
-          return;
-        }
-
-        final lat = (data['lat'] ?? data['latitude']) as num?;
-        final lng = (data['lng'] ?? data['longitude'] ?? data['lon']) as num?;
-
-        if (lat != null && lng != null) {
-          final location = LatLng(lat.toDouble(), lng.toDouble());
-
-          // Update driver tracking controller if it exists
-          try {
-            final trackingController = Get.find<DriverTrackingController>();
-            final driver = trackingController.driver.value;
-            if (driver != null) {
-              // Update driver's position directly
-              driver.lat = location.latitude;
-              driver.lng = location.longitude;
-              trackingController.driver.refresh();
-              debugPrint(
-                'DriverOrderSocket: Updated driver position to $location',
-              );
-            } else {
-              debugPrint(
-                'DriverOrderSocket: DriverTrackingController exists but no driver is set',
-              );
-            }
-          } catch (e) {
-            debugPrint(
-              'DriverOrderSocket: DriverTrackingController not found or error: $e',
-            );
-          }
-
-          // Also update LocationController if available
-          try {
-            final locationController = Get.find<LocationController>();
-            locationController.currentPosition.value = location;
-            debugPrint(
-              'DriverOrderSocket: Updated LocationController position to $location',
-            );
-          } catch (e) {
-            debugPrint(
-              'DriverOrderSocket: LocationController not found, skipping update: $e',
-            );
-          }
-        } else {
-          debugPrint(
-            'DriverOrderSocket: Invalid locationUpdate payload - missing lat/lng. Data: $data',
-          );
-        }
-      } catch (e) {
-        debugPrint('DriverOrderSocket: Error handling locationUpdate: $e');
-      }
-    });
+    // socketService.on('locationUpdate', (payload) {
+    //   debugPrint('DriverOrderSocket: locationUpdate received: $payload');
+    //   try {
+    //     Map<String, dynamic> data;
+    //     if (payload is Map) {
+    //       data = Map<String, dynamic>.from(payload);
+    //     } else {
+    //       debugPrint(
+    //         'DriverOrderSocket: locationUpdate payload is not a Map, ignoring',
+    //       );
+    //       return;
+    //     }
+    //
+    //     final lat = (data['lat'] ?? data['latitude']) as num?;
+    //     final lng = (data['lng'] ?? data['longitude'] ?? data['lon']) as num?;
+    //
+    //     if (lat != null && lng != null) {
+    //       final location = LatLng(lat.toDouble(), lng.toDouble());
+    //
+    //       // Update driver tracking controller if it exists
+    //       try {
+    //         final trackingController = Get.find<ShipmentTrackingController>();
+    //         final driver = trackingController.driver.value;
+    //         if (driver != null) {
+    //           // Update driver's position directly
+    //           driver.lat = location.latitude;
+    //           driver.lng = location.longitude;
+    //           trackingController.driver.refresh();
+    //           debugPrint(
+    //             'DriverOrderSocket: Updated driver position to $location',
+    //           );
+    //         } else {
+    //           debugPrint(
+    //             'DriverOrderSocket: ShipmentTrackingController exists but no driver is set',
+    //           );
+    //         }
+    //       } catch (e) {
+    //         debugPrint(
+    //           'DriverOrderSocket: ShipmentTrackingController not found or error: $e',
+    //         );
+    //       }
+    //
+    //       // Also update LocationController if available
+    //       try {
+    //         final locationController = Get.find<LocationController>();
+    //         locationController.currentPosition.value = location;
+    //         debugPrint(
+    //           'DriverOrderSocket: Updated LocationController position to $location',
+    //         );
+    //       } catch (e) {
+    //         debugPrint(
+    //           'DriverOrderSocket: LocationController not found, skipping update: $e',
+    //         );
+    //       }
+    //     } else {
+    //       debugPrint(
+    //         'DriverOrderSocket: Invalid locationUpdate payload - missing lat/lng. Data: $data',
+    //       );
+    //     }
+    //   } catch (e) {
+    //     debugPrint('DriverOrderSocket: Error handling locationUpdate: $e');
+    //   }
+    // });
 
     // Optional: server-side error events
     socketService.on('error', (data) {

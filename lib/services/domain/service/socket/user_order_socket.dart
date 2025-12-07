@@ -1,24 +1,21 @@
-// file: services/socket/user_order_socket.dart
+// file: lib/services/socket/user_order_socket.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../models/driver_order_model.dart';
-// <- adjust path if needed
-import '../socket/socket_service.dart';
+
+import 'socket_service.dart';
 
 class UserOrderSocket {
   final SocketService socketService = Get.find<SocketService>();
 
-  /// Exposed reactive state
-  final RxList<OrderModel> orders = <OrderModel>[].obs; // user's orders / shipments
-  final RxMap<String, Map<String, dynamic>> _liveLocations = <String, Map<String,dynamic>>{}.obs;
+  final RxList<OrderModel> orders = <OrderModel>[].obs;
+
+  final RxMap<String, Map<String, dynamic>> liveLocations = <String, Map<String, dynamic>>{}.obs;
+
   final Rx<OrderModel?> activeTrackingOrder = Rx<OrderModel?>(null);
 
-  // optional stream subs (if you create any streams)
   final List<StreamSubscription> _subs = [];
-
-  // internal dedupe map (to avoid duplicate processing)
-  final Map<String, DateTime> _recent = {};
 
   UserOrderSocket();
 
@@ -31,7 +28,6 @@ class UserOrderSocket {
 
     debugPrint('UserOrderSocket: attaching listeners');
 
-    // 2) shipment_status or shipment_update -> update single order status
     socketService.on('shipment_status', (payload) {
       try {
         final Map p = payload is Map ? payload : Map<String, dynamic>.from(payload);
@@ -40,18 +36,17 @@ class UserOrderSocket {
         final idx = orders.indexWhere((o) => o.id == shipmentId);
         if (idx != -1) {
           orders[idx].status.value = OrderModel.parseStatus(statusStr);
-          // update deliveredAt if provided
           if (p['deliveredAt'] != null) {
             orders[idx] = OrderModel.fromJson({
               ..._safeToMap(orders[idx]),
               'deliveredAt': p['deliveredAt']
             });
           }
+          orders.refresh();
         } else {
-          // if it's not in list, but status is active for this user, add it
           try {
             final maybe = OrderModel.fromJson(p);
-            if (maybe.userId != null && maybe.userId == socketService.currentUserId) {
+            if (maybe.userId == null || maybe.userId == socketService.currentUserId) {
               orders.insert(0, maybe);
             }
           } catch (_) {}
@@ -61,34 +56,44 @@ class UserOrderSocket {
       }
     });
 
-    // 4) location updates (live tracking) -- server might emit 'locationUpdate' with shipmentId
     socketService.on('locationUpdate', (payload) {
       try {
         final Map p = payload is Map ? payload : Map<String, dynamic>.from(payload);
         final shipmentId = (p['shipmentId'] ?? p['orderId'] ?? p['id'])?.toString() ?? '';
         if (shipmentId.isEmpty) return;
 
-        _liveLocations[shipmentId] = {
-          'lat': p['lat'] ?? p['latitude'] ?? p['lng'] ?? p['lon'],
-          'lng': p['lng'] ?? p['longitude'] ?? p['lon'] ?? p['lng'],
-          'ts': DateTime.now().toIso8601String(),
+        final lat = _toDouble(p['lat'] ?? p['latitude'] ?? p['latLng']?['lat']);
+        final lng = _toDouble(p['lng'] ?? p['longitude'] ?? p['lon'] ?? p['latLng']?['lng']);
+
+        if (lat == null || lng == null) return;
+
+        liveLocations[shipmentId] = {
+          'lat': lat,
+          'lng': lng,
+          'ts': p['timestamp']?.toString() ?? DateTime.now().toIso8601String(),
+          'raw': p,
         };
 
-        // if we're actively tracking this shipment, we can expose the location elsewhere
+        // update OrderModel.liveLocation if order is present
+        final idx = orders.indexWhere((o) => o.id == shipmentId);
+        if (idx != -1) {
+          final m = _safeToMap(orders[idx]);
+          m['liveLocation'] = liveLocations[shipmentId];
+          orders[idx] = OrderModel.fromJson(m);
+        }
+
         if (activeTrackingOrder.value?.id == shipmentId) {
-          _liveLocations.refresh();
+          liveLocations.refresh();
         }
       } catch (e) {
         debugPrint('UserOrderSocket: error handling locationUpdate: $e');
       }
     });
 
-    // 5) order_confirmed / order_updated events
     socketService.on('order_confirmed', (payload) {
       try {
         final Map p = payload is Map ? payload : Map<String, dynamic>.from(payload);
         final shipment = OrderModel.fromJson(p['shipment'] ?? p);
-        // update or insert
         final idx = orders.indexWhere((o) => o.id == shipment.id);
         if (idx != -1) {
           orders[idx] = shipment;
@@ -105,27 +110,31 @@ class UserOrderSocket {
     socketService.on('error', (d) => debugPrint('UserOrderSocket: socket error: $d'));
   }
 
-  /// Start tracking a particular shipment: joins server room and sets activeTrackingOrder
+  double? _toDouble(dynamic v) {
+    if (v == null) return null;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v);
+    return null;
+  }
+
   void startTracking(OrderModel order) {
     if (socketService.socket == null) return;
     final id = int.tryParse(order.id) ?? 0;
     if (id > 0) {
-      socketService.emit('joinShipment', id); // backend expects this event in your server code
+      socketService.emit('joinShipment', id);
       activeTrackingOrder.value = order;
     } else {
-      activeTrackingOrder.value = order; // still set, but can't join room
+      activeTrackingOrder.value = order;
     }
   }
 
-  /// Stop tracking (leave UI tracking)
   void stopTracking() {
     activeTrackingOrder.value = null;
   }
 
-  /// Get latest live location for a shipmentId (may return null)
-  Map<String, dynamic>? getLiveLocation(String shipmentId) => _liveLocations[shipmentId];
+  Map<String, dynamic>? getLiveLocation(String shipmentId) => liveLocations[shipmentId];
 
-  /// User actions: cancel order (emit)
   void cancelOrder(OrderModel order, {String reason = ''}) {
     final id = int.tryParse(order.id) ?? 0;
     if (id > 0) {
@@ -133,7 +142,6 @@ class UserOrderSocket {
     }
   }
 
-  /// Clean up listeners
   void stop() {
     try {
       socketService.off('existingShipments');
@@ -146,7 +154,7 @@ class UserOrderSocket {
       debugPrint('UserOrderSocket.stop: error while off(): $e');
     }
     orders.clear();
-    _liveLocations.clear();
+    liveLocations.clear();
     activeTrackingOrder.value = null;
     for (final s in _subs) {
       s.cancel();
@@ -154,7 +162,6 @@ class UserOrderSocket {
     _subs.clear();
   }
 
-  // helper: convert a minimal OrderModel to Map for merging (not full fidelity)
   static Map<String, dynamic> _safeToMap(OrderModel o) {
     return {
       'id': o.id,
@@ -175,6 +182,8 @@ class UserOrderSocket {
         'latitude': o.dropoff.latitude,
         'longitude': o.dropoff.longitude,
       },
+      'driverDetails': o.driverDetails,
+      'liveLocation': o.liveLocation,
     };
   }
 }
