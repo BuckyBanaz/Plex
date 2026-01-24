@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.example.plex_user",
+      "sha256_cert_fingerprints": [
+        "97:DA:05:09:7F:B4:DC:35:53:C4:5B:1A:7F:67:98:8E:B5:EE:98:96:61:42:18:70:08:44:33:6E:24:0E:D3:F9"
+      ]
+    }
+  }
+]
