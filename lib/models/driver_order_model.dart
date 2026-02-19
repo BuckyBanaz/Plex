@@ -8,6 +8,7 @@ enum OrderStatus {
   Created,
   Assigned,
   Accepted,
+  PickedUp,
   InTransit,
   Delivered,
   Declined,
@@ -242,6 +243,12 @@ class OrderModel {
   /// format: { 'lat': double, 'lng': double, 'timestamp': String, 'raw': dynamic }
   final Map<String, dynamic>? liveLocation;
 
+  /// OTP fields for verification
+  final String? pickupOtp;
+  final String? dropoffOtp;
+  final bool pickupOtpVerified;
+  final bool dropoffOtpVerified;
+
   OrderModel({
     required this.id,
     required this.orderId,
@@ -270,6 +277,10 @@ class OrderModel {
     this.clientSecret,
     this.deliveredAt,
     this.liveLocation,
+    this.pickupOtp,
+    this.dropoffOtp,
+    this.pickupOtpVerified = false,
+    this.dropoffOtpVerified = false,
   }) : status = initialStatus.obs;
 
   // Primary factory — accepts many possible shapes
@@ -381,6 +392,12 @@ class OrderModel {
         liveLoc = null;
       }
 
+      // OTP fields
+      final pickupOtp = (json['pickupOtp'] ?? json['pickup_otp'])?.toString();
+      final dropoffOtp = (json['dropoffOtp'] ?? json['dropoff_otp'])?.toString();
+      final pickupOtpVerified = json['pickupOtpVerified'] == true || json['pickup_otp_verified'] == true;
+      final dropoffOtpVerified = json['dropoffOtpVerified'] == true || json['dropoff_otp_verified'] == true;
+
       return OrderModel(
         id: idStr,
         orderId: orderIdVal?.toString() ?? '',
@@ -409,6 +426,10 @@ class OrderModel {
         clientSecret: clientSecret,
         deliveredAt: deliveredAt,
         liveLocation: liveLoc,
+        pickupOtp: pickupOtp,
+        dropoffOtp: dropoffOtp,
+        pickupOtpVerified: pickupOtpVerified,
+        dropoffOtpVerified: dropoffOtpVerified,
       );
     } catch (e) {
       return OrderModel(
@@ -470,6 +491,10 @@ class OrderModel {
         return OrderStatus.Assigned;
       case 'accepted':
         return OrderStatus.Accepted;
+      case 'picked_up':
+      case 'picked-up':
+      case 'pickedup':
+        return OrderStatus.PickedUp;
       case 'in_transit':
       case 'in-transit':
       case 'intransit':

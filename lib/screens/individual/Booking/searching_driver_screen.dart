@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:plex_user/constant/app_colors.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 import '../../../modules/controllers/booking/shipment_tracking_controller.dart';
 import '../../../modules/controllers/booking/search_driver_controller.dart';
 import '../../../modules/controllers/location/location_permission_controller.dart';
@@ -137,9 +138,9 @@ class _SearchingDriverScreenState extends State<SearchingDriverScreen> {
                   height: 36,
                   child: ElevatedButton(
                     onPressed: () {
-                      Get.snackbar(
-                        'Trip details',
+                      CustomSnackbar.info(
                         'Show trip details (not implemented)',
+                        title: 'Trip details',
                       );
                     },
                     style: ElevatedButton.styleFrom(

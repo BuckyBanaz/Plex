@@ -45,36 +45,58 @@ class MapLocationController extends GetxController {
 
   /// ✅ Get current location
   Future<void> _determinePosition() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      showToast(message: "location_error_enable_service".tr);
-
-      isLoading.value = false;
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        showToast(message: "location_permission_denied".tr);
-        // Get.snackbar("Error", "Location permissions are denied");
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        showToast(message: "location_error_enable_service".tr);
         isLoading.value = false;
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      showToast(message: "location_permission_denied_forever".tr);
-      // Get.snackbar("Error", "Location permission permanently denied.");
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          showToast(message: "location_permission_denied".tr);
+          isLoading.value = false;
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        showToast(message: "location_permission_denied_forever".tr);
+        isLoading.value = false;
+        return;
+      }
+
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 10), // Add timeout
+        );
+      } catch (e) {
+        debugPrint('Error getting current position: $e');
+        // Try to get last known position as fallback
+        position = await Geolocator.getLastKnownPosition();
+      }
+
+      // Validate position is available
+      if (position == null) {
+        debugPrint('No position available (current or last known)');
+        isLoading.value = false;
+        return;
+      }
+
+      // Use position (guaranteed non-null at this point)
+      currentLatLng.value = LatLng(position.latitude, position.longitude);
+      await _updateAddress(position.latitude, position.longitude);
+    } catch (e) {
+      debugPrint('Error in _determinePosition: $e');
+      // Don't crash, just set loading to false
+    } finally {
       isLoading.value = false;
-      return;
     }
-
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    currentLatLng.value = LatLng(position.latitude, position.longitude);
-    await _updateAddress(position.latitude, position.longitude);
-    isLoading.value = false;
   }
 
   /// ✅ Update address from coordinates
@@ -82,13 +104,25 @@ class MapLocationController extends GetxController {
     try {
       isConfirming.value = true; // ⬅️ Start loading
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+      
+      // Check if placemarks list is not empty
+      if (placemarks.isEmpty) {
+        address.value = "unknown_location".tr;
+        fullAddress.value = "unknown_location".tr;
+        pincode.value = '';
+        return;
+      }
+      
       Placemark place = placemarks.first;
       address.value = "${place.locality ?? ''}, ${place.subAdministrativeArea ?? ''}";
       fullAddress.value =
       "${place.name ?? ''}, ${place.subLocality ?? ''}, ${place.locality ?? ''}, ${place.administrativeArea ?? ''}, ${place.country ?? ''}";
       pincode.value = place.postalCode ?? '';
     } catch (e) {
+      debugPrint('Error updating address: $e');
       address.value = "unknown_location".tr;
+      fullAddress.value = "unknown_location".tr;
+      pincode.value = '';
     } finally {
       isConfirming.value = false; // ⬅️ Stop loading
     }
@@ -101,8 +135,13 @@ class MapLocationController extends GetxController {
   }
 
   Future<void> onCameraIdle() async {
-    await _updateAddress(currentLatLng.value.latitude, currentLatLng.value.longitude);
-    _sessionToken = _generateSessionToken();
+    try {
+      await _updateAddress(currentLatLng.value.latitude, currentLatLng.value.longitude);
+      _sessionToken = _generateSessionToken();
+    } catch (e) {
+      debugPrint('Error in onCameraIdle: $e');
+      // Don't crash, just log the error
+    }
   }
 
   /// 🔍 Debounced search handler
@@ -113,33 +152,66 @@ class MapLocationController extends GetxController {
         suggestions.clear();
         return;
       }
-      suggestions.value = await _mapRepository.getSuggestions(value, _sessionToken!);
+      try {
+        // Ensure sessionToken is not null
+        if (_sessionToken == null) {
+          _sessionToken = _generateSessionToken();
+        }
+        suggestions.value = await _mapRepository.getSuggestions(value, _sessionToken!);
+      } catch (e) {
+        debugPrint('Error in onSearchChanged: $e');
+        suggestions.clear();
+      }
     });
   }
 
   /// 📍 Handle suggestion selection
   Future<void> selectSuggestion(Map<String, dynamic> suggestion) async {
-    final placeId = suggestion['place_id'];
-    if (placeId == null) return;
+    try {
+      final placeId = suggestion['place_id'];
+      if (placeId == null) return;
 
-    searchController.text = suggestion['description'] ?? "";
-    suggestions.clear();
+      searchController.text = suggestion['description'] ?? "";
+      suggestions.clear();
 
-    final details = await _mapRepository.getPlaceDetails(placeId, _sessionToken!);
-    if (details != null) {
-      final lat = (details['lat'] as double?) ?? 0.0;
-      final lng = (details['lng'] as double?) ?? 0.0;
-
-
-      try {
-        final mapCtrl = await mapController.future;
-        mapCtrl.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16));
-      } catch (e) {
-        debugPrint('selectSuggestion animateCamera error: $e');
+      // Ensure sessionToken is not null
+      if (_sessionToken == null) {
+        _sessionToken = _generateSessionToken();
       }
 
-      await _updateAddress(lat, lng);
-      _sessionToken = _generateSessionToken();
+      final details = await _mapRepository.getPlaceDetails(placeId, _sessionToken!);
+      if (details != null) {
+        final lat = (details['lat'] as double?) ?? 0.0;
+        final lng = (details['lng'] as double?) ?? 0.0;
+
+        // Validate coordinates
+        if (lat == 0.0 && lng == 0.0) {
+          debugPrint('Invalid coordinates from place details');
+          return;
+        }
+
+        try {
+          // Check if mapController is completed before using it
+          if (!mapController.isCompleted) {
+            debugPrint('Map controller not ready yet');
+            // Wait a bit for map to initialize
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+          
+          if (mapController.isCompleted) {
+            final mapCtrl = await mapController.future;
+            await mapCtrl.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16));
+          }
+        } catch (e) {
+          debugPrint('selectSuggestion animateCamera error: $e');
+        }
+
+        await _updateAddress(lat, lng);
+        _sessionToken = _generateSessionToken();
+      }
+    } catch (e) {
+      debugPrint('Error in selectSuggestion: $e');
+      // Don't crash, just log the error
     }
   }
 }

@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:plex_user/models/user_models.dart';
-import 'package:plex_user/modules/controllers/booking/search_driver_controller.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 
 import '../../../constant/app_colors.dart';
 import '../../../models/driver_user_model.dart';
 import '../../../services/domain/service/api/api_import.dart';
 import '../../../services/domain/service/app/app_service_imports.dart';
+import '../../../services/domain/repository/repository_imports.dart';
 
 class ProfileController extends GetxController{
   final DatabaseService db = Get.find<DatabaseService>();
   final DeviceInfoService deviceInfoService = Get.find<DeviceInfoService>();
+  final UserRepository _userRepository = Get.find<UserRepository>();
 
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   final Rx<DriverUserModel?> currentDriver = Rx<DriverUserModel?>(null);
   final Rx<bool> isLoading = false.obs;
   final RxBool loading = false.obs;
+  final RxBool isUpdating = false.obs;
+
+  // Edit Profile Controllers
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final mobileController = TextEditingController();
+  final dobController = TextEditingController();
+  final editFormKey = GlobalKey<FormState>();
 
   final newPass = TextEditingController();
   final confirmPass = TextEditingController();
@@ -91,11 +98,9 @@ Future<void> token() async {
     if (!formKey.currentState!.validate()) return;
 
     if (newPass.text.trim() != confirmPass.text.trim()) {
-      Get.snackbar(
-        "Error",
+      CustomSnackbar.error(
         "Passwords do not match",
-        backgroundColor: Colors.red.shade50,
-        colorText: Colors.red.shade800,
+        title: "Error",
       );
       return;
     }
@@ -107,11 +112,9 @@ Future<void> token() async {
 
     loading.value = false;
 
-    Get.snackbar(
-      "Success",
+    CustomSnackbar.success(
       "Password reset successfully",
-      backgroundColor: Colors.green.shade50,
-      colorText: Colors.green.shade800,
+      title: "Success",
     );
 
     // Optionally navigate back
@@ -174,12 +177,9 @@ Future<void> token() async {
             onPressed: () {
               if (dialogFormKey.currentState!.validate()) {
                 Get.back();
-                Get.snackbar(
-                  "Reset Link Sent",
+                CustomSnackbar.success(
                   "Link sent to ${emailCtrl.text.trim()}",
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.blue.shade50,
-                  colorText: Colors.blue.shade800,
+                  title: "Reset Link Sent",
                 );
                 // TODO: Call actual API to send reset link
               }
@@ -202,12 +202,82 @@ Future<void> token() async {
     );
   }
 
+  /// Initialize edit profile form with current user data
+  void initEditProfile() {
+    final isDriver = db.userType == 'driver';
+    
+    if (isDriver) {
+      final driver = currentDriver.value;
+      nameController.text = driver?.name ?? '';
+      emailController.text = driver?.email ?? '';
+      mobileController.text = driver?.mobile ?? '';
+    } else {
+      final user = currentUser.value;
+      nameController.text = user?.name ?? '';
+      emailController.text = user?.email ?? '';
+      mobileController.text = user?.mobile ?? '';
+    }
+    dobController.text = '';
+  }
+
+  /// Update user profile via repository
+  Future<bool> updateProfile() async {
+    if (!editFormKey.currentState!.validate()) return false;
+
+    isUpdating.value = true;
+
+    try {
+      final result = await _userRepository.updateProfile(
+        name: nameController.text.trim(),
+        email: emailController.text.trim(),
+        mobile: mobileController.text.trim(),
+        dateOfBirth: dobController.text.isNotEmpty ? dobController.text.trim() : null,
+      );
+
+      if (result != null) {
+        // Reload user data from local DB
+        await _loadUserData();
+        CustomSnackbar.success('Profile updated successfully');
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error updating profile: $e');
+      CustomSnackbar.error('Failed to update profile');
+      return false;
+    } finally {
+      isUpdating.value = false;
+    }
+  }
+
+  /// Check if profile has changes
+  bool hasProfileChanges() {
+    final isDriver = db.userType == 'driver';
+    
+    if (isDriver) {
+      final driver = currentDriver.value;
+      return nameController.text != (driver?.name ?? '') ||
+          emailController.text != (driver?.email ?? '') ||
+          mobileController.text != (driver?.mobile ?? '');
+    } else {
+      final user = currentUser.value;
+      return nameController.text != (user?.name ?? '') ||
+          emailController.text != (user?.email ?? '') ||
+          mobileController.text != (user?.mobile ?? '');
+    }
+  }
+
   @override
   void onClose() {
     newPass.dispose();
     confirmPass.dispose();
     newPassFocus.dispose();
     confirmPassFocus.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    mobileController.dispose();
+    dobController.dispose();
     super.onClose();
   }
 }

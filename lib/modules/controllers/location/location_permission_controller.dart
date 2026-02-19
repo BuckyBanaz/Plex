@@ -9,6 +9,7 @@ import '../../../common/Toast/toast.dart';
 import '../../../routes/appRoutes.dart';
 import '../../../services/domain/repository/repository_imports.dart';
 import '../../../services/domain/service/app/app_service_imports.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 
 class LocationController extends GetxController {
   final GeolocationService gl = Get.find<GeolocationService>();
@@ -72,10 +73,9 @@ class LocationController extends GetxController {
       // start stream after permission granted
       await _startPositionStreamIfPermitted();
     } else if (status.isDenied) {
-      Get.snackbar(
-        "error".tr,
+      CustomSnackbar.error(
         "please_grant_location_permission".tr,
-        snackPosition: SnackPosition.BOTTOM,
+        title: "error".tr,
       );
     } else if (status.isPermanentlyDenied) {
       openAppSettings();

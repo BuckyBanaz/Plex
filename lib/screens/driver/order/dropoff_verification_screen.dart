@@ -1,25 +1,33 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-
-import '../../../constant/app_colors.dart';
-
-import 'driver_job_complete.dart';
+import 'package:plex_user/constant/app_colors.dart';
+import 'package:plex_user/constant/api_endpoint.dart';
+import 'package:plex_user/screens/driver/order/driver_job_complete.dart';
+import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
+import '../../../common/Toast/toast.dart';
 
 class DeliveryVerificationScreen extends StatefulWidget {
-  const DeliveryVerificationScreen({super.key});
+  final Map<String, dynamic>? shipment;
+  
+  const DeliveryVerificationScreen({super.key, this.shipment});
 
   @override
   State<DeliveryVerificationScreen> createState() =>
       _DeliveryVerificationScreenState();
 }
 
-class _DeliveryVerificationScreenState
-    extends State<DeliveryVerificationScreen> {
+class _DeliveryVerificationScreenState extends State<DeliveryVerificationScreen> {
   final int otpLength = 4;
   late List<TextEditingController> _controllers;
   late List<FocusNode> _focusNodes;
+  bool _isLoading = false;
+  bool _isResending = false;
+  
+  Map<String, dynamic> get _shipment => 
+      widget.shipment ?? Get.arguments?['shipment'] ?? {};
 
   @override
   void initState() {
@@ -56,7 +64,6 @@ class _DeliveryVerificationScreenState
       _controllers.every((c) => c.text.isNotEmpty && c.text.length == 1);
 
   void _onChanged(String value, int index) {
-    // Handle paste or multi-char input
     if (value.length > 1) {
       final chars = value.replaceAll(RegExp(r'\s+'), '').split('');
       for (int i = 0; i < otpLength; i++) {
@@ -98,24 +105,127 @@ class _DeliveryVerificationScreenState
     }
   }
 
+  Future<void> _verifyOtp() async {
+    if (!_isComplete || _isLoading) return;
+    
+    setState(() => _isLoading = true);
+    
+    try {
+      final shipmentId = _shipment['id']?.toString() ?? '';
+      final otp = _currentOtp;
+      
+      final dio = Dio();
+      final db = Get.find<DatabaseService>();
+      dio.options.headers['Authorization'] = 'Bearer ${db.accessToken}';
+      
+      final endpoint = ApiEndpoint.verifyDropoffOtp.replaceFirst(':id', shipmentId);
+      final response = await dio.post(
+        '${ApiEndpoint.baseUrl}$endpoint',
+        data: {'otp': otp},
+      );
+      
+      if (response.data['success'] == true) {
+        showToast(message: 'Delivery completed successfully!');
+        
+        // Get data from API response (more reliable than passed shipment)
+        final responseShipment = response.data['shipment'];
+        
+        // Get fare - prefer response data, fallback to passed shipment
+        final fare = responseShipment?['estimatedCost'] ?? 
+                     _shipment['estimatedCost'] ?? 
+                     _shipment['pricing']?['amount'] ??
+                     _shipment['pricing']?['estimatedCostINR'] ??
+                     _shipment['amount'] ?? 0;
+        
+        // Get payment method - prefer response data, fallback to passed shipment
+        final paymentMethod = responseShipment?['paymentMethod'] ??
+                              _shipment['paymentMethod'] ?? 
+                              _shipment['payment_method'] ??
+                              _shipment['pricing']?['paymentMethod'] ??
+                              'COD';
+        
+        debugPrint('╔══════════════════════════════════════════════════════════════');
+        debugPrint('║ 💰 TRIP COMPLETED');
+        debugPrint('║ Response Shipment: $responseShipment');
+        debugPrint('║ Fare: $fare');
+        debugPrint('║ Payment Method: $paymentMethod');
+        debugPrint('║ Passed shipment paymentMethod: ${_shipment['paymentMethod']}');
+        debugPrint('╚══════════════════════════════════════════════════════════════');
+        
+        Get.offAll(() => DriverJobCompleteScreen(
+          amount: (fare is int) ? fare.toDouble() : (fare is double ? fare : double.tryParse(fare.toString()) ?? 0.0),
+          paymentMethod: paymentMethod.toString().toUpperCase(),
+        ));
+      } else {
+        showToast(message: response.data['message'] ?? 'Verification failed');
+      }
+    } catch (e) {
+      debugPrint('OTP verification error: $e');
+      String errorMsg = 'Verification failed';
+      if (e is DioException && e.response?.data != null) {
+        errorMsg = e.response?.data['message'] ?? errorMsg;
+      }
+      showToast(message: errorMsg);
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _resendOtp() async {
+    if (_isResending) return;
+    
+    setState(() => _isResending = true);
+    
+    try {
+      final shipmentId = _shipment['id']?.toString() ?? '';
+      
+      final dio = Dio();
+      final db = Get.find<DatabaseService>();
+      dio.options.headers['Authorization'] = 'Bearer ${db.accessToken}';
+      
+      final endpoint = ApiEndpoint.resendShipmentOtp.replaceFirst(':id', shipmentId);
+      final response = await dio.post(
+        '${ApiEndpoint.baseUrl}$endpoint',
+        data: {'otpType': 'dropoff'},
+      );
+      
+      if (response.data['success'] == true) {
+        showToast(message: 'OTP notification sent to customer');
+      } else {
+        showToast(message: response.data['message'] ?? 'Failed to send OTP');
+      }
+    } catch (e) {
+      debugPrint('Resend OTP error: $e');
+      showToast(message: 'Failed to resend OTP');
+    } finally {
+      setState(() => _isResending = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
 
-              // Illustration (use SVG asset; for quick local preview you can use the uploaded PNG path)
+              // Illustration
               SvgPicture.asset(
                 "assets/images/droff_con.svg",
-                height: 220,
+                height: 180,
                 fit: BoxFit.contain,
-                // If you want to preview using uploaded PNG during development, replace above with:
-                // Image.asset('/mnt/data/f167caf5-879b-4f54-990a-9fef507a9bf1.png', height: 220),
               ),
 
               const SizedBox(height: 24),
@@ -125,7 +235,7 @@ class _DeliveryVerificationScreenState
                 "Delivery Verification",
                 style: TextStyle(
                   color: AppColors.primary,
-                  fontSize: 18.5,
+                  fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -136,10 +246,10 @@ class _DeliveryVerificationScreenState
               const Text(
                 "Enter the OTP shared by the customer to confirm the delivery.",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13.5, color: Colors.black54),
+                style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
               // OTP fields
               Row(
@@ -148,9 +258,9 @@ class _DeliveryVerificationScreenState
                   otpLength,
                   (index) => SizedBox(
                     width: 60,
-                    height: 90,
+                    height: 70,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: RawKeyboardListener(
                         focusNode: FocusNode(),
                         onKey: (raw) => _onKey(raw, index),
@@ -160,7 +270,7 @@ class _DeliveryVerificationScreenState
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 24,
                             fontWeight: FontWeight.w600,
                           ),
                           inputFormatters: [
@@ -169,31 +279,21 @@ class _DeliveryVerificationScreenState
                           ],
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: Colors.grey.shade50,
                             contentPadding: EdgeInsets.zero,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: Colors.black26,
-                                width: 1.4,
-                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: Colors.black26,
-                                width: 1.4,
-                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: AppColors.primary,
-                                width: 1.6,
-                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: AppColors.primary, width: 2),
                             ),
                           ),
-
                           onChanged: (v) => _onChanged(v, index),
                         ),
                       ),
@@ -202,46 +302,60 @@ class _DeliveryVerificationScreenState
                 ),
               ),
 
+              const SizedBox(height: 16),
+
+              /// Resend OTP
+              TextButton(
+                onPressed: _isResending ? null : _resendOtp,
+                child: _isResending 
+                  ? SizedBox(
+                      width: 20, height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(
+                      "Resend OTP to Customer",
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+              ),
+
               const Spacer(),
 
               // Delivered button
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 55,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isComplete
+                    backgroundColor: _isComplete && !_isLoading
                         ? AppColors.primary
-                        : AppColors.primarySwatch.shade100,
+                        : AppColors.primarySwatch.shade200,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: _isComplete
-                      ? () {
-                          final otp = _currentOtp;
-                          Get.to(
-                            DriverJobCompleteScreen(
-                              amount: 199,
-                              paymentMethod: "code",
-                            ),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('OTP entered: $otp')),
-                          );
-                        }
-                      : null,
-                  child: const Text(
-                    "Delivered",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+                  onPressed: _isComplete && !_isLoading ? _verifyOtp : null,
+                  child: _isLoading
+                      ? SizedBox(
+                          width: 24, height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          "Verify & Complete Delivery",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
             ],
           ),
         ),

@@ -16,7 +16,6 @@ class UserApi {
     required int langKey,
     required String apiKey,
   }) async {
-
     final response = await dio.put(
       '$basePath${ApiEndpoint.location}',
       data: {
@@ -27,19 +26,13 @@ class UserApi {
         "speed": speed,
         "recorded_at": recordedAt,
       },
-      options: Options(
-        headers: {
-          'lang_id': langKey,
-          'api_key': apiKey,
-        },
-      ),
+      options: Options(headers: {'lang_id': langKey, 'api_key': apiKey}),
     );
 
     return (response.data is Map<String, dynamic>)
         ? Map<String, dynamic>.from(response.data)
         : {'message': response.data?.toString()};
   }
-
 
   Future<Map<String, dynamic>> createShipment({
     required String userId,
@@ -72,16 +65,16 @@ class UserApi {
     }
   }
 
-
-
-
   /// Create PaymentIntent on server
-  Future<Map<String, dynamic>> createPaymentIntent({ required int amount, required String currency, String? orderId }) async {
-    final resp = await dio.post('/payments/create-payment-intent', data: {
-      'amount': amount,
-      'currency': currency,
-      'orderId': orderId,
-    });
+  Future<Map<String, dynamic>> createPaymentIntent({
+    required int amount,
+    required String currency,
+    String? orderId,
+  }) async {
+    final resp = await dio.post(
+      '/payments/create-payment-intent',
+      data: {'amount': amount, 'currency': currency, 'orderId': orderId},
+    );
     return resp.data as Map<String, dynamic>;
   }
 
@@ -115,23 +108,17 @@ class UserApi {
       rethrow;
     }
   }
+
   //
   // /// (Optional) endpoint to confirm payment/update order after webhook
   // Future<Map<String, dynamic>> confirmPaymentOnServer(String paymentIntentId) async {
   //   final resp = await dio.post('/payments/confirm', data: {'paymentIntentId': paymentIntentId});
   //   return resp.data as Map<String, dynamic>;
   // }
-  Future<Map<String, dynamic>> getAddress({
-    required int langKey,
-  }) async {
-
+  Future<Map<String, dynamic>> getAddress({required int langKey}) async {
     final response = await dio.get(
       '$basePath${ApiEndpoint.userAddress}',
-      options: Options(
-        headers: {
-          'lang_id': langKey,
-        },
-      ),
+      options: Options(headers: {'lang_id': langKey}),
     );
 
     return (response.data is Map<String, dynamic>)
@@ -149,7 +136,6 @@ class UserApi {
     required bool isDefault,
     required int langKey,
   }) async {
-
     final response = await dio.post(
       '$basePath${ApiEndpoint.userAddress}',
       data: {
@@ -161,18 +147,13 @@ class UserApi {
         "longitude": longitude,
         "isDefault": isDefault,
       },
-      options: Options(
-        headers: {
-          'lang_id': langKey,
-        },
-      ),
+      options: Options(headers: {'lang_id': langKey}),
     );
 
     return (response.data is Map<String, dynamic>)
         ? Map<String, dynamic>.from(response.data)
         : {'message': response.data?.toString()};
   }
-
 
   /// DELETE /address/{id}
   Future<Map<String, dynamic>> deleteAddress({
@@ -181,29 +162,21 @@ class UserApi {
   }) async {
     final response = await dio.delete(
       '$basePath${ApiEndpoint.userAddress}/$id',
-      options: Options(
-        headers: {
-          'lang_id': langKey,
-        },
-      ),
+      options: Options(headers: {'lang_id': langKey}),
     );
 
     return (response.data is Map<String, dynamic>)
         ? Map<String, dynamic>.from(response.data)
         : {'message': response.data?.toString()};
   }
-
 
   Future<Map<String, dynamic>> updateStatus({
     required String userId,
     required bool isOnline,
   }) async {
-
     final response = await dio.put(
       '$basePath${ApiEndpoint.updateStatus}/$userId',
-      data: {
-        "isOnline": isOnline,
-      },
+      data: {"isOnline": isOnline},
     );
 
     return (response.data is Map<String, dynamic>)
@@ -211,17 +184,49 @@ class UserApi {
         : {'message': response.data?.toString()};
   }
 
-
   Future<Map<String, dynamic>> updateFcm({
     required String userId,
     required String fcmToken,
   }) async {
-
     final response = await dio.put(
       '$basePath${ApiEndpoint.fcmToken}/$userId',
-      data: {
-        "fcmToken": fcmToken,
-      },
+      data: {"fcmToken": fcmToken},
+    );
+
+    return (response.data is Map<String, dynamic>)
+        ? Map<String, dynamic>.from(response.data)
+        : {'message': response.data?.toString()};
+  }
+
+  /// GET /user/profile - Get current user profile
+  Future<Map<String, dynamic>> getProfile() async {
+    final response = await dio.get(
+      '$basePath${ApiEndpoint.userProfile}',
+    );
+
+    return (response.data is Map<String, dynamic>)
+        ? Map<String, dynamic>.from(response.data)
+        : {'message': response.data?.toString()};
+  }
+
+  /// PUT /user/profile - Update user profile
+  Future<Map<String, dynamic>> updateProfile({
+    String? name,
+    String? email,
+    String? mobile,
+    String? dateOfBirth,
+    String? profileImage,
+  }) async {
+    final Map<String, dynamic> data = {};
+    if (name != null) data['name'] = name;
+    if (email != null) data['email'] = email;
+    if (mobile != null) data['mobile'] = mobile;
+    if (dateOfBirth != null) data['dateOfBirth'] = dateOfBirth;
+    if (profileImage != null) data['profileImage'] = profileImage;
+
+    final response = await dio.put(
+      '$basePath${ApiEndpoint.userProfile}',
+      data: data,
     );
 
     return (response.data is Map<String, dynamic>)

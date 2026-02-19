@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart' show Center, CircularProgressIndicator, Colors, debugPrint;
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:plex_user/services/domain/service/socket/socket_service.dart';
 import 'package:plex_user/services/domain/service/socket/driver_order_socket.dart';
 import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
@@ -36,33 +37,20 @@ class DriverHomeController extends GetxController {
   // Subscriptions if you want to react to new orders separately (not used for socket raw listening)
   StreamSubscription? _newOrderSub;
 
-  // Some sample recent history for UI (you already had this)
-  final RxList<Map<String, String>> recentHistory = <Map<String, String>>[
-    {
-      'name': 'Akhil Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'A',
-    },
-    {
-      'name': 'Vipin Jain',
-      'time': 'Today at 09:30 AM',
-      'amount': '200',
-      'initial': 'V',
-    },
-    {
-      'name': 'Parikshit Verma',
-      'time': 'Today at 10:30 AM',
-      'amount': '200',
-      'initial': 'P',
-    },
-    // ... keep rest as needed
-  ].obs;
+  // Recent completed orders (max 5)
+  final RxList<OrderModel> recentOrders = <OrderModel>[].obs;
+  final RxBool isLoadingHistory = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     _loadDriverData();
+    
+    // Check for active orders when driver opens app
+    _restoreActiveOrder();
+    
+    // Load recent history
+    fetchRecentHistory();
 
     // Setup handler references (so we can off() the same instances)
     _onNewShipmentHandler = (dynamic payload) {
@@ -85,45 +73,67 @@ class DriverHomeController extends GetxController {
 
     // React to isOnline changes: when true -> connect & start, when false -> stop & disconnect
     ever<bool>(isOnline, (online) async {
-      debugPrint('DriverHomeController: isOnline changed -> $online');
+      try {
+        debugPrint('DriverHomeController: isOnline changed -> $online');
 
-      if (online == true) {
-        // connect socket only when online
-        final token = db.accessToken ?? '';
-        final driver = currentDriver.value;
-        if (token.isEmpty || driver == null) {
-          debugPrint('DriverHomeController: cannot connect - missing token or driver');
-          isOnline.value = false; // revert
-          return;
+        if (online == true) {
+          // connect socket only when online
+          final token = db.accessToken ?? '';
+          final driver = currentDriver.value;
+          if (token.isEmpty || driver == null) {
+            debugPrint('DriverHomeController: cannot connect - missing token or driver');
+            isOnline.value = false; // revert
+            return;
+          }
+
+          try {
+            // Connect low-level socket
+            socketService.connect(token, driver.id);
+
+            // Start driver-specific listeners (parsing & populating orders)
+            driverOrderSocket.start();
+
+            // Also attach controller-level socket listeners (for showing bottom sheet)
+            if (_onNewShipmentHandler != null) {
+              socketService.on('newShipment', _onNewShipmentHandler!);
+            }
+            if (_onSocketErrorHandler != null) {
+              socketService.on('error', _onSocketErrorHandler!);
+            }
+          } catch (e) {
+            debugPrint('DriverHomeController: error connecting socket: $e');
+            isOnline.value = false; // revert on error
+          }
+        } else {
+          // stop listening and disconnect
+          try {
+            if (_onNewShipmentHandler != null) {
+              socketService.off('newShipment', _onNewShipmentHandler);
+            }
+            if (_onSocketErrorHandler != null) {
+              socketService.off('error', _onSocketErrorHandler);
+            }
+          } catch (e) {
+            debugPrint('DriverHomeController: error detaching socket listeners: $e');
+          }
+
+          try {
+            // Stop high-level socket handlers and clear local orders
+            driverOrderSocket.stop();
+          } catch (e) {
+            debugPrint('DriverHomeController: error stopping driverOrderSocket: $e');
+          }
+
+          try {
+            // Disconnect low-level socket
+            socketService.disconnect();
+          } catch (e) {
+            debugPrint('DriverHomeController: error disconnecting socket: $e');
+          }
         }
-
-        // Connect low-level socket
-        socketService.connect(token, driver.id);
-
-        // Start driver-specific listeners (parsing & populating orders)
-        driverOrderSocket.start();
-
-        // Also attach controller-level socket listeners (for showing bottom sheet)
-        try {
-          socketService.on('newShipment', _onNewShipmentHandler!);
-          socketService.on('error', _onSocketErrorHandler!);
-        } catch (e) {
-          debugPrint('DriverHomeController: error attaching socket listeners: $e');
-        }
-      } else {
-        // stop listening and disconnect
-        try {
-          if (_onNewShipmentHandler != null) socketService.off('newShipment', _onNewShipmentHandler);
-          if (_onSocketErrorHandler != null) socketService.off('error', _onSocketErrorHandler);
-        } catch (e) {
-          debugPrint('DriverHomeController: error detaching socket listeners: $e');
-        }
-
-        // Stop high-level socket handlers and clear local orders
-        driverOrderSocket.stop();
-
-        // Disconnect low-level socket
-        socketService.disconnect();
+      } catch (e) {
+        debugPrint('DriverHomeController: error in isOnline handler: $e');
+        // Don't crash, just log
       }
     });
 
@@ -133,25 +143,326 @@ class DriverHomeController extends GetxController {
   Future<void> _loadDriverData() async {
     try {
       isLoading.value = true;
-      final driverData = db.driver;
-      if (driverData != null) {
-        currentDriver.value = driverData;
+      
+      // First load from local storage for instant display
+      final cachedDriver = db.driver;
+      if (cachedDriver != null) {
+        currentDriver.value = cachedDriver;
+      }
+      
+      // Then fetch fresh profile from API to get latest data (including vehicles)
+      try {
+        final profileData = await userRepo.getProfile();
+        if (profileData != null) {
+          debugPrint('📱 Fresh profile data from API: $profileData');
+          
+          // Parse vehicles from API response with error handling
+          List<VehicleModel> vehicles = [];
+          try {
+            if (profileData['vehicles'] != null && profileData['vehicles'] is List) {
+              final vehiclesList = profileData['vehicles'] as List;
+              vehicles = vehiclesList
+                  .where((v) => v != null)
+                  .map((v) {
+                    try {
+                      return VehicleModel.fromJson(Map<String, dynamic>.from(v));
+                    } catch (e) {
+                      debugPrint('Error parsing vehicle: $e');
+                      return null;
+                    }
+                  })
+                  .whereType<VehicleModel>()
+                  .toList();
+              debugPrint('🚗 Vehicles from API: ${vehicles.length}');
+            }
+          } catch (e) {
+            debugPrint('Error parsing vehicles: $e');
+            vehicles = cachedDriver?.vehicles ?? [];
+          }
+          
+          // Update driver model with fresh data
+          final defaultLocation = LocationModel(
+            latitude: 0.0,
+            longitude: 0.0,
+            accuracy: 0.0,
+            heading: 0.0,
+            speed: 0.0,
+            recordedAt: DateTime.now(),
+          );
+          
+          final updatedDriver = DriverUserModel(
+            id: profileData['id'] ?? cachedDriver?.id ?? 0,
+            name: (profileData['name'] ?? cachedDriver?.name ?? '').toString(),
+            email: (profileData['email'] ?? cachedDriver?.email ?? '').toString(),
+            mobile: (profileData['mobile'] ?? cachedDriver?.mobile ?? '').toString(),
+            userType: (profileData['userType'] ?? cachedDriver?.userType ?? 'driver').toString(),
+            kycStatus: (profileData['kycStatus'] ?? cachedDriver?.kycStatus ?? '').toString(),
+            mobileVerified: profileData['mobileVerified'] ?? cachedDriver?.mobileVerified ?? false,
+            emailVerified: profileData['emailVerified'] ?? cachedDriver?.emailVerified ?? false,
+            createdAt: cachedDriver?.createdAt ?? DateTime.now(),
+            updatedAt: DateTime.now(),
+            location: cachedDriver?.location ?? defaultLocation,
+            vehicles: vehicles,
+            currentBalance: cachedDriver?.currentBalance,
+          );
+          
+          // Update local storage with fresh data
+          try {
+            await db.putDriver(updatedDriver);
+            currentDriver.value = updatedDriver;
+            debugPrint('✅ Driver data refreshed with ${vehicles.length} vehicles');
+          } catch (e) {
+            debugPrint('Error saving driver to local storage: $e');
+            // Still update the value even if save fails
+            currentDriver.value = updatedDriver;
+          }
+        }
+      } catch (e) {
+        debugPrint("Error fetching profile from API: $e");
+        // Keep cached driver if API fails
+        if (currentDriver.value == null && cachedDriver != null) {
+          currentDriver.value = cachedDriver;
+        }
       }
     } catch (e) {
       debugPrint("Failed to load driver data: $e");
+      // Ensure we have at least cached driver
+      if (currentDriver.value == null) {
+        final cachedDriver = db.driver;
+        if (cachedDriver != null) {
+          currentDriver.value = cachedDriver;
+        }
+      }
     } finally {
       isLoading.value = false;
     }
   }
 
+  /// Fetch recent 5 completed orders for history section
+  Future<void> fetchRecentHistory() async {
+    try {
+      isLoadingHistory.value = true;
+      
+      try {
+        final ShipmentRepository repo = Get.find<ShipmentRepository>();
+        final dynamic res = await repo.getShipments(parseToModels: true);
+        
+        List<OrderModel> allOrders = [];
+        
+        if (res is Map<String, dynamic>) {
+          if (res.containsKey('error') || res['success'] != true) {
+            debugPrint('fetchRecentHistory error: ${res['error'] ?? res['message']}');
+            return;
+          }
+          
+          final dynamic shipments = res['shipments'];
+          if (shipments is List<OrderModel>) {
+            allOrders = List<OrderModel>.from(shipments);
+          } else if (shipments is List) {
+            for (final item in shipments) {
+              try {
+                if (item is OrderModel) {
+                  allOrders.add(item);
+                } else if (item is Map) {
+                  allOrders.add(OrderModel.fromJson(Map<String, dynamic>.from(item)));
+                }
+              } catch (e) {
+                debugPrint('Error parsing order item in fetchRecentHistory: $e');
+                // Skip invalid items
+              }
+            }
+          }
+        } else if (res is List) {
+          for (final item in res) {
+            try {
+              if (item is OrderModel) {
+                allOrders.add(item);
+              } else if (item is Map) {
+                allOrders.add(OrderModel.fromJson(Map<String, dynamic>.from(item)));
+              }
+            } catch (e) {
+              debugPrint('Error parsing order item in fetchRecentHistory: $e');
+              // Skip invalid items
+            }
+          }
+        }
+        
+        // Sort by createdAt descending (most recent first)
+        try {
+          allOrders.sort((a, b) {
+            try {
+              final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              return bDate.compareTo(aDate);
+            } catch (e) {
+              debugPrint('Error sorting orders: $e');
+              return 0;
+            }
+          });
+        } catch (e) {
+          debugPrint('Error in sort: $e');
+        }
+        
+        // Take only first 5
+        recentOrders.value = allOrders.take(5).toList();
+        
+        debugPrint('fetchRecentHistory: loaded ${recentOrders.length} recent orders');
+      } catch (e) {
+        debugPrint('fetchRecentHistory API error: $e');
+        // Keep existing orders if API fails
+      }
+    } catch (e) {
+      debugPrint('fetchRecentHistory error: $e');
+    } finally {
+      isLoadingHistory.value = false;
+    }
+  }
+  
+  /// Format date for display
+  String formatOrderTime(DateTime? dt) {
+    if (dt == null) return '';
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final orderDate = DateTime(dt.year, dt.month, dt.day);
+    
+    if (orderDate == today) {
+      return 'Today at ${DateFormat('h:mm a').format(dt)}';
+    } else if (orderDate == today.subtract(const Duration(days: 1))) {
+      return 'Yesterday at ${DateFormat('h:mm a').format(dt)}';
+    } else {
+      return DateFormat('dd MMM, h:mm a').format(dt);
+    }
+  }
+
+  /// Restore active order when driver reopens app
+  /// Fetches active orders from backend and navigates to tracking if found
+  Future<void> _restoreActiveOrder() async {
+    try {
+      debugPrint('╔══════════════════════════════════════════════════════════════');
+      debugPrint('║ 🔄 CHECKING FOR ACTIVE ORDERS...');
+      debugPrint('╚══════════════════════════════════════════════════════════════');
+      
+      // First check local storage for saved order
+      try {
+        final savedOrder = db.driverCurrentOrder;
+        if (savedOrder != null) {
+          debugPrint('║ Found saved order in local storage: ${savedOrder.id}');
+        }
+      } catch (e) {
+        debugPrint('Error reading saved order from local storage: $e');
+      }
+      
+      // Fetch active orders from backend
+      try {
+        final ShipmentRepository repo = Get.find<ShipmentRepository>();
+        final result = await repo.getDriverActiveOrders();
+        
+        if (result['success'] != true) {
+          debugPrint('║ No active orders found or error: ${result['message'] ?? result['error']}');
+          return;
+        }
+        
+        final List<OrderModel> activeOrders = result['orders'] ?? [];
+        
+        if (activeOrders.isEmpty) {
+          debugPrint('║ No active orders to restore');
+          // Clear saved order if backend says no active orders
+          try {
+            db.deleteDriverCurrentOrder();
+          } catch (e) {
+            debugPrint('Error deleting driver current order: $e');
+          }
+          return;
+        }
+        
+        // Get the most recent active order (first one - backend returns ordered by updatedAt DESC)
+        final OrderModel activeOrder = activeOrders.first;
+        
+        // Validate order has required fields
+        if (activeOrder.id == null || activeOrder.pickup == null || activeOrder.dropoff == null) {
+          debugPrint('║ Invalid active order data, skipping restore');
+          return;
+        }
+        
+        debugPrint('╔══════════════════════════════════════════════════════════════');
+        debugPrint('║ ✅ ACTIVE ORDER FOUND!');
+        debugPrint('║ Order ID: ${activeOrder.id}');
+        debugPrint('║ Status: ${activeOrder.status.value}');
+        debugPrint('║ Pickup: ${activeOrder.pickup.address}');
+        debugPrint('║ Dropoff: ${activeOrder.dropoff.address}');
+        debugPrint('╚══════════════════════════════════════════════════════════════');
+        
+        // Save to local storage
+        try {
+          await db.putDriverCurrentOrder(activeOrder);
+        } catch (e) {
+          debugPrint('Error saving active order to local storage: $e');
+        }
+        
+        // Navigate to tracking screen with small delay for UI to settle
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        try {
+          final Map<String, dynamic> args = {
+            'shipment': {
+              'id': activeOrder.id,
+              'orderId': activeOrder.orderId ?? '',
+              'pickup': {
+                'name': activeOrder.pickup.name ?? '',
+                'phone': activeOrder.pickup.phone ?? '',
+                'address': activeOrder.pickup.address ?? '',
+                'latitude': activeOrder.pickup.latitude ?? 0.0,
+                'longitude': activeOrder.pickup.longitude ?? 0.0,
+              },
+              'dropoff': {
+                'name': activeOrder.dropoff.name ?? '',
+                'phone': activeOrder.dropoff.phone ?? '',
+                'address': activeOrder.dropoff.address ?? '',
+                'latitude': activeOrder.dropoff.latitude ?? 0.0,
+                'longitude': activeOrder.dropoff.longitude ?? 0.0,
+              },
+              'invoiceNumber': activeOrder.invoiceNumber ?? '',
+              'estimatedCost': activeOrder.estimatedCost ?? 0.0,
+              'driverId': activeOrder.driverId ?? 0,
+              'status': activeOrder.status.value.toString(),
+            },
+            'restored': true, // Flag to indicate this is a restored order
+          };
+          
+          showToast(message: 'Resuming your active delivery');
+          Get.toNamed(AppRoutes.driverOrderTracking, arguments: args);
+        } catch (e) {
+          debugPrint('Error navigating to tracking screen: $e');
+        }
+      } catch (e) {
+        debugPrint('Error fetching active orders: $e');
+      }
+      
+    } catch (e) {
+      debugPrint('Error restoring active order: $e');
+      // Don't crash, just log
+    }
+  }
+
   void showNewOrderSheet(OrderModel order) {
-    Get.bottomSheet(
-      NewOrderSheet(orderData: order),
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
-    );
+    try {
+      // Validate order before showing sheet
+      if (order.id == null || order.pickup == null || order.dropoff == null) {
+        debugPrint('Invalid order data, cannot show sheet');
+        return;
+      }
+      
+      Get.bottomSheet(
+        NewOrderSheet(orderData: order),
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        isDismissible: false,
+        enableDrag: false,
+      );
+    } catch (e) {
+      debugPrint('Error showing new order sheet: $e');
+      // Don't crash, just log
+    }
   }
 
   /// Accept order flow (uses repository; optimistic UI update + rollback on failure).
@@ -159,17 +470,31 @@ class DriverHomeController extends GetxController {
     bool loaderShown = false;
 
     try {
+      // Validate order before accepting
+      if (order.id == null || order.pickup == null || order.dropoff == null) {
+        showToast(message: 'Invalid order data');
+        return;
+      }
+
       // show loader
       if (Get.isDialogOpen == false) {
-        Get.dialog(
-          Center(child: CircularProgressIndicator(color: Colors.orange)),
-          barrierDismissible: false,
-        );
-        loaderShown = true;
+        try {
+          Get.dialog(
+            Center(child: CircularProgressIndicator(color: Colors.orange)),
+            barrierDismissible: false,
+          );
+          loaderShown = true;
+        } catch (e) {
+          debugPrint('Error showing loader: $e');
+        }
       }
 
       // close bottom sheet if any
-      if (Get.isBottomSheetOpen == true) Get.back();
+      try {
+        if (Get.isBottomSheetOpen == true) Get.back();
+      } catch (e) {
+        debugPrint('Error closing bottom sheet: $e');
+      }
 
       // optimistic in-memory update
       try {
@@ -177,8 +502,17 @@ class DriverHomeController extends GetxController {
       } catch (_) {}
 
       final ShipmentRepository repo = Get.find<ShipmentRepository>();
+      final shipmentId = int.tryParse(order.id.toString()) ?? 0;
+      if (shipmentId == 0) {
+        showToast(message: 'Invalid order ID');
+        if (loaderShown && Get.isDialogOpen == true) {
+          Get.back();
+        }
+        return;
+      }
+
       final result = await repo.acceptShipment(
-        shipmentId: int.tryParse(order.id) ?? 0,
+        shipmentId: shipmentId,
         order: order,
       );
 
@@ -242,30 +576,38 @@ class DriverHomeController extends GetxController {
       }
 
       // navigate to tracking
-      final Map<String, dynamic> args = {
-        'shipment': {
-          'id': finalOrder.id,
-          'orderId': finalOrder.orderId,
-          'pickup': {
-            'name': finalOrder.pickup.name,
-            'phone': finalOrder.pickup.phone,
-            'address': finalOrder.pickup.address,
-            'latitude': finalOrder.pickup.latitude,
-            'longitude': finalOrder.pickup.longitude,
-          },
-          'dropoff': {
-            'name': finalOrder.dropoff.name,
-            'phone': finalOrder.dropoff.phone,
-            'address': finalOrder.dropoff.address,
-            'latitude': finalOrder.dropoff.latitude,
-            'longitude': finalOrder.dropoff.longitude,
-          },
-          'invoiceNumber': finalOrder.invoiceNumber,
-          'estimatedCost': finalOrder.estimatedCost,
-          'driverId': finalOrder.driverId,
-        }
-      };
-      Get.toNamed(AppRoutes.driverOrderTracking, arguments: args);
+      try {
+        final Map<String, dynamic> args = {
+          'shipment': {
+            'id': finalOrder.id ?? '',
+            'orderId': finalOrder.orderId ?? '',
+            'pickup': {
+              'name': finalOrder.pickup?.name ?? '',
+              'phone': finalOrder.pickup?.phone ?? '',
+              'address': finalOrder.pickup?.address ?? '',
+              'latitude': finalOrder.pickup?.latitude ?? 0.0,
+              'longitude': finalOrder.pickup?.longitude ?? 0.0,
+            },
+            'dropoff': {
+              'name': finalOrder.dropoff?.name ?? '',
+              'phone': finalOrder.dropoff?.phone ?? '',
+              'address': finalOrder.dropoff?.address ?? '',
+              'latitude': finalOrder.dropoff?.latitude ?? 0.0,
+              'longitude': finalOrder.dropoff?.longitude ?? 0.0,
+            },
+            'invoiceNumber': finalOrder.invoiceNumber ?? '',
+            'estimatedCost': finalOrder.estimatedCost ?? 0.0,
+            'driverId': finalOrder.driverId ?? 0,
+            'paymentMethod': finalOrder.paymentMethod ?? '',
+            'paymentStatus': finalOrder.paymentStatus ?? '',
+            'status': finalOrder.status.value.toString(),
+          }
+        };
+        Get.toNamed(AppRoutes.driverOrderTracking, arguments: args);
+      } catch (e) {
+        debugPrint('Error navigating to tracking: $e');
+        showToast(message: 'Error navigating to tracking screen');
+      }
     } catch (e, st) {
       debugPrint('Error accepting order: $e\n$st');
       try {

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:plex_user/common/Toast/toast.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
 import '../../../models/user_models.dart';
 import '../../../routes/appRoutes.dart';
@@ -71,10 +72,9 @@ class BookingController extends GetxController {
     if (status.isGranted) return true;
 
     if (status.isPermanentlyDenied) {
-      Get.snackbar(
-        "permission_required".tr,
+      CustomSnackbar.warning(
         "please_enable_permissions".tr,
-        snackPosition: SnackPosition.BOTTOM,
+        title: "permission_required".tr,
       );
       await openAppSettings();
       return false;
@@ -84,10 +84,9 @@ class BookingController extends GetxController {
 
     if (status.isGranted) return true;
 
-    Get.snackbar(
-      status.isDenied ? "permission_denied".tr : "permission_required".tr,
+    CustomSnackbar.warning(
       "permission_required_to_select".tr,
-      snackPosition: SnackPosition.BOTTOM,
+      title: status.isDenied ? "permission_denied".tr : "permission_required".tr,
     );
 
     if (status.isPermanentlyDenied) await openAppSettings();
@@ -137,6 +136,16 @@ class BookingController extends GetxController {
       return;
     }
 
+    // Validate coordinates
+    if (pLat.value == 0.0 || pLng.value == 0.0) {
+      showToast(message: "Please select pickup location".tr);
+      return;
+    }
+    if (dLat.value == 0.0 || dLng.value == 0.0) {
+      showToast(message: "Please select dropoff location".tr);
+      return;
+    }
+
     // If all valid
     try {
       isLoading.value = true;
@@ -148,6 +157,9 @@ class BookingController extends GetxController {
         weight: weight.value,
       );
       Get.toNamed(AppRoutes.confirm);
+    } catch (e) {
+      debugPrint('Error in next(): $e');
+      CustomSnackbar.error('Failed to proceed. Please try again.'.tr, title: 'error'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -183,13 +195,17 @@ class BookingController extends GetxController {
         currency.value = (data['currency'] ?? '').toString();
         if (estimatedCostINR.value > 0) tripFare.value = estimatedCostINR.value;
       } else {
-        Get.snackbar(
-          'estimate_failed'.tr,
-          res['message']?.toString() ?? 'unable_to_get_estimate'.tr,
+        // Show backend error message if available
+        final errorMessage = res['message']?.toString() ?? 
+                            res['error']?.toString() ?? 
+                            'unable_to_get_estimate'.tr;
+        CustomSnackbar.error(
+          errorMessage,
+          title: 'estimate_failed'.tr,
         );
       }
     } catch (e) {
-      Get.snackbar('error'.tr, 'failed_fetch_estimate'.tr);
+      CustomSnackbar.error('failed_fetch_estimate'.tr, title: 'error'.tr);
     }
   }
 
@@ -372,10 +388,9 @@ class BookingController extends GetxController {
 
   void removeCoupon() {
     isCouponApplied.value = false;
-    Get.snackbar(
-      "coupon_removed".tr,
+    CustomSnackbar.info(
       "coupon_removed_message".tr,
-      snackPosition: SnackPosition.BOTTOM,
+      title: "coupon_removed".tr,
     );
   }
 // inside BookingController class
@@ -420,10 +435,7 @@ class BookingController extends GetxController {
       isLoading.value = false;
 
       if (res.containsKey('error')) {
-        Get.snackbar("Error", res['error'].toString(),
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white);
+        CustomSnackbar.error(res['error'].toString(), title: "Error");
         return null;
       }
 
@@ -444,7 +456,7 @@ class BookingController extends GetxController {
       return Map<String, dynamic>.from(res);
     } catch (e) {
       isLoading.value = false;
-      Get.snackbar('Error', 'failed_create_shipment'.tr);
+      CustomSnackbar.error('failed_create_shipment'.tr, title: 'Error');
       debugPrint("createShipmentAndPreparePayment error: $e");
       return null;
     } finally {
@@ -637,19 +649,17 @@ class BookingController extends GetxController {
   Future<void> useCurrentLocationAsPickup() async {
     // If location is still loading, show message
     if (locationController.currentAddress.value == 'loading_location'.tr) {
-      Get.snackbar(
-        "info".tr,
+      CustomSnackbar.info(
         "please_wait_getting_location".tr,
-        snackPosition: SnackPosition.BOTTOM,
+        title: "info".tr,
       );
       return;
     }
 
     _applyPickupFromLocation();
-    Get.snackbar(
-      "success".tr,
+    CustomSnackbar.success(
       "pickup_set_to_current_location".tr,
-      snackPosition: SnackPosition.BOTTOM,
+      title: "success".tr,
     );
   }
 

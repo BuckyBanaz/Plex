@@ -11,6 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 import 'package:plex_user/services/domain/service/socket/socket_service.dart';
+import 'package:plex_user/services/domain/repository/repository_imports.dart';
 
 import '../../../constant/app_colors.dart';
 import '../../../models/driver_order_model.dart';
@@ -126,17 +127,26 @@ final DatabaseService db = Get.find<DatabaseService>();
     update(['map']);
   }
 
+  Timer? _locationPollTimer;
+  
   void startTracking(OrderModel o) {
     final token = db.accessToken ?? '';
     final id = db.user!.id;
     if (token.isEmpty || id == null) {
-      debugPrint('Shipment Controller: cannot connect - missing token or driver');
-      // isOnline.value = false; // revert
+      debugPrint('Shipment Controller: cannot connect - missing token or user');
       return;
     }
 
+    debugPrint('╔══════════════════════════════════════════════════════════════');
+    debugPrint('║ 🚀 STARTING SHIPMENT TRACKING');
+    debugPrint('║ Order ID: ${o.id}');
+    debugPrint('╚══════════════════════════════════════════════════════════════');
+
     // Connect low-level socket
     socketService.connect(token, id);
+    
+    // Start socket listeners
+    userOrderSocket.start();
 
     _liveLocSub?.cancel();
     order.value = o;
@@ -149,6 +159,40 @@ final DatabaseService db = Get.find<DatabaseService>();
 
     _ensurePickupDropMarkers();
     _subscribeToLiveLocationForOrder(o.id);
+    
+    // Start polling driver location every 10 seconds (backup for socket)
+    _startLocationPolling(o.id);
+    
+    // Fetch initial driver location from API
+    _fetchDriverLocationFromApi(o.id);
+  }
+  
+  void _startLocationPolling(String shipmentId) {
+    _locationPollTimer?.cancel();
+    _locationPollTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      _fetchDriverLocationFromApi(shipmentId);
+    });
+  }
+  
+  Future<void> _fetchDriverLocationFromApi(String shipmentId) async {
+    try {
+      debugPrint('║ 📍 Fetching driver location from API...');
+      final ShipmentRepository repo = Get.find<ShipmentRepository>();
+      final result = await repo.getDriverLocation(shipmentId: shipmentId);
+      
+      if (result['success'] == true && result['lat'] != null && result['lng'] != null) {
+        final lat = (result['lat'] as num).toDouble();
+        final lng = (result['lng'] as num).toDouble();
+        final newLoc = LatLng(lat, lng);
+        
+        debugPrint('║ ✅ Driver location from API: $lat, $lng');
+        _updateDriverLocation(newLoc);
+      } else {
+        debugPrint('║ ⚠️ No driver location from API: ${result['message'] ?? 'unknown'}');
+      }
+    } catch (e) {
+      debugPrint('║ ❌ Error fetching driver location: $e');
+    }
   }
 
   void startTrackingWithDriver(OrderModel driver, LatLng driverLoc) {
@@ -168,6 +212,8 @@ final DatabaseService db = Get.find<DatabaseService>();
   }
 
   void stopTracking() {
+    debugPrint('║ 🛑 STOPPING SHIPMENT TRACKING');
+    _locationPollTimer?.cancel();
     try {
       userOrderSocket.stopTracking();
     } catch (_) {}
@@ -212,6 +258,12 @@ final DatabaseService db = Get.find<DatabaseService>();
     ));
 
     markers.refresh();
+    
+    // Draw initial route from pickup to dropoff (will be updated when driver location comes)
+    if (driverLocation.value == null) {
+      _updateRoute(pickupLat, dropLat);
+    }
+    
     update();
   }
 
@@ -244,6 +296,10 @@ final DatabaseService db = Get.find<DatabaseService>();
   }
 
   void _updateDriverLocation(LatLng newLoc) {
+    debugPrint('╔══════════════════════════════════════════════════════════════');
+    debugPrint('║ 🚗 UPDATING DRIVER LOCATION ON MAP');
+    debugPrint('║ Lat: ${newLoc.latitude}, Lng: ${newLoc.longitude}');
+    
     final prev = driverLocation.value;
     driverLocation.value = newLoc;
 
@@ -251,8 +307,21 @@ final DatabaseService db = Get.find<DatabaseService>();
 
     final target = _determineTargetLatLng();
     if (target != null) {
+      debugPrint('║ 📍 Target: ${target.latitude}, ${target.longitude}');
+      debugPrint('║ 🛣️ Drawing route from DRIVER to TARGET');
+      debugPrint('╚══════════════════════════════════════════════════════════════');
       _updateDistanceEta(newLoc, target);
       _updateRoute(newLoc, target);
+    } else {
+      debugPrint('║ ⚠️ No target - drawing route from driver to dropoff');
+      debugPrint('╚══════════════════════════════════════════════════════════════');
+      // Fallback: draw route from driver to dropoff
+      final o = order.value;
+      if (o != null && o.dropoff.latitude != null && o.dropoff.longitude != null) {
+        final dropoff = LatLng(o.dropoff.latitude!, o.dropoff.longitude!);
+        _updateDistanceEta(newLoc, dropoff);
+        _updateRoute(newLoc, dropoff);
+      }
     }
 
     update();
@@ -287,10 +356,12 @@ final DatabaseService db = Get.find<DatabaseService>();
     final o = order.value;
     if (o == null) return null;
     final status = o.status.value;
-    if (status == OrderStatus.InTransit) {
+    // When picked up or in transit, driver is heading to dropoff
+    if (status == OrderStatus.PickedUp || status == OrderStatus.InTransit) {
       if (o.dropoff.latitude == null || o.dropoff.longitude == null) return null;
       return LatLng(o.dropoff.latitude!, o.dropoff.longitude!);
     }
+    // When created, assigned, or accepted, driver is heading to pickup
     if (status == OrderStatus.Created || status == OrderStatus.Assigned || status == OrderStatus.Accepted) {
       if (o.pickup.latitude == null || o.pickup.longitude == null) return null;
       return LatLng(o.pickup.latitude!, o.pickup.longitude!);
@@ -326,6 +397,10 @@ final DatabaseService db = Get.find<DatabaseService>();
   }
 
   Future<void> _updateRoute(LatLng origin, LatLng destination) async {
+    debugPrint('║ 🛣️ _updateRoute called');
+    debugPrint('║ Origin: ${origin.latitude}, ${origin.longitude}');
+    debugPrint('║ Destination: ${destination.latitude}, ${destination.longitude}');
+    
     try {
       final url = 'https://maps.googleapis.com/maps/api/directions/json'
           '?origin=${origin.latitude},${origin.longitude}'
@@ -335,6 +410,7 @@ final DatabaseService db = Get.find<DatabaseService>();
       final res = await Dio().get(url);
       if (res.data['status'] != 'OK') {
         debugPrint('Directions API status: ${res.data['status']}');
+        // Fallback: draw straight line
         polylines.clear();
         polylines.add(Polyline(
           polylineId: const PolylineId('route'),
@@ -348,11 +424,26 @@ final DatabaseService db = Get.find<DatabaseService>();
       }
 
       final routes = res.data['routes'] as List<dynamic>;
-      if (routes.isEmpty) return;
+      if (routes.isEmpty) {
+        debugPrint('║ ⚠️ No routes found, drawing straight line');
+        polylines.clear();
+        polylines.add(Polyline(
+          polylineId: const PolylineId('route'),
+          points: [origin, destination],
+          width: 6,
+          color: AppColors.primary,
+        ));
+        polylines.refresh();
+        update();
+        return;
+      }
+      
       final encoded = routes[0]['overview_polyline']['points'] as String;
       final decoded = PolylinePoints.decodePolyline(encoded);
       final points = decoded.map((p) => LatLng(p.latitude, p.longitude)).toList();
 
+      debugPrint('║ ✅ Route decoded with ${points.length} points');
+      
       polylines.clear();
       polylines.add(Polyline(
         polylineId: const PolylineId('route'),
@@ -394,6 +485,7 @@ final DatabaseService db = Get.find<DatabaseService>();
 
   @override
   void onClose() {
+    _locationPollTimer?.cancel();
     _liveLocSub?.cancel();
     _activeOrderSub?.cancel();
     super.onClose();

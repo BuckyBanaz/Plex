@@ -1,112 +1,209 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:plex_user/models/notification_model.dart';
+import 'package:plex_user/services/domain/repository/repository_imports.dart';
+import 'package:plex_user/services/domain/service/socket/user_order_socket.dart';
 
-/// Enum taaki hum notification type ko aasani se pehchaan sakein
-enum UserNotificationType {
-  delivered,
-  pendingPayment,
-  readyForPickup,
-  readyToDeliver,
-  scheduled
-}
-
-/// Notification data ke liye ek model class
-class UserNotificationModel {
-  final String id;
-  final UserNotificationType type;
-  final String title;
-  final String subtitle;
-  final String date;
-  final String time;
-
-  UserNotificationModel({
-    required this.id,
-    required this.type,
-    required this.title,
-    required this.subtitle,
-    required this.date,
-    required this.time,
-  });
-}
-
-/// Humara GetX Controller
+/// UserNotificationController - Manages notifications from API with real-time updates
 class UserNotificationController extends GetxController {
+  final NotificationRepository _notificationRepository = Get.find<NotificationRepository>();
 
-
-  final RxList<UserNotificationModel> notifications = <UserNotificationModel>[].obs;
+  final RxList<NotificationModel> notifications = <NotificationModel>[].obs;
+  final RxInt unreadCount = 0.obs;
+  final RxBool isLoading = false.obs;
+  final RxBool hasMore = true.obs;
+  
+  int _offset = 0;
+  final int _limit = 20;
 
   @override
   void onInit() {
     super.onInit();
-    fetchDummyData(); // Controller start hote hi data load karega
+    fetchNotifications();
+    _listenToSocketNotifications();
   }
 
-  // Dummy data jo aapne pucha tha (exact image ke hisaab se)
-  void fetchDummyData() {
-    var dummyList = [
-      UserNotificationModel(
-        id: '1',
-        type: UserNotificationType.delivered,
-        title: 'PLEX#: 004-12092283 Delivered',
-        subtitle: 'Thank you for your order',
-        date: 'Today',
-        time: '6:30 PM',
-      ),
-      UserNotificationModel(
-        id: '2',
-        type: UserNotificationType.pendingPayment,
-        title: 'Pending payment',
-        subtitle: 'Pay \$20 here', // '$' sign ke liye '\' use kiya hai
-        date: 'Today',
-        time: '6:30 PM',
-      ),
-      UserNotificationModel(
-        id: '3',
-        type: UserNotificationType.readyForPickup,
-        title: 'Order ready to pickup',
-        subtitle: 'Arrives between in 5:50 PM - 6:10 AM',
-        date: 'Today',
-        time: '6:30 PM',
-      ),
-      UserNotificationModel(
-        id: '4',
-        type: UserNotificationType.readyToDeliver,
-        title: 'Order ready to Delivered',
-        subtitle: 'Will be delivered in 20 min',
-        date: 'Today',
-        time: '6:30 PM',
-      ),
-      UserNotificationModel(
-        id: '5',
-        type: UserNotificationType.scheduled,
-        title: 'Order Scheduled',
-        // Newline ke liye '\n' use kiya hai
-        subtitle: 'For Mon 1, Nov Arriving at\n11:51 PM - 12:30 AM',
-        date: 'Today',
-        time: '6:30 PM',
-      ),
-    ];
+  /// Listen for real-time notifications from socket
+  void _listenToSocketNotifications() {
+    try {
+      // Try to get socket service if available
+      if (Get.isRegistered<UserOrderSocket>()) {
+        final userOrderSocket = Get.find<UserOrderSocket>();
+        
+        userOrderSocket.socketService.on('new_notification', (data) {
+          debugPrint('📨 New notification received: $data');
+          
+          if (data != null) {
+            final notification = NotificationModel.fromJson(
+              Map<String, dynamic>.from(data),
+            );
+            
+            // Add to beginning of list
+            notifications.insert(0, notification);
+            
+            // Update unread count
+            if (!notification.isRead) {
+              unreadCount.value++;
+            }
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error setting up notification socket: $e');
+    }
+  }
 
-    // List ko update kar rahe hain
-    notifications.assignAll(dummyList);
+  /// Fetch notifications from API
+  Future<void> fetchNotifications({bool refresh = false}) async {
+    if (refresh) {
+      _offset = 0;
+      hasMore.value = true;
+    }
+
+    if (!hasMore.value && !refresh) return;
+
+    isLoading.value = true;
+
+    try {
+      final result = await _notificationRepository.getNotifications(
+        limit: _limit,
+        offset: _offset,
+      );
+
+      if (refresh) {
+        notifications.assignAll(result.notifications);
+      } else {
+        notifications.addAll(result.notifications);
+      }
+
+      unreadCount.value = result.unreadCount;
+      
+      // Check if there are more notifications
+      hasMore.value = result.notifications.length >= _limit;
+      _offset += result.notifications.length;
+
+      debugPrint('✅ Fetched ${result.notifications.length} notifications, total: ${notifications.length}');
+    } catch (e) {
+      debugPrint('❌ Error fetching notifications: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
-  /// Testing ke liye notifications clear karne ka function
-  void clearNotifications() {
-    notifications.clear();
+
+  /// Refresh notifications (pull to refresh)
+  Future<void> refreshNotifications() async {
+    await fetchNotifications(refresh: true);
   }
-  /// Helper function jo type ke hisaab se dot (•) ka color return karega
-  Color getColorForType(UserNotificationType type) {
+
+  /// Load more notifications (pagination)
+  Future<void> loadMore() async {
+    if (!isLoading.value && hasMore.value) {
+      await fetchNotifications();
+    }
+  }
+
+  /// Mark notification as read
+  Future<void> markAsRead(int notificationId) async {
+    final success = await _notificationRepository.markAsRead(notificationId);
+    
+    if (success) {
+      // Update local state
+      final index = notifications.indexWhere((n) => n.id == notificationId);
+      if (index != -1) {
+        final notification = notifications[index];
+        if (!notification.isRead) {
+          // Create updated notification with isRead = true
+          notifications[index] = NotificationModel(
+            id: notification.id,
+            userId: notification.userId,
+            shipmentId: notification.shipmentId,
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            data: notification.data,
+            isRead: true,
+            createdAt: notification.createdAt,
+            updatedAt: DateTime.now(),
+          );
+          
+          // Decrease unread count
+          if (unreadCount.value > 0) {
+            unreadCount.value--;
+          }
+        }
+      }
+    }
+  }
+
+  /// Mark all notifications as read
+  Future<void> markAllAsRead() async {
+    final success = await _notificationRepository.markAllAsRead();
+    
+    if (success) {
+      // Update all notifications locally
+      notifications.value = notifications.map((n) => NotificationModel(
+        id: n.id,
+        userId: n.userId,
+        shipmentId: n.shipmentId,
+        type: n.type,
+        title: n.title,
+        body: n.body,
+        data: n.data,
+        isRead: true,
+        createdAt: n.createdAt,
+        updatedAt: DateTime.now(),
+      )).toList();
+      
+      unreadCount.value = 0;
+    }
+  }
+
+  /// Delete a notification
+  Future<void> deleteNotification(int notificationId) async {
+    final success = await _notificationRepository.deleteNotification(notificationId);
+    
+    if (success) {
+      final notification = notifications.firstWhereOrNull((n) => n.id == notificationId);
+      if (notification != null && !notification.isRead) {
+        unreadCount.value = (unreadCount.value > 0) ? unreadCount.value - 1 : 0;
+      }
+      notifications.removeWhere((n) => n.id == notificationId);
+    }
+  }
+
+  /// Clear all notifications
+  Future<void> clearNotifications() async {
+    final success = await _notificationRepository.clearAllNotifications();
+    
+    if (success) {
+      notifications.clear();
+      unreadCount.value = 0;
+    }
+  }
+
+  /// Get color for notification type
+  Color getColorForType(NotificationType type) {
     switch (type) {
-      case UserNotificationType.delivered:
-        return Colors.green; // Color(0xFF34C759)
-      case UserNotificationType.pendingPayment:
-        return Colors.red; // Color(0xFFFF3B30)
-      case UserNotificationType.readyForPickup:
-        return Colors.blue; // Color(0xFF007AFF)
-      case UserNotificationType.readyToDeliver:
-        return Colors.orange; // Color(0xFFFF9500)
-      case UserNotificationType.scheduled:
-        return Colors.purple; // Color(0xFFAF52DE)
+      case NotificationType.delivered:
+        return Colors.green;
+      case NotificationType.paymentPending:
+        return Colors.red;
+      case NotificationType.pickupOtp:
+      case NotificationType.dropoffOtp:
+        return Colors.blue;
+      case NotificationType.pickedUp:
+      case NotificationType.inTransit:
+        return Colors.orange;
+      case NotificationType.driverAssigned:
+        return Colors.purple;
+      case NotificationType.orderCreated:
+        return Colors.teal;
+      case NotificationType.cancelled:
+        return Colors.red.shade700;
+      case NotificationType.paymentSuccess:
+        return Colors.green.shade700;
+      default:
+        return Colors.grey;
     }
   }
 }

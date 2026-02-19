@@ -4,12 +4,13 @@ import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/driver/home/driver_home_screen.dart';
+import 'package:plex_user/services/domain/service/driver/driver_location_service.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../profile/profile_screen.dart';
 import '../driver_rides_screens.dart';
 // import '../profile/driver_profile_screen.dart';
-
+import '../wallet/driver_wallet_screen.dart';
 
 class DriverMainScreenController extends GetxController {
   var selectedIndex = 0;
@@ -23,11 +24,12 @@ class DriverMainScreenController extends GetxController {
 
 class DriverMainNavController extends GetxController {
   final currentIndex = 0.obs;
+  late final DriverLocationService _locationService;
 
   final List<Widget> tabs = [
     const DriverHomeScreen(),
     DriverRideScreen(),
-    const Center(child: Text("Wallet Screen")),
+    DriverWalletScreen(),
     DriverProfileScreen(),
   ];
 
@@ -44,6 +46,21 @@ class DriverMainNavController extends GetxController {
     'nav_notification'.tr,
     'nav_profile'.tr,
   ];
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Initialize and start location service
+    _locationService = Get.put(DriverLocationService(), permanent: true);
+    _locationService.startLocationUpdates();
+  }
+
+  @override
+  void onClose() {
+    // Stop location updates when leaving driver dashboard
+    _locationService.stopLocationUpdates();
+    super.onClose();
+  }
 
   String labelFor(int index) => _labelKeys[index].tr;
   void setIndex(int i) => currentIndex.value = i;

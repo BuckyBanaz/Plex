@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter/material.dart';
 import 'package:plex_user/common/Toast/toast.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
 import '../../../routes/appRoutes.dart';
 
@@ -55,8 +56,21 @@ class StripePaymentController extends GetxController {
 
       // Snackbar dikhao
       showToast(message: 'Payment successful');
-      // Get.snackbar('Success', 'Payment successful');
-      // await userRepo.confirmPaymentStripe(paymentIntentId: paymentIntentId.value, paymentMethod: "pm_card_visa");
+      
+      // Manual payment confirmation (no webhook needed for local dev)
+      if (paymentIntentId.value.isNotEmpty) {
+        print("📤 Confirming payment on backend...");
+        try {
+          await userRepo.confirmPaymentStripe(
+            paymentIntentId: paymentIntentId.value, 
+            paymentMethod: "pm_card_visa"
+          );
+          print("✅ Backend payment confirmation done - status updated to PAID");
+        } catch (e) {
+          print("⚠️ Backend confirmation error: $e");
+        }
+      }
+      
       print("Navigating to booking confirmation...");
       Get.offAllNamed(AppRoutes.bookingConfirm);
 
@@ -80,7 +94,7 @@ class StripePaymentController extends GetxController {
       // 5) On Unexpected Error
       print("❌❌❌ PAYMENT STATUS: FAILED (Unexpected Error) ❌❌❌");
       print("Error Details: $e");
-      Get.snackbar('Error', e.toString());
+      CustomSnackbar.error(e.toString(), title: 'Error');
 
     } finally {
       // Ye hamesha chalega (success ya fail)

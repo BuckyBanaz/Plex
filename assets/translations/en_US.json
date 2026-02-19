@@ -399,7 +399,8 @@
   "phone_number": "Phone number",
   "address_selected": "Address Selected",
   "Edit": "Edit",
-  "Delete": "Delete"
-
-
+  "Delete": "Delete",
+  "edit_profile": "Edit Profile",
+  "save_changes": "Save Changes",
+  "save": "Save"
 }

@@ -16,6 +16,7 @@ import 'package:plex_user/screens/individual/home/user_home_screen.dart';
 import 'package:plex_user/screens/location/location_permission_screen.dart';
 import 'package:plex_user/screens/notification/driver_notification_screen.dart';
 import 'package:plex_user/screens/payments/user_payment_screen.dart';
+import 'package:plex_user/screens/admin/admin_kyc_list_screen.dart';
 
 import '../screens/auth/choose_account_screen.dart';
 import '../screens/auth/driver_approvel_screen.dart';
@@ -38,6 +39,7 @@ import '../screens/payments/payment_failed_screen.dart';
 import '../screens/profile/help_support_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/splash/splash_screen.dart';
+import '../screens/driver/wallet/driver_wallet_screen.dart';
 
 class AppRoutes {
   static const splash = '/splash';
@@ -78,27 +80,44 @@ class AppRoutes {
   static const driverOrderTracking = '/driverOrderTracking';
   static const prickupVerification = '/prickupVerification';
   static const dropoffVerification = '/dropoffVerification';
+  
+  // Driver wallet
+  static const driverWallet = '/driverWallet';
+  
+  // Admin routes
+  static const adminKycList = '/adminKycList';
 
   static get routes => [
+    // Splash - NO middleware here, splash handles navigation with API call
     GetPage(name: splash, page: () => SplashScreen()),
-    GetPage(name: login, page: () => LoginScreen(),middlewares: [EnsureAuthMiddleware()]),
+    
+    // Auth screens - allow logged-in redirect
+    GetPage(name: login, page: () => LoginScreen(), middlewares: [EnsureNotAuthMiddleware()]),
     GetPage(name: forgotPassword, page: () => ForgotPasswordScreen()),
     GetPage(name: resetPassword, page: () => ResetPasswordScreen()),
-    GetPage(name: signup, page: () => SignupScreen()),
-    GetPage(name: driverSignup, page: () => DriverSignupScreen()),
+    GetPage(name: signup, page: () => SignupScreen(), middlewares: [EnsureNotAuthMiddleware()]),
+    GetPage(name: driverSignup, page: () => DriverSignupScreen(), middlewares: [EnsureNotAuthMiddleware()]),
     GetPage(name: choose, page: () => ChooseAccountScreen()),
     GetPage(name: view, page: () => CompanyRegistrationScreen()),
     GetPage(name: otp, page: () => OtpScreen()),
+    
+    // Driver KYC flow
     GetPage(name: kyc, page: () => DriverKycFlow()),
     GetPage(name: vehicleEntry, page: () => VehicleDetailsScreen()),
     GetPage(name: approvel, page: () => DriverApprovalScreen()),
+    
+    // User dashboard screens
     GetPage(name: userDashBoard, page: () => UserMainScreen()),
     GetPage(name: userHome, page: () => UserHomeScreen()),
     GetPage(name: userAddress, page: () => UserAddressScreen()),
     GetPage(name: addUserAddress, page: () => AddNewUserAddressScreen()),
     GetPage(name: userHelp, page: () => HelpSupportScreen()),
+    
+    // Driver dashboard screens
     GetPage(name: driverDashBoard, page: () => DriverMainScreen()),
     GetPage(name: driverHome, page: () => DriverHomeScreen()),
+    
+    // Common screens
     GetPage(name: location, page: () => LocationPermissionScreen()),
     GetPage(name: booking, page: () => BookingScreen()),
     GetPage(name: pickup, page: () => PickupDetailsScreen()),
@@ -117,5 +136,11 @@ class AppRoutes {
     GetPage(name: driverOrderTracking, page: () => DriverOrderTrackingScreen()),
     GetPage(name: prickupVerification, page: () => PickupVerificationScreen()),
     GetPage(name: dropoffVerification, page: () => DeliveryVerificationScreen()),
+    
+    // Driver wallet
+    GetPage(name: driverWallet, page: () => const DriverWalletScreen()),
+    
+    // Admin screens
+    GetPage(name: adminKycList, page: () => const AdminKycListScreen()),
   ];
 }

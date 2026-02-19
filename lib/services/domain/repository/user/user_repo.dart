@@ -21,7 +21,6 @@ class UserRepository {
 
   Future<void> updateUserLocation(Position position) async {
     try {
-
       final apiKey = databaseService.apiKey.toString();
 
       await userApi.updateLocation(
@@ -31,13 +30,14 @@ class UserRepository {
         heading: position.heading,
         speed: position.speed,
         // Use position.timestamp if available, otherwise use current time
-        recordedAt: position.timestamp?.toIso8601String() ?? DateTime.now().toIso8601String(),
+        recordedAt:
+            position.timestamp?.toIso8601String() ??
+            DateTime.now().toIso8601String(),
         langKey: langKey,
         apiKey: apiKey,
       );
 
       debugPrint("User location updated successfully via repository.");
-
     } catch (e) {
       debugPrint("Error updating user location: $e");
       // Optionally re-throw or show a toast
@@ -45,11 +45,17 @@ class UserRepository {
     }
   }
 
-
-
   /// amount is in smallest currency unit (e.g., paise for INR, cents for USD)
-  Future<String> createPaymentIntent({ required int amount, String currency = 'inr', String? orderId }) async {
-    final data = await userApi.createPaymentIntent(amount: amount, currency: currency, orderId: orderId);
+  Future<String> createPaymentIntent({
+    required int amount,
+    String currency = 'inr',
+    String? orderId,
+  }) async {
+    final data = await userApi.createPaymentIntent(
+      amount: amount,
+      currency: currency,
+      orderId: orderId,
+    );
     // expect { clientSecret: "...", paymentIntentId: "pi_..." }
     return data['clientSecret'] as String;
   }
@@ -79,13 +85,14 @@ class UserRepository {
       rethrow;
     }
   }
+
   Future<List<AddressModel>> getUserAddresses() async {
     try {
       final response = await userApi.getAddress(langKey: langKey);
 
       debugPrint("User address get successfully via repository.");
 
-      if (response != null && response['data'] != null) {
+      if (response['data'] != null) {
         final List<dynamic> data = response['data'];
         return data.map((e) => AddressModel.fromJson(e)).toList();
       } else {
@@ -107,8 +114,6 @@ class UserRepository {
     required bool isDefault,
   }) async {
     try {
-      final apiKey = databaseService.apiKey.toString();
-
       await userApi.addAddress(
         address: address,
         addressAs: addressAs,
@@ -127,15 +132,18 @@ class UserRepository {
       showToast(message: "Failed to add Address");
     }
   }
+
   /// Delete address by id. Returns true when deletion succeeded.
-  Future<bool> deleteUserAddress({ required int id }) async {
+  Future<bool> deleteUserAddress({required int id}) async {
     try {
       final response = await userApi.deleteAddress(id: id, langKey: langKey);
 
       debugPrint("User address delete response via repository: $response");
 
       // Depending on your backend, you might get { success: true } or { message: '...' }
-      if (response['success'] == true || response['status'] == 'success' || (response['message'] != null)) {
+      if (response['success'] == true ||
+          response['status'] == 'success' ||
+          (response['message'] != null)) {
         showToast(message: "Address deleted successfully");
         return true;
       }
@@ -155,7 +163,9 @@ class UserRepository {
 
       // Run only for driver
       if (userType != 'driver') {
-        debugPrint("⚠️ updateStatus skipped — user is not a driver ($userType)");
+        debugPrint(
+          "⚠️ updateStatus skipped — user is not a driver ($userType)",
+        );
         return;
       }
 
@@ -176,7 +186,6 @@ class UserRepository {
 
       if (response['success'] == true || response['message'] != null) {
         debugPrint("✅ Driver online status updated successfully");
-
       } else {
         debugPrint("⚠️ Failed to update driver status: $response");
         showToast(message: "Failed to update driver status");
@@ -186,8 +195,6 @@ class UserRepository {
       showToast(message: "Error updating driver status");
     }
   }
-
-
 
   Future<void> updateFcmToken() async {
     try {
@@ -226,5 +233,96 @@ class UserRepository {
     }
   }
 
+  /// Get user profile from API
+  Future<Map<String, dynamic>?> getProfile() async {
+    try {
+      final response = await userApi.getProfile();
 
+      if (response['success'] == true && response['data'] != null) {
+        debugPrint("✅ User profile fetched successfully");
+        return response['data'] as Map<String, dynamic>;
+      } else {
+        debugPrint("⚠️ Failed to fetch profile: $response");
+        return null;
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching profile: $e");
+      return null;
+    }
+  }
+
+  /// Update user profile
+  Future<Map<String, dynamic>?> updateProfile({
+    String? name,
+    String? email,
+    String? mobile,
+    String? dateOfBirth,
+    String? profileImage,
+  }) async {
+    try {
+      final response = await userApi.updateProfile(
+        name: name,
+        email: email,
+        mobile: mobile,
+        dateOfBirth: dateOfBirth,
+        profileImage: profileImage,
+      );
+
+      if (response['success'] == true) {
+        debugPrint("✅ Profile updated successfully");
+
+        // Update local database
+        final userType = databaseService.userType;
+
+        if (userType == 'driver') {
+          final driver = databaseService.driver;
+          if (driver != null) {
+            final updatedDriver = DriverUserModel(
+              id: driver.id,
+              name: name ?? driver.name,
+              email: email ?? driver.email,
+              mobile: mobile ?? driver.mobile,
+              userType: driver.userType,
+              kycStatus: driver.kycStatus,
+              mobileVerified: driver.mobileVerified,
+              emailVerified: driver.emailVerified,
+              createdAt: driver.createdAt,
+              updatedAt: DateTime.now(),
+              location: driver.location,
+              vehicles: driver.vehicles,
+              currentBalance: driver.currentBalance,
+            );
+            await databaseService.putDriver(updatedDriver);
+          }
+        } else {
+          final user = databaseService.user;
+          if (user != null) {
+            final updatedUser = UserModel(
+              id: user.id,
+              name: name ?? user.name,
+              email: email ?? user.email,
+              mobile: mobile ?? user.mobile,
+              userType: user.userType,
+              mobileVerified: user.mobileVerified,
+              emailVerified: user.emailVerified,
+              createdAt: user.createdAt,
+              updatedAt: DateTime.now(),
+              address: user.address,
+            );
+            await databaseService.putUser(updatedUser);
+          }
+        }
+
+        return response['data'] as Map<String, dynamic>?;
+      } else {
+        debugPrint("⚠️ Failed to update profile: ${response['message']}");
+        showToast(message: response['message'] ?? "Failed to update profile");
+        return null;
+      }
+    } catch (e) {
+      debugPrint("❌ Error updating profile: $e");
+      showToast(message: "Error updating profile");
+      return null;
+    }
+  }
 }

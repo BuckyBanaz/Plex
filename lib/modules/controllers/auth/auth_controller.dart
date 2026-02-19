@@ -4,12 +4,15 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart'; // Import Dio for proper error handling
 import 'package:plex_user/common/Toast/toast.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
+import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 import 'package:plex_user/routes/appRoutes.dart';
 
 import '../../../models/driver_user_model.dart';
 import '../../../models/user_models.dart';
 
 class AuthController extends GetxController {
+  // Services
+  final DatabaseService _databaseService = Get.find<DatabaseService>();
 
   // Controllers
   final nameController = TextEditingController();
@@ -53,11 +56,8 @@ class AuthController extends GetxController {
     emailError.value = null;
     passwordError.value = null;
   }
-  final vehicles = [
-    'Bike',
-    'Car',
-    'Van',
-  ];
+
+  final vehicles = ['Bike', 'Car', 'Van'];
   @override
   void onInit() {
     super.onInit();
@@ -114,7 +114,35 @@ class AuthController extends GetxController {
 
       showToast(message: "Login successful");
       userRepo.updateFcmToken();
-      Get.offAllNamed(AppRoutes.location);
+
+      // Navigate based on user type and KYC status
+      final userType = _databaseService.userType;
+
+      if (userType == 'driver') {
+        // Check KYC status for drivers - ONLY rely on backend kycStatus
+        final driver = _databaseService.driver;
+        final kycStatus = driver?.kycStatus;
+        
+        debugPrint('Login - Driver kycStatus from backend: $kycStatus');
+
+        // Reset local isKycDone based on backend status
+        if (kycStatus == null || kycStatus.isEmpty || kycStatus == 'not_submitted') {
+          // KYC not submitted -> go to KYC screen
+          _databaseService.putKycDone(false);
+          Get.offAllNamed(AppRoutes.kyc);
+        } else if (kycStatus == 'verified') {
+          // Fully verified -> go to location/dashboard
+          _databaseService.putKycDone(true);
+          Get.offAllNamed(AppRoutes.location);
+        } else {
+          // pending, awaiting_approval, rejected -> approval screen
+          _databaseService.putKycDone(true); // KYC was submitted
+          Get.offAllNamed(AppRoutes.approvel);
+        }
+      } else {
+        // Individual user -> go to location screen
+        Get.offAllNamed(AppRoutes.location);
+      }
     } on DioError catch (e) {
       final msg = e.response?.data['message'] ?? e.message ?? '';
       if (msg.toLowerCase().contains('user not found')) {
@@ -138,7 +166,6 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
-
 
   Future<void> signup() async {
     // Validate signup form
@@ -167,7 +194,8 @@ class AuthController extends GetxController {
 
       Get.offAllNamed(AppRoutes.otp, arguments: email);
     } on DioError catch (dioErr) {
-      final msg = dioErr.response?.data?['message'] ??
+      final msg =
+          dioErr.response?.data?['message'] ??
           dioErr.message ??
           'Registration failed';
       showToast(message: '$msg');
@@ -180,15 +208,15 @@ class AuthController extends GetxController {
       } else {
         showToast(message: 'Signup failed. Please try again.');
       }
-    }
-    finally {
+    } finally {
       isSignupLoading.value = false;
     }
   }
 
   Future<void> registerDriver() async {
     // Validate driver signup form
-    if (signupDriverKey.currentState == null || !signupDriverKey.currentState!.validate()) {
+    if (signupDriverKey.currentState == null ||
+        !signupDriverKey.currentState!.validate()) {
       return;
     }
 
@@ -204,10 +232,10 @@ class AuthController extends GetxController {
         name: name,
         email: email,
         password: password,
-          // vehicleType: selectedVehicle.value!.toLowerCase() ?? '',
-          // licenseNo:licenseNo,
+        // vehicleType: selectedVehicle.value!.toLowerCase() ?? '',
+        // licenseNo:licenseNo,
         // phone: "${countryCode}${phone}"
-        phone: "${phone}"
+        phone: "${phone}",
       );
 
       print("✅ Driver registered: $response");
@@ -215,7 +243,8 @@ class AuthController extends GetxController {
       clearControllers(); // optional
       Get.offAllNamed(AppRoutes.otp, arguments: email);
     } on DioError catch (dioErr) {
-      final msg = dioErr.response?.data?['message'] ??
+      final msg =
+          dioErr.response?.data?['message'] ??
           dioErr.message ??
           'Driver registration failed';
       // Get.snackbar("Error", msg);
@@ -231,25 +260,23 @@ class AuthController extends GetxController {
 
   // Main method called by UI
   Future<void> submitForgotPassword() async {
-
-    if (forgotPasswordKey.currentState == null || !forgotPasswordKey.currentState!.validate()) {
+    if (forgotPasswordKey.currentState == null ||
+        !forgotPasswordKey.currentState!.validate()) {
       return;
     }
     final email = emailController.text.trim();
 
-
     isLoading.value = true;
 
     try {
-      final res = await _authRepo.forgotPassword(
-        email: email,
-      );
+      final res = await _authRepo.forgotPassword(email: email);
 
       isLoading.value = false;
 
       final bool success = res['success'] == true;
-      final String message =
-      (res['message']?.toString().isNotEmpty ?? false) ? res['message'].toString() : '';
+      final String message = (res['message']?.toString().isNotEmpty ?? false)
+          ? res['message'].toString()
+          : '';
 
       if (success) {
         // Show success dialog
@@ -262,9 +289,11 @@ class AuthController extends GetxController {
                 Text('Success'),
               ],
             ),
-            content: Text(message.isNotEmpty
-                ? message
-                : 'Password reset link sent successfully.'),
+            content: Text(
+              message.isNotEmpty
+                  ? message
+                  : 'Password reset link sent successfully.',
+            ),
             actions: [
               TextButton(
                 onPressed: () {
@@ -272,7 +301,7 @@ class AuthController extends GetxController {
                   Get.back(); // go back to previous screen (login)
                 },
                 child: const Text('OK'),
-              )
+              ),
             ],
           ),
           barrierDismissible: false,

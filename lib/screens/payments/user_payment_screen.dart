@@ -50,27 +50,38 @@ class _PaymentScreenState extends State<PaymentScreen> {
           // ),
         ],
       ),
-      bottomNavigationBar: CustomButton(onTap: (){
-        c.isLoading.value ? null : c.proceedPayment();
-        // Get.offAllNamed(AppRoutes.bookingConfirm);
-      },widget: Center(
-
-        child:  c.isLoading.value
-            ? CircularProgressIndicator(
-          color: AppColors.textColor,
-          strokeWidth: 3,
-        )
-            : Text(
-          "pay_now".trParams({
-            "amount": c.bookingController.amountPayable.toStringAsFixed(2)
-          }),
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
+      bottomNavigationBar: Obx(() {
+        // Check both loading states
+        final isLoading = c.isLoading.value || c.stripeController.isLoading.value;
+        
+        return CustomButton(
+          onTap: isLoading ? () {} : () {
+            c.proceedPayment();
+          },
+          widget: Center(
+            child: isLoading
+                ? SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                : Text(
+                    "pay_now".trParams({
+                      "amount": c.bookingController.amountPayable.toStringAsFixed(2)
+                    }),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
-        ),
-      ),),
+          color: isLoading ? Colors.grey : AppColors.primary,
+        );
+      }),
     );
   }
 }

@@ -382,17 +382,62 @@ class ShipmentRepository {
     required double lng,
   }) async {
     try {
-      final result = await shipmentApi.updateShipment(
+      final result = await shipmentApi.updateShipmentLocation(
         orderId: orderId,
         lat: lat,
         lng: lng,
       );
 
-      debugPrint("Shipment updated successfully: $result");
+      debugPrint("Shipment location updated successfully: $result");
       return result;
     } catch (e) {
-      debugPrint("Error in repository while updating shipment: $e");
+      debugPrint("Error in repository while updating shipment location: $e");
       return {'error': e.toString()};
+    }
+  }
+
+  /// Get driver's active shipments (assigned, in_transit, picked_up)
+  /// Used to restore active order when driver reopens app
+  Future<Map<String, dynamic>> getDriverActiveOrders() async {
+    try {
+      final result = await shipmentApi.getDriverActiveOrders();
+
+      if (result.containsKey('error')) {
+        debugPrint('API error fetching active orders: ${result['error']}');
+        return {'success': false, 'error': result['error']};
+      }
+
+      final success = result['success'] == true;
+      final data = result['data'];
+
+      if (!success) {
+        return {
+          'success': false,
+          'message': result['message'] ?? 'Failed to fetch active orders',
+        };
+      }
+
+      // Parse to OrderModel list
+      final List<OrderModel> orders = [];
+      if (data is List) {
+        for (final item in data) {
+          try {
+            if (item is Map<String, dynamic>) {
+              orders.add(OrderModel.fromJson(item));
+            } else if (item is Map) {
+              orders.add(OrderModel.fromJson(Map<String, dynamic>.from(item)));
+            }
+          } catch (e) {
+            debugPrint('Failed to parse active order: $e');
+          }
+        }
+      }
+
+      debugPrint('✅ Fetched ${orders.length} active orders');
+      return {'success': true, 'orders': orders, 'data': data};
+    } catch (e) {
+      debugPrint('Error fetching driver active orders: $e');
+      return {'success': false, 'error': e.toString()};
     }
   }
 

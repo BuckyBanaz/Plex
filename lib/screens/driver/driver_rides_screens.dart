@@ -494,6 +494,7 @@ class _OrderCard extends StatelessWidget {
       case OrderStatus.InTransit:
       case OrderStatus.Assigned:
       case OrderStatus.Accepted:
+      case OrderStatus.PickedUp:
         return Colors.orange;
       case OrderStatus.Delivered:
         return Colors.green;

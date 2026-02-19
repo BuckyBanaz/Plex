@@ -8,7 +8,8 @@ class SocketService extends GetxService {
 
   final RxList<dynamic> existingShipments = <dynamic>[].obs;
 
-  static const String _serverUrl = 'http://p2dev10.in:3000';
+  // For Android emulator use 10.0.2.2, for physical device use your PC's IP
+  static const String _serverUrl = 'http://10.0.2.2:3000';
 
   bool _connected = false;
   String? _currentToken;

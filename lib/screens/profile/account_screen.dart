@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/profile/components/profile_option.dart';
+import 'package:plex_user/screens/profile/edit_profile_screen.dart';
 import '../../../modules/controllers/settings/profile_controller.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/helpers.dart';
@@ -55,8 +56,12 @@ class AccountScreen extends StatelessWidget {
 
               rating: 20,
               // profileImage: ... // pass if available
-              onEditPressed: () {
-                // open edit profile
+              onEditPressed: () async {
+                final result = await Get.to(() => const EditProfileScreen());
+                if (result == true) {
+                  // Reload user data after profile update
+                  c.onInit();
+                }
               },
             ),
 

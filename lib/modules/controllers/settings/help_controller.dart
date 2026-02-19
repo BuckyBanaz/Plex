@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 
 class HelpController extends GetxController {
   // --- Support Details ---
@@ -16,9 +17,9 @@ class HelpController extends GetxController {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
-      Get.snackbar(
-        'error_title'.tr,
+      CustomSnackbar.error(
         '${'error_cannot_launch'.tr} $supportPhoneNumber',
+        title: 'error_title'.tr,
       );
     }
   }
@@ -33,9 +34,9 @@ class HelpController extends GetxController {
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
-      Get.snackbar(
-        'error_title'.tr,
+      CustomSnackbar.error(
         '${'error_cannot_launch'.tr} $supportEmail',
+        title: 'error_title'.tr,
       );
     }
   }
@@ -44,18 +45,18 @@ class HelpController extends GetxController {
   void launchChat() {
     // Yahan aap apne live chat (jaise Tawk.to, Crisp)
     // ka WebView ya SDK launch kar sakte hain
-    Get.snackbar(
-      'contact_chat'.tr,
+    CustomSnackbar.info(
       'chat_coming_soon'.tr,
+      title: 'contact_chat'.tr,
     );
   }
 
   // Nayi support ticket screen par navigate karne ke liye
   void submitNewTicket() {
     // Example: Get.to(() => NewTicketScreen());
-    Get.snackbar(
-      'submit_ticket'.tr,
+    CustomSnackbar.info(
       'Opening new ticket form...', // Isko bhi translate kar sakte hain
+      title: 'submit_ticket'.tr,
     );
   }
 }

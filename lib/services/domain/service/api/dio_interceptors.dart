@@ -15,10 +15,21 @@ class AppInterceptors extends Interceptor {
       ) async {
     if (isExternal) return handler.next(options);
 
-    printInfo(
-      info:
-      "\nAPI headers: ${options.headers} \nAPI data: ${options.data} \nAPI request: ${options.uri}",
-    );
+    // ========== DEBUG: REQUEST LOG ==========
+    debugPrint('');
+    debugPrint('╔══════════════════════════════════════════════════════════════');
+    debugPrint('║ 🚀 API REQUEST');
+    debugPrint('╠══════════════════════════════════════════════════════════════');
+    debugPrint('║ Method: ${options.method}');
+    debugPrint('║ URL: ${options.uri}');
+    debugPrint('║ Headers: ${options.headers}');
+    if (options.data != null) {
+      debugPrint('║ Body: ${options.data}');
+    }
+    if (options.queryParameters.isNotEmpty) {
+      debugPrint('║ Query: ${options.queryParameters}');
+    }
+    debugPrint('╚══════════════════════════════════════════════════════════════');
 
     var accessToken = gt.Get.find<DatabaseService>().accessToken;
 
@@ -27,7 +38,7 @@ class AppInterceptors extends Interceptor {
 
     if (accessToken != null && accessToken.isNotEmpty && !skipToken) {
       options.headers['Authorization'] = 'Bearer $accessToken';
-      print("accessToken: $accessToken");
+      debugPrint('║ Token: ${accessToken.substring(0, 20)}...');
     }
 
     return handler.next(options);
@@ -35,10 +46,16 @@ class AppInterceptors extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    printInfo(
-      info:
-      '\nRequest type: ${response.requestOptions.method} \nRequest Success: ${response.statusCode}\nData: ${response.data}',
-    );
+    // ========== DEBUG: RESPONSE LOG ==========
+    debugPrint('');
+    debugPrint('╔══════════════════════════════════════════════════════════════');
+    debugPrint('║ ✅ API RESPONSE');
+    debugPrint('╠══════════════════════════════════════════════════════════════');
+    debugPrint('║ Method: ${response.requestOptions.method}');
+    debugPrint('║ URL: ${response.requestOptions.uri}');
+    debugPrint('║ Status: ${response.statusCode}');
+    debugPrint('║ Data: ${response.data}');
+    debugPrint('╚══════════════════════════════════════════════════════════════');
 
     if (response.statusCode != null &&
         response.statusCode.toString().startsWith('2')) {
@@ -52,11 +69,17 @@ class AppInterceptors extends Interceptor {
   /// Automatically retries the original request once after a successful token refresh.
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    debugPrint(
-      'API Error: ${err.requestOptions.method} ${err.response?.statusCode} ${err.requestOptions.uri}',
-    );
-    debugPrint('Error Data: ${err.response?.data}');
-    debugPrint('Error Message: ${err.response?.statusMessage}');
+    // ========== DEBUG: ERROR LOG ==========
+    debugPrint('');
+    debugPrint('╔══════════════════════════════════════════════════════════════');
+    debugPrint('║ ❌ API ERROR');
+    debugPrint('╠══════════════════════════════════════════════════════════════');
+    debugPrint('║ Method: ${err.requestOptions.method}');
+    debugPrint('║ URL: ${err.requestOptions.uri}');
+    debugPrint('║ Status: ${err.response?.statusCode}');
+    debugPrint('║ Error: ${err.response?.data}');
+    debugPrint('║ Message: ${err.response?.statusMessage}');
+    debugPrint('╚══════════════════════════════════════════════════════════════');
 
     if (isExternal) return handler.next(err);
 

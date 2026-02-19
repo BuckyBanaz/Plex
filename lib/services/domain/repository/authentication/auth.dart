@@ -455,4 +455,184 @@ int langKey = 1;
     }
   }
 
+  /// Submit vehicle details after KYC
+  Future<Map<String, dynamic>> submitVehicleDetails({
+    required String ownerName,
+    required String registeringAuthority,
+    required String vehicleType,
+    required String fuelType,
+    required int vehicleAge,
+    File? vehicleImage,
+    String? licensePlate,
+    String? vehicleMake,
+    String? vehicleModel,
+  }) async {
+    try {
+      final token = databaseService.accessToken ?? '';
+      final response = await authApi.submitVehicleDetails(
+        ownerName: ownerName,
+        registeringAuthority: registeringAuthority,
+        vehicleType: vehicleType,
+        fuelType: fuelType,
+        vehicleAge: vehicleAge,
+        vehicleImage: vehicleImage,
+        licensePlate: licensePlate,
+        vehicleMake: vehicleMake,
+        vehicleModel: vehicleModel,
+        token: token,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final body = response.data;
+        if (body is Map<String, dynamic>) {
+          return body;
+        } else if (body is Map) {
+          return Map<String, dynamic>.from(body);
+        }
+        return {'success': true, 'message': 'Vehicle details submitted'};
+      } else {
+        final msg = (response.data is Map) 
+            ? (response.data['message'] ?? response.data['error']) 
+            : 'Vehicle details submission failed';
+        throw Exception(msg?.toString() ?? 'Failed with status ${response.statusCode}');
+      }
+    } on DioError catch (dioError) {
+      final serverData = dioError.response?.data;
+      final message = (serverData is Map) 
+          ? (serverData['message'] ?? serverData['error']) 
+          : dioError.message;
+      debugPrint('submitVehicleDetails() DioError: $message');
+      throw Exception(message?.toString() ?? 'Network error during vehicle details submission');
+    } catch (e, st) {
+      debugPrint('submitVehicleDetails() error: $e\n$st');
+      throw Exception('Vehicle details submission failed: ${e.toString()}');
+    }
+  }
+
+  /// Get driver KYC and vehicle status
+  Future<Map<String, dynamic>> getDriverStatus() async {
+    try {
+      final token = databaseService.accessToken ?? '';
+      final response = await authApi.getDriverStatus(token: token);
+
+      if (response.statusCode == 200) {
+        final body = response.data;
+        if (body is Map<String, dynamic>) {
+          return body;
+        } else if (body is Map) {
+          return Map<String, dynamic>.from(body);
+        }
+        return {'success': false, 'message': 'Invalid response'};
+      } else {
+        throw Exception('Failed to get driver status');
+      }
+    } catch (e) {
+      debugPrint('getDriverStatus() error: $e');
+      throw Exception('Failed to get driver status: ${e.toString()}');
+    }
+  }
+
+  /// Refresh driver status from backend and update local storage
+  /// Returns the new kycStatus
+  Future<String> refreshAndUpdateDriverStatus() async {
+    try {
+      debugPrint('╔══════════════════════════════════════════════════════════════');
+      debugPrint('║ 🔄 REFRESHING DRIVER STATUS');
+      debugPrint('╚══════════════════════════════════════════════════════════════');
+      
+      final response = await getDriverStatus();
+      
+      if (response['success'] == true) {
+        final data = response['data'];
+        final kycStatus = data?['kycStatus'] ?? 'not_submitted';
+        
+        debugPrint('║ Backend kycStatus: $kycStatus');
+        
+        // Update local driver model with new kycStatus
+        final currentDriver = databaseService.driver;
+        if (currentDriver != null) {
+          final updatedDriver = DriverUserModel(
+            id: currentDriver.id,
+            name: currentDriver.name,
+            email: currentDriver.email,
+            userType: currentDriver.userType,
+            mobile: currentDriver.mobile,
+            kycStatus: kycStatus,
+            mobileVerified: currentDriver.mobileVerified,
+            emailVerified: currentDriver.emailVerified,
+            createdAt: currentDriver.createdAt,
+            updatedAt: currentDriver.updatedAt,
+            location: currentDriver.location,
+            vehicles: currentDriver.vehicles,
+            currentBalance: currentDriver.currentBalance,
+          );
+          
+          await databaseService.putDriver(updatedDriver);
+          debugPrint('║ Local driver kycStatus updated to: $kycStatus');
+        }
+        
+        // Update isKycDone flag
+        if (kycStatus == 'verified') {
+          databaseService.putKycDone(true);
+        } else if (kycStatus == 'pending' || kycStatus == 'awaiting_approval') {
+          databaseService.putKycDone(true); // submitted but not verified
+        } else {
+          databaseService.putKycDone(false);
+        }
+        
+        debugPrint('╚══════════════════════════════════════════════════════════════');
+        return kycStatus;
+      }
+      
+      return 'not_submitted';
+    } catch (e) {
+      debugPrint('refreshAndUpdateDriverStatus() error: $e');
+      return 'not_submitted';
+    }
+  }
+
+  /// NEW: Submit Driver KYC - Step 1 (ID Proof + Profile Photo)
+  Future<Map<String, dynamic>> submitDriverKycNew({
+    required String idProofType,
+    required String idProofNumber,
+    required File idProofImage,
+    required File profilePhoto,
+  }) async {
+    try {
+      final token = databaseService.accessToken ?? '';
+      final response = await authApi.submitDriverKycNew(
+        idProofType: idProofType,
+        idProofNumber: idProofNumber,
+        idProofImage: idProofImage,
+        profilePhoto: profilePhoto,
+        token: token,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final body = response.data;
+        if (body is Map<String, dynamic>) {
+          return body;
+        } else if (body is Map) {
+          return Map<String, dynamic>.from(body);
+        }
+        return {'success': true, 'message': 'KYC submitted successfully'};
+      } else {
+        final msg = (response.data is Map) 
+            ? (response.data['message'] ?? response.data['error']) 
+            : 'KYC submission failed';
+        throw Exception(msg?.toString() ?? 'Failed with status ${response.statusCode}');
+      }
+    } on DioError catch (dioError) {
+      final serverData = dioError.response?.data;
+      final message = (serverData is Map) 
+          ? (serverData['message'] ?? serverData['error']) 
+          : dioError.message;
+      debugPrint('submitDriverKycNew() DioError: $message');
+      return {'success': false, 'message': message?.toString() ?? 'Network error'};
+    } catch (e, st) {
+      debugPrint('submitDriverKycNew() error: $e\n$st');
+      return {'success': false, 'message': 'KYC submission failed: ${e.toString()}'};
+    }
+  }
+
 }

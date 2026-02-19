@@ -30,5 +30,6 @@ part 'authentication/auth_api.dart';
 part 'user/user_api.dart';
 part 'map/map_api.dart';
 part 'shipment/shipment_api.dart';
+part 'notification/notification_api.dart';
 
 // part 'user/user.dart';

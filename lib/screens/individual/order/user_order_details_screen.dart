@@ -9,6 +9,7 @@ import 'package:iconly/iconly.dart';
 import 'package:plex_user/constant/app_colors.dart';
 import 'package:plex_user/screens/individual/Booking/shipment_tracking_screen.dart';
 import 'package:plex_user/screens/widgets/helpers.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 import '../../../../constant/app_assets.dart';
 import '../../../../models/driver_order_model.dart';
 import '../../../modules/controllers/orders/user_order_controller.dart';
@@ -57,6 +58,10 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
       case OrderStatus.Accepted:
         text = "Accepted";
         bg = Colors.teal.shade600;
+        break;
+      case OrderStatus.PickedUp:
+        text = "Picked Up";
+        bg = Colors.purple.shade600;
         break;
       case OrderStatus.InTransit:
         text = "In Transit";
@@ -280,6 +285,138 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
     } catch (_) {
       return <String>[];
     }
+  }
+
+  // OTP Section for User
+  Widget _buildOtpSection(OrderModel order) {
+    // Only show OTPs when driver is assigned
+    final shouldShow = order.status.value == OrderStatus.Accepted ||
+        order.status.value == OrderStatus.Assigned ||
+        order.status.value == OrderStatus.PickedUp ||
+        order.status.value == OrderStatus.InTransit;
+    
+    if (!shouldShow) return const SizedBox.shrink();
+
+    final pickupOtp = order.pickupOtp ?? '';
+    final dropoffOtp = order.dropoffOtp ?? '';
+    final isPickedUp = order.status.value == OrderStatus.PickedUp ||
+        order.status.value == OrderStatus.InTransit;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        Text(
+          "Verification OTPs",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          "Share these OTPs with the driver to verify pickup and delivery",
+          style: TextStyle(fontSize: 12, color: Colors.black54),
+        ),
+        const SizedBox(height: 16),
+        
+        Row(
+          children: [
+            // Pickup OTP Card
+            Expanded(
+              child: _buildOtpCard(
+                title: "Pickup OTP",
+                otp: pickupOtp,
+                icon: Icons.local_shipping_outlined,
+                isVerified: isPickedUp,
+                color: isPickedUp ? Colors.green : AppColors.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Dropoff OTP Card
+            Expanded(
+              child: _buildOtpCard(
+                title: "Delivery OTP",
+                otp: dropoffOtp,
+                icon: Icons.location_on_outlined,
+                isVerified: order.status.value == OrderStatus.Delivered,
+                color: order.status.value == OrderStatus.Delivered 
+                    ? Colors.green 
+                    : Colors.indigo,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOtpCard({
+    required String title,
+    required String otp,
+    required IconData icon,
+    required bool isVerified,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isVerified ? Colors.green.shade50 : color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isVerified ? Colors.green.shade200 : color.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isVerified ? Colors.green : color,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (isVerified) ...[
+                const Spacer(),
+                Icon(Icons.check_circle, size: 16, color: Colors.green),
+              ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (isVerified)
+            Text(
+              "Verified",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.green,
+                letterSpacing: 2,
+              ),
+            )
+          else
+            Text(
+              otp.isNotEmpty ? otp : "----",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: color,
+                letterSpacing: 8,
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   // --- End helpers ---
@@ -519,10 +656,17 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
               ],
             ),
             const SizedBox(height: 24.0),
-            if (order.status.value == OrderStatus.InTransit) ...[
+            if (order.status.value == OrderStatus.InTransit ||
+                order.status.value == OrderStatus.PickedUp ||
+                order.status.value == OrderStatus.Accepted ||
+                order.status.value == OrderStatus.Assigned) ...[
               const SizedBox(height: 20),
               _buildTrackButton(context),
             ],
+            
+            // OTP Verification Cards
+            _buildOtpSection(order),
+            
             const SizedBox(height: 20),
 
             // Collect time (immediate or scheduled)
@@ -607,12 +751,9 @@ class UserOrderDetailsScreen extends GetView<UserOrderController> {
               alignment: Alignment.centerLeft,
               child: TextButton(
                 onPressed: () {
-                  Get.snackbar(
-                    "Help",
+                  CustomSnackbar.info(
                     "Need help functionality not implemented yet.",
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: AppColors.primary,
-                    colorText: Colors.white,
+                    title: "Help",
                   );
                 },
                 child: const Text(

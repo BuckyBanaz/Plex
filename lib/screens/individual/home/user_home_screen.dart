@@ -50,7 +50,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                      onTap: () async {
                        // logout();
                        // await AuthRepository().refreshToken();
-                       Get.toNamed(AppRoutes.searchingDriver);
+                      //  Get.toNamed(AppRoutes.searchingDriver);
+
+                       Get.toNamed(AppRoutes.booking);
                        print('City to city tapped');
                      },
                    ),
@@ -61,8 +63,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                    // BannerCarousel(),
                    // // FeaturedBanner(),
                    // SizedBox(height: 18),
-                   MenusGrid(),
-                   SizedBox(height: 18),
+                  //  MenusGrid(),
+                  //  SizedBox(height: 18),
                    // const SizedBox(height: 14),
                    // const RewardsCard(),
                    // const SizedBox(height: 14),

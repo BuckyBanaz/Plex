@@ -2,11 +2,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:plex_user/modules/controllers/booking/shipment_tracking_controller.dart';
-import 'package:plex_user/services/domain/service/app/app_service_imports.dart';
 import '../../../../models/driver_order_model.dart';
-import '../../../../modules/controllers/location/location_permission_controller.dart';
 import 'socket_service.dart';
 
 class DriverOrderSocket {
@@ -45,14 +41,14 @@ class DriverOrderSocket {
         // update central cache (optional)
         socketService.existingShipments.assignAll(list);
 
-        // parse and filter
+        // parse and filter - only show pending orders (not taken/completed)
         final parsed = list
             .map((j) => OrderModel.fromJson(Map<String, dynamic>.from(j)))
-            .where((o) => o.status.value != OrderStatus.InTransit)
+            .where((o) => _isAvailableOrder(o.status.value))
             .toList();
         orders.assignAll(parsed);
         debugPrint(
-          'DriverOrderSocket: parsed ${parsed.length} cached orders (filtered InTransit)',
+          'DriverOrderSocket: parsed ${parsed.length} available orders',
         );
       } catch (e) {
         debugPrint('DriverOrderSocket: error parsing existingShipments: $e');
@@ -93,9 +89,10 @@ class DriverOrderSocket {
           Map<String, dynamic>.from(payload),
         );
 
-        if (newOrder.status.value == OrderStatus.InTransit) {
+        // Only add if order is available (not taken/completed)
+        if (!_isAvailableOrder(newOrder.status.value)) {
           debugPrint(
-            'DriverOrderSocket: ignoring newShipment id=${newOrder.id} because status is InTransit',
+            'DriverOrderSocket: ignoring newShipment id=${newOrder.id} because status is ${newOrder.status.value}',
           );
           return;
         }
@@ -113,29 +110,46 @@ class DriverOrderSocket {
     socketService.on('shipment_status', (payload) {
       try {
         final String shipmentId = payload['shipmentId'].toString();
-        final String status = payload['status'].toString();
+        final String status = payload['status'].toString().toLowerCase().replaceAll('_', '');
+
+        debugPrint('DriverOrderSocket: shipment_status received - id=$shipmentId, status=$status');
 
         final idx = orders.indexWhere((o) => o.id == shipmentId);
         if (idx != -1) {
-          if (status == 'in_transit' ||
-              status == 'rejected' ||
-              status == 'cancelled') {
+          // Remove if order is taken/completed (not available anymore)
+          final takenStatuses = [
+            'accepted', 'assigned', 'pickedup', 'intransit', 
+            'delivered', 'rejected', 'cancelled', 'completed'
+          ];
+          if (takenStatuses.contains(status)) {
             orders.removeAt(idx);
             debugPrint(
-              'DriverOrderSocket: removed order $shipmentId due to status $status',
+              'DriverOrderSocket: removed order $shipmentId - status: $status (taken/completed)',
             );
-          } else {
-            try {
-              orders[idx].status.value = OrderModel.parseStatus(status);
-            } catch (_) {}
           }
         } else {
           debugPrint(
-            'DriverOrderSocket: shipment_status for unknown id=$shipmentId, status=$status',
+            'DriverOrderSocket: shipment_status for id=$shipmentId not in list, status=$status',
           );
         }
       } catch (e) {
         debugPrint('DriverOrderSocket: error handling shipment_status: $e');
+      }
+    });
+    
+    // 4) shipmentTaken - when another driver accepts
+    socketService.on('shipmentTaken', (payload) {
+      try {
+        final String shipmentId = (payload['shipmentId'] ?? payload['id']).toString();
+        debugPrint('DriverOrderSocket: shipmentTaken received - id=$shipmentId');
+        
+        final idx = orders.indexWhere((o) => o.id == shipmentId);
+        if (idx != -1) {
+          orders.removeAt(idx);
+          debugPrint('DriverOrderSocket: removed taken order $shipmentId');
+        }
+      } catch (e) {
+        debugPrint('DriverOrderSocket: error handling shipmentTaken: $e');
       }
     });
 
@@ -215,6 +229,7 @@ class DriverOrderSocket {
       socketService.off('existingShipments');
       socketService.off('newShipment');
       socketService.off('shipment_status');
+      socketService.off('shipmentTaken');
       socketService.off('locationUpdate');
       socketService.off('error');
     } catch (e) {
@@ -241,5 +256,20 @@ class DriverOrderSocket {
     final id = int.tryParse(order.id) ?? 0;
     if (id > 0) socketService.emit('reject_order', {'orderId': id});
     order.status.value = OrderStatus.Declined;
+  }
+  
+  /// Check if order is available for drivers to accept
+  /// Only pending/awaiting orders should show in the list
+  bool _isAvailableOrder(OrderStatus status) {
+    final unavailableStatuses = [
+      OrderStatus.Accepted,
+      OrderStatus.Assigned,
+      OrderStatus.PickedUp,
+      OrderStatus.InTransit,
+      OrderStatus.Delivered,
+      OrderStatus.Declined,
+      OrderStatus.Cancelled,
+    ];
+    return !unavailableStatuses.contains(status);
   }
 }

@@ -99,6 +99,10 @@ Widget buildStatusChip(OrderStatus status) {
       text = "Accepted";
       bg = Colors.teal.shade600;
       break;
+    case OrderStatus.PickedUp:
+      text = "Picked Up";
+      bg = Colors.purple.shade600;
+      break;
     case OrderStatus.InTransit:
       text = "In Transit";
       bg = Colors.indigo.shade600;

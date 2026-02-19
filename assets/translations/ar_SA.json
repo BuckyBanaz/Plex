@@ -414,12 +414,11 @@
  "saved_addresses": "العناوين المحفوظة",
  "work": "العمل",
 
- "phone_number": "رقم الهاتف",
- "address_selected": "تم تحديد العنوان",
- "Edit": "تعديل",
- "Delete": "حذف"
-
-
-
-
+"phone_number": "رقم الهاتف",
+"address_selected": "تم تحديد العنوان",
+"Edit": "تعديل",
+"Delete": "حذف",
+"edit_profile": "تعديل الملف الشخصي",
+"save_changes": "حفظ التغييرات",
+"save": "حفظ"
 }

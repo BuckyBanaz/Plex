@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:plex_user/screens/widgets/custom_text_field.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 import '../../../constant/app_colors.dart';
 import '../../../services/translations/locale_controller.dart';
 
@@ -171,11 +172,9 @@ class _ChangeLanguageScreenState extends State<ChangeLanguageScreen> {
                     onTap: () {
                       controller.saveAndChange(lang.code);
                       // optionally give small feedback
-                      Get.snackbar(
-                        'Language changed',
+                      CustomSnackbar.success(
                         '${_languageLabelFor(lang.code)}',
-                        snackPosition: SnackPosition.BOTTOM,
-                        duration: const Duration(milliseconds: 900),
+                        title: 'Language changed',
                       );
                     },
                   );

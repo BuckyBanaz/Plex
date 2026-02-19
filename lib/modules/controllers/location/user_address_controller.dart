@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:plex_user/models/user_models.dart';
+import 'package:plex_user/screens/widgets/custom_snackbar.dart';
 import 'package:plex_user/services/domain/repository/repository_imports.dart';
 
 import '../../../services/domain/service/app/app_service_imports.dart';
@@ -208,11 +209,11 @@ class UserAddressController extends GetxController {
 
   void selectSavedAddress(AddressModel address) {
     Get.back();
-    Get.snackbar('address_selected'.tr, '${address.addressAs}: ${address.address}');
+    CustomSnackbar.success('${address.addressAs}: ${address.address}', title: 'address_selected'.tr);
   }
 
   void editAddress(AddressModel address) {
-    Get.snackbar('Edit', 'Editing address: ${address.addressAs}');
+    CustomSnackbar.info('Editing address: ${address.addressAs}', title: 'Edit');
     // TODO: Implement edit flow (navigate to edit screen with address)
   }
 
@@ -237,24 +238,24 @@ class UserAddressController extends GetxController {
 
         if (success) {
           await fetchAndStoreUserAddresses();
-          Get.snackbar('Deleted', 'Address ${address.addressAs} removed');
+          CustomSnackbar.success('Address ${address.addressAs} removed', title: 'Deleted');
         } else {
           savedAddresses.remove(address);
           await _updateLocalUserWithAddresses(savedAddresses);
-          Get.snackbar('Deleted (local)', 'Address removed locally (server delete failed)');
+          CustomSnackbar.warning('Address removed locally (server delete failed)', title: 'Deleted (local)');
         }
       } catch (e) {
         debugPrint('deleteAddress failed (server): $e');
         savedAddresses.remove(address);
         await _updateLocalUserWithAddresses(savedAddresses);
-        Get.snackbar('Deleted (local)', 'Address removed locally (server error)');
+        CustomSnackbar.warning('Address removed locally (server error)', title: 'Deleted (local)');
       } finally {
         isDeleting.value = false;
       }
     } else {
       savedAddresses.remove(address);
       await _updateLocalUserWithAddresses(savedAddresses);
-      Get.snackbar('Deleted', 'Address ${address.addressAs} removed (local)');
+      CustomSnackbar.success('Address ${address.addressAs} removed (local)', title: 'Deleted');
     }
   }
 
@@ -386,7 +387,7 @@ class UserAddressController extends GetxController {
   /* ------------------------- Save Address (send to backend) ------------------------- */
   Future<void> saveAddress() async {
     if (landmarkController.text.isEmpty) {
-      Get.snackbar('Error', 'Please enter address details (Floor, House no.)');
+      CustomSnackbar.error('Please enter address details (Floor, House no.)', title: 'Error');
       return;
     }
     if (isSaving.value) return;
@@ -410,11 +411,11 @@ class UserAddressController extends GetxController {
 
       isSaving.value = false;
       Get.back();
-      Get.snackbar('Success', 'Address saved successfully!');
+      CustomSnackbar.success('Address saved successfully!', title: 'Success');
     } catch (e) {
       isSaving.value = false;
       debugPrint('saveAddress failed: $e');
-      Get.snackbar('Error', 'Failed to save address: $e');
+      CustomSnackbar.error('Failed to save address: $e', title: 'Error');
     }
   }
 

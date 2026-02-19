@@ -30,8 +30,24 @@ class ShipmentApi {
           ? Map<String, dynamic>.from(response.data)
           : {'message': response.data?.toString()};
     } catch (e) {
-      debugPrint('Error creating shipment: $e');
-      return {'error': e.toString()};
+      debugPrint('Error estimating shipment: $e');
+      
+      // Extract error message from DioException response
+      if (e is DioException && e.response != null) {
+        final responseData = e.response!.data;
+        final message = _extractMessageFrom(responseData) ?? 'Unknown error occurred';
+        return {
+          'success': false,
+          'message': message,
+          'error': message,
+        };
+      }
+      
+      return {
+        'success': false,
+        'error': e.toString(),
+        'message': e.toString(),
+      };
     }
   }
 
@@ -190,19 +206,37 @@ class ShipmentApi {
     }
   }
 
-  Future<Map<String, dynamic>> updateShipment({ required int orderId,required double lat,required double lng}) async {
-    final resp = await dio.post("${ApiEndpoint.shipment}/$orderId/update", data: {
-      "lat": lat,
-      "lng": lng
-    },
-      options: Options(
-        headers: {
-          'id': orderId,
-        },
-      ),
+  Future<Map<String, dynamic>> updateShipmentLocation({ required int orderId,required double lat,required double lng}) async {
+    try {
+      debugPrint('[ShipmentApi] Updating location for shipment $orderId: lat=$lat, lng=$lng');
+      final resp = await dio.post("${ApiEndpoint.shipment}/$orderId/location", data: {
+        "lat": lat,
+        "lng": lng
+      });
+      debugPrint('[ShipmentApi] Location update response: ${resp.data}');
+      return resp.data as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('[ShipmentApi] Error updating shipment location: $e');
+      return {'error': e.toString()};
+    }
+  }
 
-    );
-    return resp.data as Map<String, dynamic>;
+// Get driver's active shipments (in_transit, assigned, picked_up)
+  Future<Map<String, dynamic>> getDriverActiveOrders() async {
+    try {
+      debugPrint('[ShipmentApi] Fetching driver active orders...');
+      final response = await dio.get(ApiEndpoint.driverActiveOrders);
+
+      if (response.data is Map<String, dynamic>) {
+        debugPrint('[ShipmentApi] Active orders fetched: ${response.data}');
+        return Map<String, dynamic>.from(response.data);
+      }
+
+      return {'success': false, 'message': response.data?.toString()};
+    } catch (e) {
+      debugPrint('[ShipmentApi] Error fetching active orders: $e');
+      return {'success': false, 'error': e.toString()};
+    }
   }
 
 // helper: extract common server message safely

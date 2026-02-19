@@ -227,6 +227,10 @@ showToast(message: "success_card_added".tr);
         );
 
         print("Stripe Payment flow completed (check logs for success/failure).");
+        // Don't set isLoading to false here - Stripe controller handles it
+        // If payment was successful, navigation happens in payWithStripe
+        // If payment was cancelled/failed, Stripe controller sets isLoading = false
+        isLoading.value = false;
         return;
       }
 

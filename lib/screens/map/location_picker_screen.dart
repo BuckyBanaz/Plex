@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:iconly/iconly.dart';
@@ -36,13 +37,31 @@ class LocationPickerScreen extends StatelessWidget {
                 target: controller.currentLatLng.value,
                 zoom: 16,
               ),
-              onMapCreated: (mapCtrl) => controller.mapController.complete(mapCtrl),
+              onMapCreated: (mapCtrl) {
+                try {
+                  if (!controller.mapController.isCompleted) {
+                    controller.mapController.complete(mapCtrl);
+                  }
+                } catch (e) {
+                  debugPrint('Error completing map controller: $e');
+                }
+              },
               onCameraMove: controller.onCameraMove,
-              onCameraIdle: controller.onCameraIdle,
+              onCameraIdle: () {
+                try {
+                  controller.onCameraIdle();
+                } catch (e) {
+                  debugPrint('Error in onCameraIdle: $e');
+                }
+              },
               myLocationEnabled: true,
               myLocationButtonEnabled: true,
               zoomControlsEnabled: false,
               mapToolbarEnabled: false,
+              onTap: (LatLng position) {
+                // Allow user to tap on map to select location
+                controller.currentLatLng.value = position;
+              },
             ),
 
             /// --- Center Pin Icon ---
